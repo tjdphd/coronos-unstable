@@ -1039,10 +1039,14 @@ void redhallmhd::finalizeFootPointDriving( stack& run ) {
     if ( ofs.good() ) {
       for (unsigned k = 0; k < n1n2c; k++) {               /* ~ order: roldlb rnewlb roldub rnewub pbot ~ */
 
-        if (srun == 1) {
-          std::cout << "roldlb[" << k << "] = " << roldlb[k] << " ";
-          std::cout << "rnewlb[" << k << "] = " << rnewlb[k] << std::endl;
-        }
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+
+//      if (srun == 1) {
+//        std::cout << "roldlb[" << k << "] = " << roldlb[k] << " ";
+//        std::cout << "rnewlb[" << k << "] = " << rnewlb[k] << std::endl;
+//      }
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
         
         ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << roldlb[k].real() << " ";
         ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << roldlb[k].imag() << " ";
