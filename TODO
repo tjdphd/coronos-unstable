@@ -1,0 +1,84 @@
+LAST UPDATED: 19 July 2016
+
+0.) Scut work ( Low Priority )
+
+*   a.) beautification..................................................ongoing
+
+    b.) I'd really like to disassociate fftw from physics. Seems to me the only way to do this
+        is to turn fftw into a namespace instead of a class which physics and solve can "use."
+        I feel like I tried something like this once before and ran into trouble though, so
+        I'm not sure...
+
+    c.) rename redhallmhd to rhmhd.
+
+    d.) simplication (ie elimination of run_instance in favor of just a canvas with stack)
+
+1.) Priority Development Work
+
+*   a.) start documentation...............................................small steps taken
+*   b.) upload to github..................................................Done
+*   c.) complete CPU RMHD reproduction including:..........................Done
+
+*       i.) Longcope boundary conditions (based on LiWei's cuda port).......Done
+*      ii.) energy, evsz, spectral et al calculations.......................mostly done
+*     iii.) recording of vorticity and current density in output.............done
+*      iv.) Parker heating test...........................................mostly done
+
+*   d.) complete CPU IRMHD addition - Done, needs the following testing
+
+11/30/16  NOTES: solve averaging issue related to QtyVsZ and energies
+                 run two-run vs one-run tests in trackEn to find problem with inter-run hiccup.
+
+                 after some experiments have reached following tentative conclusions:
+                 1.) energy conservation check seems trustworthy for single subrun experiments
+                     but some revision of restarts is needed to remove "dimples" in conservation
+                     check time series curves. Whatever the problem is seems to lie pretty
+                     deeply with the inter-run storage. 
+                 2.) barring errors introduced via restarts it appears that decent energy
+                     conservation is acheived for parker rmhd,  Gauss rmhd, and Parker inhm,
+                     but not for Gauss inhm unless the eenv_zero envelop parameter is significantly
+                     reduced. Another question is whether other changes in Gauss parameters could
+                     improve the situation. Experiments will have to be done.
+                 3.) The restart issue really needs to be addressed first I think. 
+
+        o.) verify sum over z-energies gives volumetric energies.....................................cr, ??_????
+        i.) Energy Conservation checks (ECC) for Parker homogeneous RMHD as control..................ec, pk_rmhd
+       ii.) Energy Conservation checks (ECC) for Magnetic Reconnection homogeneous RMHD as control...ec, mr_rmhd  
+      iii.) ECC very weak Parker inhomogeneity tests.................................................wk, pk_inhm 
+       iv.) ECC larger Parker inhomogeneity tests....................................................st, pk_inhm
+        v.) ECC incompressible Gaussian homogeneous tests............................................ec, gs_rmhd
+       vi.) ECC incompressible Gaussian weak inhomogeneity tests.....................................wk, gs_inhm
+      vii.) ECC incompressible Gaussian strong inhomogeity tests.....................................st, gs_inhm
+     viii.) optionally, depending on previous outcomes, ECC naive Gaussian tests.....................nv, gs_inhm
+       ix.) wave action conservation tests...........................................................wa, ??_inhm
+
+    e.) add logarithmic spectra output, pef, aef, etc....
+
+    f.) CPU Hall RMHD including:
+
+        i.) double check current infrastructure
+       ii.) update electron inertia portion to reflect correction
+      iii.) compare runs neglecting electron inertia against CPU "fourfield" code.
+
+*   g.) commence gpu implementation where possible given progress on other fronts....small steps taken
+    h.) profiling / optimizing
+*   i.) portability to other platforms - significant progress made, efforts ongoing.
+
+2.) Related priority Theoretical Work
+
+    a.) Complete derivations for RMHD, IRMHD, connect with other already completed theoretical work. (check Zank and Mattheaus (sp?))
+*   b.) Reproduce Hazeltine 85 and 87 (and 86 if necessary)................In progress
+    c.) Use results of a to check current form of four-field model
+    d.) check model against Morrison(?) 2010.
+    e.) also look for work by Chaston
+
+3.) Wish List
+
+    a.) (non-?)optional Binary - possibly hdf5 output for all data.
+    b.) more comprehensive output such as B-field components etc
+    c.) the option to output datafiles without having to complete a run first
+    d.) an IDL widget application analogous to what I've put together for 
+        the hybrid code.
+    e.) possible provisions for other graphical post-processing options, particularly
+        with Vapor(?) in mind.
+    f.) field-line tracing through volume - ask Xuan.
