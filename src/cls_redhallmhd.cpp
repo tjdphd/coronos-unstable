@@ -561,15 +561,15 @@ void redhallmhd::computeFourierU( stack& run ) {
        idx            =        0 * (n2/2 + 1) + 1;
        real_part      =  1.0e-03L;
        imag_part      =  0.0L;
-//     tuple          = ComplexVar(real_part, imag_part);
-       tuple.real(real_part); tuple.imag(imag_part);
+       tuple          = ComplexVar(real_part, imag_part);
+//     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        idx            =        1 * (n2/2 + 1);
        real_part      = -1.0e-03L;
        imag_part      =  0.0L;
-//       tuple          = ComplexVar(real_part, imag_part);
-       tuple.real(real_part); tuple.imag(imag_part);
+         tuple          = ComplexVar(real_part, imag_part);
+//     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        idx            = (n1-1) * (n2/2 + 1);
@@ -586,8 +586,8 @@ void redhallmhd::computeFourierU( stack& run ) {
        idx            =  (n1-1) * (n2/2 + 1) + 1;
        real_part      =     0.1L;
        imag_part      =     0.0L;
-//     tuple          = ComplexVar(real_part, imag_part);
-       tuple.real(real_part); tuple.imag(imag_part);
+       tuple          = ComplexVar(real_part, imag_part);
+//     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        break;
@@ -778,7 +778,7 @@ void redhallmhd::finalizeBoundaries( stack& run) {
 
     int bdrys; run.palette.fetch("bdrys", &bdrys);
 
-    if (bdrys > 0) { finalizeFootPointDriving( run ); }
+//    if (bdrys > 0) { finalizeFootPointDriving( run ); }
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -2787,8 +2787,8 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
                 ++brcount;
                 next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
                 ++brcount;
-//              tuple        = ComplexVar(next_real, next_imag);
-                tuple.real(next_real); tuple.imag(next_imag);
+                tuple        = ComplexVar(next_real, next_imag);
+//              tuple.real(next_real); tuple.imag(next_imag);
                 rnewlb[l]    = tuple;
 
             }
@@ -2867,8 +2867,8 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
                 ++trcount;
                 next_imag    = ffp * (((double) rand() / RAND_MAX ) * two - one);
                 ++trcount;
-//              tuple        = std::complex<double>(next_real, next_imag);
-                tuple.real(next_real); tuple.imag(next_imag);
+                tuple        = std::complex<double>(next_real, next_imag);
+//              tuple.real(next_real); tuple.imag(next_imag);
                 rnewub[l]    = tuple;
 
             }
