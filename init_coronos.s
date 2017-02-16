@@ -170,7 +170,7 @@ then
   echo " "                                                                                   >> $jobr
   echo "#SBATCH -A $project"                                                                 >> $jobr
   echo "#SBATCH --job-name=coronos"                                                          >> $jobr
-  echo "#SBATCH --output=tjd.%j.$N.out"                                                      >> $jobr
+  echo "#SBATCH --output=tjd.%j.%N.out"                                                      >> $jobr
   echo "#SBATCH --partition=$partition"                                                      >> $jobr
   echo "#SBATCH --nodes=$nnodes"                                                             >> $jobr
   echo "#SBATCH --tasks-per-node=$ppn"                                                       >> $jobr
@@ -190,23 +190,23 @@ then
   echo "#EOF "                                                                               >> $jobr
   chmod u+x $jobr
 #
-  echo "#!/bin/sh"                                                                     > $joba
-  echo " "                                                                            >> $joba
-  echo "#SBATCH --partition=transfer"                                                 >> $joba
-  echo "#SBATCH --ntasks=1"                                                           >> $joba
-  echo "#SBATCH --tasks-per-node=1"                                                   >> $joba
-  echo "#SBATCH --mail-user=tdennis10@alaska.edu"                                     >> $joba
-  echo "#SBATCH --mail-type=FAIL"                                                     >> $joba
-  echo "#SBATCH --time=$arch_wall"                                                    >> $joba
-  echo "#SBATCH --output=tjd.%j"                                                      >> $joba
-  echo " "                                                                            >> $joba
-  echo ". /usr/share/Modules/init/sh"                                                 >> $joba
-  echo " "                                                                            >> $joba
-  echo "cd $cur_dir"                                                                  >> $joba
-  echo "srun -l /bin/hostname | sort -n | awk '{print \$2}' > ./nodes.\$SLURM_JOB_ID" >> $joba
-  echo "time $cur_dir/crs-archive.s $start $stop"                                     >> $joba
-  echo " "                                                                            >> $joba
-  echo "#EOF "                                                                        >> $joba
+  echo "#!/bin/sh"                                                                            > $joba
+  echo " "                                                                                   >> $joba
+  echo "#SBATCH --partition=transfer"                                                        >> $joba
+  echo "#SBATCH --ntasks=1"                                                                  >> $joba
+  echo "#SBATCH --tasks-per-node=1"                                                          >> $joba
+  echo "#SBATCH --mail-user=tdennis10@alaska.edu"                                            >> $joba
+  echo "#SBATCH --mail-type=FAIL"                                                            >> $joba
+  echo "#SBATCH --time=$arch_wall"                                                           >> $joba
+  echo "#SBATCH --output=tjd.%j"                                                             >> $joba
+  echo " "                                                                                   >> $joba
+  echo ". /usr/share/Modules/init/sh"                                                        >> $joba
+  echo " "                                                                                   >> $joba
+  echo "cd $cur_dir"                                                                         >> $joba
+  echo "srun -l /bin/hostname | sort -n | awk '{print \$2}' > ./nodes.\$SLURM_JOB_ID"        >> $joba
+  echo "time $cur_dir/crs-archive.s $start $stop"                                            >> $joba
+  echo " "                                                                                   >> $joba
+  echo "#EOF "                                                                               >> $joba
   chmod u+x $joba
 else
   echo "init-coronos: ERROR - the resource management option " $rsc_man " is unknown."

@@ -227,7 +227,7 @@ void lcsolve::Loop( stack& run ) {
 //
 //    Step(               "predict", run            );   /* ~ execute predictor update                                ~ */
 //
-//    passAdjacentLayers( "correct", run            );
+      passAdjacentLayers( "correct", run            );
 //    physics.updatePAJ(  "correct", run            );   /* ~ P, A, and J now contain predictor-updated values        ~ */
 //
 //    setS(               "correct", run, physics   );   /* ~ set corrector S's                                       ~ */
@@ -285,7 +285,7 @@ void lcsolve::Loop( stack& run ) {
 void lcsolve::passAdjacentLayers( std::string str_step, stack& run ) {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Status * status = 0;
+  MPI_Status status;
 
   ComplexArray& O     = run.U0;                           /* ~ for predictor case                          ~ */
   ComplexArray& H     = run.U1;                           /* ~ un-updated values are transferred           ~ */
@@ -312,138 +312,174 @@ void lcsolve::passAdjacentLayers( std::string str_step, stack& run ) {
     if (rank != 0 ) {
       if (rank != np - 1) {
 
-        MPI_Send(  &O[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank + 1     , MPI_COMM_WORLD        ); // send " p(:,n3)"
+          MPI_Send(&O[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,    rank,          MPI_COMM_WORLD         ); // send    "p(:,n3)"
+          MPI_Recv(&H[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,    np + rank,     MPI_COMM_WORLD, &status); // receive "atop   "
+
+      if (model.compare("inhm") == 0 ) {
+
+          MPI_Send(&H[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,  2*(     rank),   MPI_COMM_WORLD          );
+          MPI_Recv(&O[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,  2*(np + rank),   MPI_COMM_WORLD, &status );
+
+       }
 
         if (model.compare("hall") == 0 ) {
-          MPI_Send(&Z[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank         , MPI_COMM_WORLD        ); // send "bz(:,n3)"
+
+          MPI_Send(&Z[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(rank        ), MPI_COMM_WORLD         ); // send "bz(:,n3)"
+          MPI_Recv(&V[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(np + rank   ), MPI_COMM_WORLD, &status); // receive "vztop"
+
         }
 
-      }
+      } // rank is not np - 1
 
-      MPI_Recv(  &O.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, rank         , MPI_COMM_WORLD, status); // receive " pbot"
+          MPI_Recv(&O.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,         rank - 1,  MPI_COMM_WORLD, &status); // receive "pbot  "
+          MPI_Send(&H[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,    np + rank - 1,  MPI_COMM_WORLD         ); // send    "a(:,1)"
 
-      if (model.compare("hall") == 0 ) {
-        MPI_Recv(&Z.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, rank - 1     , MPI_COMM_WORLD, status); // receive "bzbot"
-      }
+      if (model.compare("inhm") == 0 ) {
 
-      MPI_Send(  &H[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, np + rank - 1, MPI_COMM_WORLD        ); // send " a(:,1)"
+          MPI_Recv(&H.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 2*(     rank - 1), MPI_COMM_WORLD, &status );
+          MPI_Send(&O[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 2*(np + rank - 1), MPI_COMM_WORLD          );
 
-      if (model.compare("hall") == 0 ) {
-        MPI_Send(&V[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, np + rank    , MPI_COMM_WORLD        ); // send "vz(:,1)"
-      }
-
-      if ( rank != np - 1) {
-
-        MPI_Recv(  &H[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank    , MPI_COMM_WORLD, status); // receive " atop"
+       }
 
         if (model.compare("hall") == 0 ) {
-          MPI_Recv(&V[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 1, MPI_COMM_WORLD, status); // receive "vztop"
+
+          MPI_Recv(&Z.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 3*(     rank - 1), MPI_COMM_WORLD, &status); // receive "bzbot"
+          MPI_Send(&V[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 3*(np + rank - 1), MPI_COMM_WORLD         ); // send "vz(:,1)"
+
         }
 
-      }
-    }
+    }  // rank is not 0
     else {
 
-          MPI_Send(  &O[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank + 1     , MPI_COMM_WORLD        ); // send " p(:,n3)"
+          MPI_Send(&O[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,         rank,      MPI_COMM_WORLD         );  // send    "p(:,n3)"
+          MPI_Recv(&H[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,    np + rank,      MPI_COMM_WORLD, &status);  // receive "atop   "
 
-          if (model.compare("hall") == 0 ) {
-            MPI_Send(&Z[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank         , MPI_COMM_WORLD        ); // send "bz(:,n3)"
-          }
+      if (model.compare("inhm") == 0 ) {
 
-          MPI_Recv(  &H[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank    , MPI_COMM_WORLD, status); // receive " atop"
+          MPI_Send(&H[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 2*(     rank + 1), MPI_COMM_WORLD         );
+          MPI_Recv(&O[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 2*(np + rank + 1), MPI_COMM_WORLD, &status);
 
-          if (model.compare("hall") == 0 ) {
-            MPI_Recv(&V[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 1, MPI_COMM_WORLD, status); // receive "vztop"
-          }
-    }
-}
+       }
+
+        if (model.compare("hall") == 0 ) {
+
+          MPI_Send(&Z[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(     rank    ), MPI_COMM_WORLD         ); // send "bz(:,n3)"
+          MPI_Recv(&V[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(np + rank    ), MPI_COMM_WORLD, &status); // receive "vztop"
+
+        }
+
+    } // rank is 0    
+
+  } // predictor step
   else if (str_step.compare("correct") == 0) {     /* ~ corrector case                              ~ */
 
     if (rank != 0 ) {
       if (rank != np - 1) {
 
-        MPI_Send(  &tO[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank + 1     , MPI_COMM_WORLD        ); // send " tp(:,n3)"
+          MPI_Send(&tO[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,         rank,     MPI_COMM_WORLD         ); // send    "tp(:,n3)"
+          MPI_Recv(&tH[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,    np + rank,     MPI_COMM_WORLD, &status); // receive "atop    "
 
-          if (model.compare("hall") == 0 ) {
-            MPI_Send(&tZ[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank         , MPI_COMM_WORLD        ); // send "tbz(:,n3)"
-          }
+      if (model.compare("inhm") == 0 ) {
 
-      }
+          MPI_Send(&tH[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 2*(     rank),     MPI_COMM_WORLD          );
+          MPI_Recv(&tO[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 2*(np + rank),     MPI_COMM_WORLD, &status );
 
-      MPI_Recv(  &tO.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, rank         , MPI_COMM_WORLD, status); // receive " pbot"
+       }
 
-      if (model.compare("hall") == 0 ) {
-        MPI_Recv(&tZ.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, rank - 1     , MPI_COMM_WORLD, status); // receive "bzbot"
-      }
-
-      MPI_Send(  &tH[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, np + rank - 1, MPI_COMM_WORLD        ); // send " ta(:,1)"
-      if (model.compare("hall") == 0 ) {
-        MPI_Send(&tV[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, np + rank    , MPI_COMM_WORLD        ); // send "tvz(:,1)"
-      }
-
-      if ( rank != np - 1) {
-
-        MPI_Recv(  &tH[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank    , MPI_COMM_WORLD, status); // receive " atop"
         if (model.compare("hall") == 0 ) {
-          MPI_Recv(&tV[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 1, MPI_COMM_WORLD, status); // receive "vztop"
+  
+          MPI_Send(&tZ[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(     rank    ), MPI_COMM_WORLD         ); // send "tbz(:,n3)"
+          MPI_Recv(&tV[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(np + rank + 1), MPI_COMM_WORLD, &status); // receive "vztop"
+
         }
+
+      }
+
+          MPI_Recv(&tO.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,         rank - 1,  MPI_COMM_WORLD, &status); // receive "pbot   "
+          MPI_Send(&tH[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,    np + rank - 1,  MPI_COMM_WORLD         ); // send    "ta(:,1)"
+
+      if (model.compare("inhm") == 0 ) {
+
+          MPI_Recv(&tH.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 2*(     rank   ),  MPI_COMM_WORLD, &status);
+          MPI_Send(&tO[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 2*(np + rank   ),  MPI_COMM_WORLD         );
+
+       }
+
+      if (model.compare("hall") == 0 ) {
+
+          MPI_Recv(&tZ.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 3*(rank - 1 ),     MPI_COMM_WORLD, &status); // receive "bzbot"
+          MPI_Send(&tV[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 3*(np + rank),     MPI_COMM_WORLD         ); // send "tvz(:,1)"
 
       }
 
     }
     else {
 
-          MPI_Send(  &tO[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank + 1     , MPI_COMM_WORLD        ); // send " tp(:,n3)"
+          MPI_Send(&tO[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,      rank,         MPI_COMM_WORLD         ); // send    "tp(:,n3)"
+          MPI_Recv(&tH[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank,         MPI_COMM_WORLD, &status); // receive "atop"
 
-          if (model.compare("hall") == 0 ) {
-            MPI_Send(&tZ[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, rank         , MPI_COMM_WORLD        ); // send "tbz(:,n3)"
-          }
+      if (model.compare("inhm") == 0 ) {
 
-          MPI_Recv(  &tH[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank    , MPI_COMM_WORLD, status); // receive " atop"
+          MPI_Send(&tH[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 2*(     rank + 1), MPI_COMM_WORLD         );
+          MPI_Recv(&tO[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 2*(np + rank + 1), MPI_COMM_WORLD, &status);
 
-          if (model.compare("hall") == 0 ) {
-            MPI_Recv(&tV[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 1, MPI_COMM_WORLD, status); // receive "vztop"
-          }
+       }
+
+      if (model.compare("hall") == 0 ) {
+
+          MPI_Send(&tZ[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(rank         ), MPI_COMM_WORLD         ); // send "tbz(:,n3)"
+          MPI_Recv(&tV[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(np + rank + 1), MPI_COMM_WORLD, &status); // receive "vztop"
+
+      }
+
     }
-  }
+  } // corrector case
+//
+//  /* ~ begin inhm here ~ */
+//
+//  if (model.compare("inhm") == 0 ) {
+//    if ( str_step.compare("predict") == 0) {                 /* ~ predictor case                              ~ */
+//      if (rank != 0 ) {
+//        if (rank != np - 1) {
+//
+//          MPI_Send(&H[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,  3*(     rank),     MPI_COMM_WORLD          );
+//          MPI_Recv(&O[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,  3*(np + rank),     MPI_COMM_WORLD, &status );
+//
+//        }
+//
+//          MPI_Recv(&H.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,  3*(     rank - 1), MPI_COMM_WORLD, &status );
+//          MPI_Send(&O[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,  3*(np + rank - 1), MPI_COMM_WORLD          );
+//
+//      }
+//
+//      else {
 
-  /* ~ begin inhm here ~ */
+//          MPI_Send(&H[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,  3*(     rank + 1), MPI_COMM_WORLD          );
+//          MPI_Recv(&O[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,  3*(np + rank + 1), MPI_COMM_WORLD, &status );
 
-  if (model.compare("inhm") == 0 ) {
-    if ( str_step.compare("predict") == 0) {                 /* ~ predictor case                              ~ */
-      if (rank != 0 ) {
-
-        MPI_Recv(      &H.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,      rank + 2, MPI_COMM_WORLD, status );
-        MPI_Send(      &O[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, np + rank + 2, MPI_COMM_WORLD         );
-
-        if (rank != np - 1) {
-          MPI_Send(    &H[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,      rank + 3, MPI_COMM_WORLD         );
-          MPI_Recv(    &O[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 3, MPI_COMM_WORLD, status );
-        }
-      }
-      else {
-             MPI_Send( &H[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,      rank + 3, MPI_COMM_WORLD         );
-             MPI_Recv( &O[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 3, MPI_COMM_WORLD, status );
-     }
-   }
-
-   else if (str_step.compare("correct") == 0) {                 /* ~ corrector case                              ~ */
-      if (rank != 0 ) {
-
-        MPI_Recv(      &tH.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1,      rank + 2, MPI_COMM_WORLD, status );
-        MPI_Send(      &tO[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, np + rank + 2, MPI_COMM_WORLD         );
-
-        if (rank != np - 1) {
-          MPI_Send(    &tH[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,      rank + 3, MPI_COMM_WORLD         );
-          MPI_Recv(    &tO[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 3, MPI_COMM_WORLD, status );
-        }
-      }
-      else {
-             MPI_Send( &tH[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1,      rank + 3, MPI_COMM_WORLD         );
-             MPI_Recv( &tO[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, np + rank + 3, MPI_COMM_WORLD, status );
-      }
-    }
-  }
+//     }
+//   }
+//
+//   else if (str_step.compare("correct") == 0) {                 /* ~ corrector case                              ~ */
+//      if (rank != 0 ) {
+//        if (rank != np - 1) {
+//          MPI_Send(&tH[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(     rank),     MPI_COMM_WORLD          );
+//          MPI_Recv(&tO[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(np + rank),     MPI_COMM_WORLD, &status );
+//        }
+//
+//          MPI_Recv(&tH.front(),   n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 3*(     rank),     MPI_COMM_WORLD, &status );
+//          MPI_Send(&tO[abot_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank - 1, 3*(np + rank),     MPI_COMM_WORLD          );
+//
+//      }
+//
+//      else {
+//      
+//          MPI_Send( &tH[n3_idx],   n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(     rank + 1), MPI_COMM_WORLD          );
+//          MPI_Recv( &tO[atop_idx], n1n2c, MPI::DOUBLE_COMPLEX, rank + 1, 3*(np + rank + 1), MPI_COMM_WORLD, &status );
+//
+//      }
+//    }
+//  }
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
