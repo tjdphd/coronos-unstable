@@ -3,8 +3,8 @@
 #
 
 AC_PREREQ([2.63])
-AC_LANG(C++)
 AC_INIT([coronos], [0.01], [tdennis10@alaska.edu])
+AC_LANG(C++)
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/coronos.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -57,12 +57,12 @@ fi
 
   AX_COMPILER_VERSION
 
-  AC_MSG_NOTICE([found compiler vendor $ax_cv_c_compiler_vendor])
-  AC_MSG_NOTICE([found compiler version $ax_cv_c_compiler_version])
+  AC_MSG_NOTICE([found compiler vendor $ax_cv_cxx_compiler_vendor])
+  AC_MSG_NOTICE([found compiler version $ax_cv_cxx_compiler_version])
 
-  PORTLAND=`expr match "$ax_cv_c_compiler_vendor" '\(portland\)'`
-     INTEL=`expr match "$ax_cv_c_compiler_vendor" '\(intel\)'`
-       GNU=`expr match "$ax_cv_c_compiler_vendor" '\(gnu\)'`
+  PORTLAND=`expr match "$ax_cv_cxx_compiler_vendor" '\(portland\)'`
+     INTEL=`expr match "$ax_cv_cxx_compiler_vendor" '\(intel\)'`
+       GNU=`expr match "$ax_cv_cxx_compiler_vendor" '\(gnu\)'`
 
   if  test -n "$PORTLAND"
   then VENDOR=$PORTLAND
@@ -84,9 +84,14 @@ fi
    if  test -n "$MPIHOME"
    then
      MPI_DIR=$MPIHOME
+   fi
+
+   if test -n "MPI_HOME"
+   then
+     MPI_DIR=$MPI_HOME
+   fi
      MPI_INC="$MPI_DIR/include"
      MPI_LIB="$MPI_DIR/lib"
-   fi
    
    if test -n "$MPI_DIR"
    then

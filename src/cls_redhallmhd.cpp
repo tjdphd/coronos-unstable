@@ -232,23 +232,26 @@ void redhallmhd::initU( stack& run ) {
 
   if (calcsvz == 1) {
 
-    int isp; physics_data.fetch(    "isp",     &isp);
-    int n1;  run.stack_data.fetch("n1", &n1);
-    int n2;  run.stack_data.fetch("n2", &n2);
+    int isp; physics_data.fetch(    "isp", &isp);
+    int n1;  run.stack_data.fetch(   "n1", &n1 );
+    int n2;  run.stack_data.fetch(  "n2",  &n2 );
 
-    dk     = (pi * n1) / isp;
+    int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank );
+
+
+    dk     = sqrt(two)*(pi * n1) / isp;
     dk_m1  = one / dk;
 
     kb     = two * pi;
     kf     = kb + (isp * dk);
 
-    ikb    = 1 + (int) (kb * dk_m1);
-    ikf    = 1 + (int) (kf * dk_m1);
+    ikb    = (int) (kb * dk_m1);
+    ikf    = (int) (kf * dk_m1);
 
-    nk  = ikf - ikb + 1;
+    nk     = ikf - ikb + 1;
 
-    RealArray   SpcRecord;  SpcRecord.assign(7,zero);
-    Real2DArray SpcLayer;   SpcLayer.assign(n3,SpcRecord);
+    RealArray   SpcRecord; SpcRecord.assign(7,zero);
+    Real2DArray SpcLayer;  SpcLayer.assign(n3,SpcRecord);
     SpcVsZ.assign(isp+1,SpcLayer);
     ke.assign(isp+1,zero);
 
@@ -778,7 +781,7 @@ void redhallmhd::finalizeBoundaries( stack& run) {
 
     int bdrys; run.palette.fetch("bdrys", &bdrys);
 
-//    if (bdrys > 0) { finalizeFootPointDriving( run ); }
+    if (bdrys > 0) { finalizeFootPointDriving( run ); }
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -814,7 +817,7 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank );
 
-  MPI_Status * status   = 0;
+  MPI_Status status;
 
   int tag_old           = 0;
   int tag_new           = 1;
@@ -990,8 +993,8 @@ void redhallmhd::initFootPointDriving( stack& run ) {
     }
     if ( srun > 1) {
        
-       MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_old, MPI_COMM_WORLD, status);
-       MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_new, MPI_COMM_WORLD, status);
+       MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_old, MPI_COMM_WORLD, &status);
+       MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_new, MPI_COMM_WORLD, &status);
 
       }
     }
@@ -1002,7 +1005,7 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 void redhallmhd::finalizeFootPointDriving( stack& run ) {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Status * status = 0;
+  MPI_Status   status;
 
   int  rcount;  run.palette.fetch(  "rcount",  &rcount  );
   int brcount;  physics_data.fetch( "brcount", &brcount );
@@ -1021,8 +1024,8 @@ void redhallmhd::finalizeFootPointDriving( stack& run ) {
 
   if (rank            == 0)      {
      
-    MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_old, MPI_COMM_WORLD, status);
-    MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_new, MPI_COMM_WORLD, status);
+    MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_old, MPI_COMM_WORLD, &status);
+    MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_new, MPI_COMM_WORLD, &status);
 
     std::string data_dir;  run.palette.fetch(    "data_dir",   &data_dir  );
     std::string prefix;    run.palette.fetch(    "prefix",     &prefix    );
@@ -1827,9 +1830,10 @@ void redhallmhd::trackPowerSpectra( RealVar t_cur, stack& run ) {
 
        int m;
        int idx;
+
        for (unsigned k = 0; k < n1n2c; ++k) {
 
-         m       = 1 + sqrt(k2[k]) * dk_m1;
+         m       = sqrt(k2[k]) * dk_m1;
          idx     = (l*n1n2c) + k;
 
          spe[m]  = spe[m] + k2[k] * ( pow(std::norm(P[idx]),         2) );
@@ -1838,23 +1842,23 @@ void redhallmhd::trackPowerSpectra( RealVar t_cur, stack& run ) {
          szm[m]  = szm[m] + k2[k] * ( pow(std::norm(P[idx] - A[idx]),2) );
 
        }
-
-       for (unsigned j = 0; j < isp+1; ++j) {
-
-         spe[j] = two * spe[j] * dk_m1;
-         sae[j] = two * sae[j] * dk_m1;
-         szp[j] = two * szp[j] * dk_m1;
-         szm[j] = two * szm[j] * dk_m1;
-
-         SpcVsZ[j][l-1][i_k  ] = j * dk;
-         SpcVsZ[j][l-1][i_spe] = SpcVsZ[j][l-1][i_spe] + spe[j];
-         SpcVsZ[j][l-1][i_sae] = SpcVsZ[j][l-1][i_sae] + sae[j];
-         SpcVsZ[j][l-1][i_ts ] = SpcVsZ[j][l-1][i_ts ] + spe[j] + sae[j];
-         SpcVsZ[j][l-1][i_szp] = SpcVsZ[j][l-1][i_szp] + szp[j];
-         SpcVsZ[j][l-1][i_szm] = SpcVsZ[j][l-1][i_szm] + szm[j];
-         SpcVsZ[j][l-1][i_tz ] = SpcVsZ[j][l-1][i_tz ] + szp[j] + szm[j];
-
-       }
+  
+         for (unsigned j = 0; j < isp+1; ++j) {
+  
+           spe[j] = two * spe[j] * dk_m1;
+           sae[j] = two * sae[j] * dk_m1;
+           szp[j] = two * szp[j] * dk_m1;
+           szm[j] = two * szm[j] * dk_m1;
+  
+           SpcVsZ[j][l-1][i_k  ] = j * dk;
+           SpcVsZ[j][l-1][i_spe] = SpcVsZ[j][l-1][i_spe] + spe[j];
+           SpcVsZ[j][l-1][i_sae] = SpcVsZ[j][l-1][i_sae] + sae[j];
+           SpcVsZ[j][l-1][i_ts ] = SpcVsZ[j][l-1][i_ts ] + spe[j] + sae[j];
+           SpcVsZ[j][l-1][i_szp] = SpcVsZ[j][l-1][i_szp] + szp[j];
+           SpcVsZ[j][l-1][i_szm] = SpcVsZ[j][l-1][i_szm] + szm[j];
+           SpcVsZ[j][l-1][i_tz ] = SpcVsZ[j][l-1][i_tz ] + szp[j] + szm[j];
+  
+         }
     }
   }
 }
@@ -2160,7 +2164,6 @@ void redhallmhd::reportPowerSpectra ( stack& run ) {
   if (calcsvz == 1) {
 
     int isp;physics_data.fetch(    "isp",     &isp);
-    MPI_Status * status = 0;
 
     int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -2221,7 +2224,7 @@ void redhallmhd::reportPowerSpectra ( stack& run ) {
 void redhallmhd::reportQtyVsZ ( stack& run ) {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank );
-  MPI_Status * status = 0;
+  MPI_Status status;
 
   int   nw; run.palette.fetch("nw",   &nw    );
   int   n3; run.palette.fetch("p3",   &n3    );
@@ -2241,7 +2244,7 @@ void redhallmhd::reportQtyVsZ ( stack& run ) {
 
    if (rank != 0 ) { MPI_Send(&QtyVsZ[rank*n3 + l].front(), 25, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD); }
    else { for (unsigned rnk_k = 1; rnk_k < np; rnk_k++) {
-            MPI_Recv(&QtyVsZ[rnk_k*n3+l].front(), 25, MPI_DOUBLE, rnk_k, rnk_k, MPI_COMM_WORLD, status);
+            MPI_Recv(&QtyVsZ[rnk_k*n3+l].front(), 25, MPI_DOUBLE, rnk_k, rnk_k, MPI_COMM_WORLD, &status);
           }
         }
  }
