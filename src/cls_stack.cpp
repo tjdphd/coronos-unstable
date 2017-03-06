@@ -373,7 +373,7 @@ void stack::writeUData() {
       }
 
       ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_p << " ";
-      ofs   << std::setw(25) << std::right << std::setprecision(20) << std::scientific << next_a << " ";
+      ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_a << " ";
 
       if (iu3 < 3)  {
 

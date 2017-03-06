@@ -138,16 +138,16 @@ class redhallmhd
   int         ikf;
   int         nk;
 
-  void updatePAJ( std::string str_step, stack& run );
-  void applyBC(   std::string str_step, stack& run );                 /* ~ Apply Boundary Conditions at current step ~ */
-  void updateTimeInc(                   stack& run );
+  void updatePAOJ( std::string str_step, stack& run );
+  void applyBC(    std::string str_step, stack& run );                 /* ~ Apply Boundary Conditions at current step ~ */
+  void updateTimeInc(                    stack& run );
 
-  void PfromO(                          stack& run );                 /* ~ Obtain P from vorticity                   ~ */
-  void AfromH(                          stack& run );                 /* ~ Obtain A from H                           ~ */
+  void PfromO(                           stack& run );                 /* ~ Obtain P from vorticity                   ~ */
+  void AfromH(                           stack& run );                 /* ~ Obtain A from H                           ~ */
 
-  void evalElls(                        stack& run );                 /* ~ calculate l's and h's at each layer       ~ */
-  void evalValf(                        stack& run );                 /* ~ calculate Va at each layer                ~ */
-  void evalUmean(                       stack& run );                 /* ~ calculate Va at each layer                ~ */
+  void evalElls(                         stack& run );                 /* ~ calculate l's and h's at each layer       ~ */
+  void evalValf(                         stack& run );                 /* ~ calculate Va at each layer                ~ */
+  void evalUmean(                        stack& run );                 /* ~ calculate Va at each layer                ~ */
 
                                                                       /* ~ Energy etc time-series related            ~ */
 

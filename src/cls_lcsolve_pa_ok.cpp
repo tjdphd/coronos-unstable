@@ -97,57 +97,57 @@ void lcsolve::Loop( stack& run ) {
       ofs.open( c_state_pa, std::ios::out );
       for (unsigned k = 0; k < iu2*n1n2c;++k) {
 
-//      if (std::abs(physics.P[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.P[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      ofs << std::endl;
-
-        if (std::abs(physics.O[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].real() << " ";
+        if (std::abs(physics.P[k].real()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].real() << " ";
         }
         else {
           ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
         }
-        if (std::abs(physics.O[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].imag() << " ";
+        if (std::abs(physics.P[k].imag()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].imag() << " ";
         }
         else {
           ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
         }
-        if (std::abs(run.U1[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
+        if (std::abs(physics.A[k].real()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].real() << " ";
         }
         else {
           ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
         }
-        if (std::abs(run.U1[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
+        if (std::abs(physics.A[k].imag()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].imag() << " ";
         }
         else {
           ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
         }
         ofs << std::endl;
+
+//      if (std::abs(physics.O[k].real()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].real() << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      if (std::abs(physics.O[k].imag()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].imag() << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      if (std::abs(run.U1[k].real()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      if (std::abs(run.U1[k].imag()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      ofs << std::endl;
 
 //      if (std::abs(run.U0[k].real()) > smallish ){
 //        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U0[k].real()    << " ";
@@ -216,10 +216,11 @@ void lcsolve::Loop( stack& run ) {
 
   physics.updatePAOJ( "predict", run              );
   physics.PfromO (               run              );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
+
 //physics.AfromH (               run              );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
 //physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
-
 //physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+
 //physics.fftw.fftwReverseAll(     run            );
 //physics.reportQtyVsZ(            run            );
 //physics.reportPowerSpectra(      run            );
@@ -236,31 +237,31 @@ void lcsolve::Loop( stack& run ) {
       ofs.open( c_state_pa, std::ios::out );
       for (unsigned k = 0; k< iu2*n1n2c;++k) {
 
-//      if (std::abs(physics.P[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.P[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      ofs << std::endl;
+        if (std::abs(physics.P[k].real()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].real() << " ";
+        }
+        else {
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+        }
+        if (std::abs(physics.P[k].imag()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].imag() << " ";
+        }
+        else {
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+        }
+        if (std::abs(physics.A[k].real()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].real() << " ";
+        }
+        else {
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+        }
+        if (std::abs(physics.A[k].imag()) > smallish ){
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].imag() << " ";
+        }
+        else {
+          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+        }
+        ofs << std::endl;
 
 //      if (std::abs(run.U0[k].real()) > smallish ){
 //        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U0[k].real()    << " ";
@@ -288,31 +289,31 @@ void lcsolve::Loop( stack& run ) {
 //      }
 //      ofs << std::endl;
 
-        if (std::abs(physics.O[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].real() << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(physics.O[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].imag() << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(run.U1[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(run.U1[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        ofs << std::endl;
+//      if (std::abs(physics.O[k].real()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].real() << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      if (std::abs(physics.O[k].imag()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].imag() << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      if (std::abs(run.U1[k].real()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      if (std::abs(run.U1[k].imag()) > smallish ){
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
+//      }
+//      else {
+//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
+//      }
+//      ofs << std::endl;
 
       }
       ofs.close();
@@ -324,11 +325,13 @@ void lcsolve::Loop( stack& run ) {
 
 //physics.updatePAOJ(  "predict",   run           );
 //physics.PfromO (                  run           );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
+
   physics.AfromH (                  run           );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
   physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
-
   physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+
   physics.fftw.fftwReverseAll(     run            );
+
   physics.reportQtyVsZ(            run            );
   physics.reportPowerSpectra(      run            );
 

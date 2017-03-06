@@ -315,15 +315,19 @@ void fft::fftwForwardAll( stack& run ) {
       switch(i_f) {
       case(0) :
         for (unsigned k = 0; k < nc;   k++) { U0[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
+        U0[(strt_idx)].real()=zero;
         break;
       case(1) :  
         for (unsigned k = 0; k < nc;   k++) { U1[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
+        U1[(strt_idx)].real()=zero;
         break;
       case(2) :  
         for (unsigned k = 0; k < nc;   k++) { U2[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
+        U2[(strt_idx)].real()=zero;
         break;
       case(3) :  
         for (unsigned k = 0; k < nc;   k++) { U3[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
+        U2[(strt_idx)].real()=zero;
         break;
       }
 
@@ -361,15 +365,19 @@ void fft::fftwReverseAll( stack& run ) {
       for (unsigned   k = 0; k < nc; k++) { cplx_in[k] = (ComplexVar) zero; }
       switch(i_f) {
       case(0) :
+        U0[strt_idx].real()=zero;
         for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U0[strt_idx + k];  }
         break;
       case(1) :
+        U1[strt_idx].real()=zero;
         for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U1[strt_idx + k];  }
         break;
       case(2) :
+        U2[strt_idx].real()=zero;
         for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U2[strt_idx + k];  }
         break;
       case(3) :
+        U3[strt_idx].real()=zero;
         for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U3[strt_idx + k];  }
         break;
       }
@@ -422,8 +430,10 @@ void fft::fftwForwardAll( stack& run, ComplexArray& Oout, ComplexArray& Jout ) {
       switch(i_f) {
       case(0) :
         for (unsigned k = 0; k < nc;   k++) { Oout[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
+        Oout[strt_idx].real()=0;
         break;
       case(1) :  
+        Jout[strt_idx].real()=0;
         for (unsigned k = 0; k < nc;   k++) { Jout[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
         break;
       }
@@ -455,9 +465,11 @@ void fft::fftwReverseAll( stack& run, ComplexArray& Oin, ComplexArray& Jin ) {
       for (unsigned   k = 0; k < nc; k++) { cplx_in[k] = (ComplexVar) zero; }
       switch(i_f) {
       case(0) :
+        Oin[strt_idx].real()=0;
         for (unsigned k = 0; k < nc; k++) { cplx_in[k] = Oin[strt_idx + k];  }
         break;
       case(1) :
+        Jin[strt_idx].real()=0;
         for (unsigned k = 0; k < nc; k++) { cplx_in[k] = Jin[strt_idx + k];  }
         break;
       }
@@ -518,14 +530,18 @@ void fft::fftwForwardLayerofField ( stack& run, int i_l, int i_f ) {
   switch(i_f) {
   case(0) :
     for (unsigned k = 0; k < nc;   k++) { U0[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
+    U0[strt_idx].real()=zero;
     break;
   case(1) :  
+    U1[strt_idx].real()=zero;
     for (unsigned k = 0; k < nc;   k++) { U1[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
     break;
   case(2) :  
+    U2[strt_idx].real()=zero;
     for (unsigned k = 0; k < nc;   k++) { U2[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
     break;
   case(3) :  
+    U3[strt_idx].real()=zero;
     for (unsigned k = 0; k < nc;   k++) { U3[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
     break;
   }
@@ -562,15 +578,19 @@ void fft::fftwReverseLayerofField ( stack& run, int i_l, int i_f) {
   for (unsigned   k = 0; k < nc; k++) { cplx_in[k] = czero; }
   switch(i_f) {
   case(0) :
+    U0[strt_idx].real()=zero;
     for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U0[strt_idx + k];  }
     break;
   case(1) :
+    U1[strt_idx].real()=zero;
     for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U1[strt_idx + k];  }
     break;
   case(2) :
+    U2[strt_idx].real()=zero;
     for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U2[strt_idx + k];  }
     break;
   case(3) :
+    U3[strt_idx].real()=zero;
     for (unsigned k = 0; k < nc; k++) { cplx_in[k] = U3[strt_idx + k];  }
     break;
   }
@@ -617,6 +637,7 @@ void fft::fftwForwardRaw( stack& run, RealArray& Rin, ComplexArray& Cout) {
 #endif
 
     for (unsigned k   = 0 ; k < n1n2c ; k++){ Cout[c_strt_idx + k] = scale*cplx_out[k]*rt[k];}
+    Cout[c_strt_idx].real()=zero;
 
   }
 }
@@ -641,6 +662,7 @@ void fft::fftwReverseRaw( stack& run, ComplexArray& Cin, RealArray& Rout) {
   for (unsigned k     = 0 ; k < n1n2 ; k++) { r_out[k]             =  zero;               }
   for (unsigned k     = 0 ; k < n1n2c; k++) { cplx_in[k]           = Cin[c_strt_idx + k]; }
 
+  Cin[c_strt_idx].real()=zero;
 #ifdef LD_PRECISION_H
   fftwl_execute(p_lay_rev);
 #elif defined OD_PRECISION_H
@@ -669,6 +691,7 @@ void fft::fftwReverseIC(ComplexArray& Cin, RealArray& Rout ) {
   for (unsigned k = 0 ; k < n1n2 ; k++) { r_out[k]    = zero;         }
   for (unsigned k = 0 ; k < n1n2c; k++) { cplx_in[k]  = Cin[k];       }
 
+  cplx_in[0].real()=zero;
 #ifdef LD_PRECISION_H
   fftwl_execute(p_lay_rev);
 #elif defined OD_PRECISION_H
@@ -700,6 +723,7 @@ void fft::fftwForwardIC( RealArray& Rin, ComplexArray& Cout) {
 #endif
 
  for (unsigned k = 0 ; k < n1n2c; k++) {Cout[k]     = scale * cplx_out[k]*rt[k]; }
+  Cout[0].real()=zero;
 
 }
 
