@@ -139,6 +139,7 @@ class redhallmhd
   int         nk;
 
   void updatePAOJ( std::string str_step, stack& run );
+  void checkState( int pair, stack &run); 
   void applyBC(    std::string str_step, stack& run );                 /* ~ Apply Boundary Conditions at current step ~ */
   void updateTimeInc(                    stack& run );
 

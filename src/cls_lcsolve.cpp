@@ -72,119 +72,29 @@ void lcsolve::Loop( stack& run ) {
   RealVar t_cur ; run.palette.fetch(    "tstart" , &t_cur  );
   RealVar dt    ;
 
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
-    std::string str_srun = static_cast<std::ostringstream*>( &(std::ostringstream() << srun)  ) -> str();
-    std::string str_rank = static_cast<std::ostringstream*>( &(std::ostringstream() << rank)  ) -> str();
-    std::string state_pa = "state_pa_rnk-" + str_rank + "_srun-" + str_srun;
-    const char *c_state_pa;
-    RealVar next;
-    c_state_pa           = state_pa.c_str();
-    std::ofstream ofs;
-
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
   for (unsigned l = 0; l < ndt;l++) {
 
   /* ~ iptest conditional goes here              ~ */
 
-    passAdjacentLayers( "predict",    run         );
-
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
-    if (srun == 2 && l == 0) {
-// look at A and P here.
-      ofs.open( c_state_pa, std::ios::out );
-      for (unsigned k = 0; k < iu2*n1n2c;++k) {
-
-//      if (std::abs(physics.P[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.P[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      ofs << std::endl;
-
-        if (std::abs(physics.O[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].real() << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(physics.O[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].imag() << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(run.U1[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(run.U1[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        ofs << std::endl;
-
-//      if (std::abs(run.U0[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U0[k].real()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(run.U0[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U0[k].imag()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(run.U1[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(run.U1[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      ofs << std::endl;
-
-      }
-      ofs.close();
-    }
-
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
 //  passAdjacentLayers( "predict",    run         );
+//  physics.applyBC(    "predict",    run         );
+//  physics.updatePAOJ( "predict",    run         );   /* ~ P, A, and J contain un-updated/corrector-updated values ~ */
 
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+
+//  if (srun == 2 && l == 0) {
+
+//    physics.checkState(0,             run         );
+//    physics.trackEnergies(     t_cur, run         );
+
+//  }
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+
+    passAdjacentLayers( "predict",    run         );
     physics.applyBC(    "predict",    run         );
     physics.updatePAOJ( "predict",    run         );   /* ~ P, A, and J contain un-updated/corrector-updated values ~ */
+
     physics.trackQtyVsZ(       t_cur, run         );
 
     physics.trackEnergies(     t_cur, run         );
@@ -215,14 +125,16 @@ void lcsolve::Loop( stack& run ) {
  }
 
   physics.updatePAOJ( "predict", run              );
-  physics.PfromO (               run              );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
-//physics.AfromH (               run              );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
-//physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
 
-//physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
-//physics.fftw.fftwReverseAll(     run            );
-//physics.reportQtyVsZ(            run            );
-//physics.reportPowerSpectra(      run            );
+
+  physics.PfromO (               run              );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
+  physics.AfromH (               run              );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
+  physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
+
+  physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+  physics.fftw.fftwReverseAll(     run            );
+  physics.reportQtyVsZ(            run            );
+  physics.reportPowerSpectra(      run            );
 
 //run.palette.reset(   "tstart", t_cur            );
 
@@ -231,92 +143,16 @@ void lcsolve::Loop( stack& run ) {
     
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-  if (srun == 1)  {
-// look at A and P here.
-      ofs.open( c_state_pa, std::ios::out );
-      for (unsigned k = 0; k< iu2*n1n2c;++k) {
+//if (srun == 1)  {
 
-//      if (std::abs(physics.P[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.P[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.P[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].real() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(physics.A[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.A[k].imag() << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      ofs << std::endl;
+//  physics.checkState(0,             run         );
+//  physics.trackEnergies(     t_cur, run         );
 
-//      if (std::abs(run.U0[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U0[k].real()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(run.U0[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U0[k].imag()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(run.U1[k].real()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      if (std::abs(run.U1[k].imag()) > smallish ){
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
-//      }
-//      else {
-//        ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-//      }
-//      ofs << std::endl;
+//}
 
-        if (std::abs(physics.O[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].real() << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(physics.O[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << physics.O[k].imag() << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(run.U1[k].real()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].real()    << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        if (std::abs(run.U1[k].imag()) > smallish ){
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << run.U1[k].imag()    << " ";
-        }
-        else {
-          ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero                << " ";
-        }
-        ofs << std::endl;
-
-      }
-      ofs.close();
-      }
+//RealArray realP(iu2*n1n2,zero);
+//physics.fftw.fftwReverseRaw(run, physics.P, realP); 
+//physics.fftw.fftwForwardRaw(run, realP, physics.P); 
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
@@ -324,18 +160,28 @@ void lcsolve::Loop( stack& run ) {
 
 //physics.updatePAOJ(  "predict",   run           );
 //physics.PfromO (                  run           );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
-  physics.AfromH (                  run           );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
-  physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
+//physics.AfromH (                  run           );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
+//physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
 
-  physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
-  physics.fftw.fftwReverseAll(     run            );
-  physics.reportQtyVsZ(            run            );
-  physics.reportPowerSpectra(      run            );
+//physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+//physics.fftw.fftwReverseAll(     run            );
+//physics.reportQtyVsZ(            run            );
+//physics.reportPowerSpectra(      run            );
 
   run.palette.reset(   "tstart", t_cur            );
 
   ++srun;
   run.palette.reset(   "srun"  , srun             );
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+
+//if (srun == 2)  {
+
+//  physics.checkState(0,             run         );
+
+//}
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
   run.writeUData(                                 );
   run.writeParameters(                            );
@@ -1299,37 +1145,18 @@ void lcsolve::Step( std::string str_step, stack& run ) {
 
       if (     str_step.compare("predict") == 0) {           /* ~ the predictor case                           ~ */
 
-        if (rank == 0 && (k - n1n2c) < n1n2c) {
-          tU0[idx] = U0[idx];                                /* ~ pass pbot values to tU0                      ~ */
-        }
-        if ( rank != (np - 1)) {
-          tU0[k]   = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];}
-        else {
-          if ( k   < (kstop - n1n2c)) { tU0[k] = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];}
-          else                        { tU0[k] = U0[k];                                                         }
-        }
-
+        tU0[k]     = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];}
         tU1[k]     = (SE1[idx] * U1[k] + (dt * (B1[k] + D1[k] + A1[k]))) * SI1[idx];
 
         if ( model.compare("hall") == 0 ) {
-
-/* ~ NOTE: hall case does not yet reflect conditionals added above to tU0 for tU2 ~ */ 
 
           tU2[k]    = (SE2[idx] * U2[k] + (dt * (B2[k] + D2[k] + A2[k]))) * SI2[idx];
           tU3[k]    = (SE3[idx] * U3[k] + (dt * (B3[k] + D3[k] + A3[k]))) * SI3[idx];
 
         }
-      }
       else if (str_step.compare("correct") == 0) { /* ~ the corrector case                          ~ */
 
-         if ( rank != (np - 1)) {
-           U0[k]    = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];
-         }
-         else {
-           if ( k   < (kstop - n1n2c)) {
-             U0[k]  = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];
-           }
-         }
+         U0[k]      = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];
          U1[k]      = (SE1[idx] * U1[k] + (dt * (B1[k] + D1[k] + A1[k]))) * SI1[idx];
 
         if ( model.compare("hall") == 0 ) {
