@@ -751,6 +751,7 @@ void redhallmhd::initBoundaries( stack& run) {
   if ( rank == 0 || rank == np - 1 ) {
     
     int bdrys; run.palette.fetch("bdrys", &bdrys);
+
     if (bdrys > 0 ) { initFootPointDriving( run ); }
     else            { initNoDrive(          run ); }
 
@@ -834,6 +835,7 @@ void redhallmhd::initFootPointDriving( stack& run ) {
   if (rcount > 0) { for (int l = 0; l < rcount; ++l) { dummy = (double) rand() / RAND_MAX; }}
 
   int srun;   run.palette.fetch(     "srun", &srun  );
+  int n1;     run.stack_data.fetch(   "n1",  &n1    );
   int n2;     run.stack_data.fetch(   "n2",  &n2    );
   int n1n2c;  run.stack_data.fetch( "n1n2c", &n1n2c );
   RealVar kc; run.palette.fetch(       "kc", &kc    );
@@ -841,7 +843,7 @@ void redhallmhd::initFootPointDriving( stack& run ) {
   int bdrys;  run.palette.fetch(    "bdrys", &bdrys );
   int n3;     run.palette.fetch(       "p3", &n3    );
 
-  int i_ua = 0;
+  int i_ua;
   int i_cpy;
 
   ComplexArray Ptop(n1n2c, czero);
@@ -851,6 +853,8 @@ void redhallmhd::initFootPointDriving( stack& run ) {
   RealVar    next_real; 
   RealVar    next_imag;
   ComplexVar tuple;
+
+  i_ua = 0;
 
   if (rank == 0 || rank == np - 1 ) {
 
@@ -867,8 +871,6 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
     if (srun == 1) {
 
-//    int i_ua = 0;
-//    int i_cpy;
       for (int l = 0; l < n1n2c; ++l) {
 
 /* ~ fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  */
@@ -888,13 +890,12 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
             }
             ++i_ua;
-
           } // not copying
           else { i_cpy    = (l/((n2/2)+1));
-            if (i_cpy < 0 || i_cpy > n2/2-1) {
-            std::cout << "initFoot: WARNING - i_cpy = " << i_cpy << " for l = " << l << std::endl;
-            } // i_cpy out of range
-            else {
+//          if (i_cpy < 0 || i_cpy > n2/2-1) {
+//            std::cout << "initFoot: WARNING ONE - i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//          } // i_cpy out of range
+//          else { old
               if ( i_cpy < n2/2 ) {
                 rnewlb[l] = rnewlb[i_cpy];
               } // really copying
@@ -912,17 +913,17 @@ void redhallmhd::initFootPointDriving( stack& run ) {
                 }
                 ++i_ua;
               } // not really copying
-            }   // i_cpy in range
+//          }   // i_cpy in range
           }     // copying
         }       // l is <  (n1n2c - (n2/2) - 1
         else {
 
           i_cpy = (l - n1n2c + n2/2+2);
           if (i_cpy < 0 || i_cpy > n2/2+1) {
-            std::cout << "initFoot: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+            std::cout << "initFoot: WARNING TWO - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
           }
           else {
-            std::cout << "initFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//          std::cout << "initFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
             rnewlb[l] = std::conj(rnewlb[i_cpy]);
           }
 
@@ -932,6 +933,8 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
       }        // for loop in l
 
+//    assert (n1n2c == i_ua + n1);
+      std::cout << "initFoot: i_ua = " << i_ua << " for rank = " << rank << std::endl; 
 
     l_reset_success     = physics_data.reset("brcount", brcount);
 
@@ -993,8 +996,8 @@ void redhallmhd::initFootPointDriving( stack& run ) {
        }
      }
      else { std::cout << "initFootPointDriving: WARNING - could not open file " << boundary_data_file << std::endl; }
-    } // srun > 1
 
+    } // srun > 1
   }   //rank is zero
 
   if ( rank == np - 1 ) {
@@ -1028,10 +1031,10 @@ void redhallmhd::initFootPointDriving( stack& run ) {
               ++i_ua;
             } // not copying
             else { i_cpy    = (l/((n2/2)+1));
-              if (i_cpy < 0 || i_cpy > n2/2-1) {
-                std::cout << "initFoot: WARNING - i_cpy = " << i_cpy << " for l = " << l << std::endl;
-              } // i_cpy out of range
-              else {
+//            if (i_cpy < 0 || i_cpy > n2/2-1) {
+//              std::cout << "initFoot: WARNING THREE - i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//            } // i_cpy out of range
+//            else {
                 if ( i_cpy < n2/2 ) {
                   rnewub[l] = rnewub[i_cpy];
                 } // really copying
@@ -1054,17 +1057,17 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
                   ++i_ua;
                 }  // not really copying
-              }    // i_cpy in range
+//            }    // i_cpy in range
             }      // copying
           } // l  < (n1n2c - (n2/2)-1)
           else {
 
             i_cpy = (l - n1n2c + n2/2+2);
             if (i_cpy < 0 || i_cpy > n2/2+1) {
-              std::cout << "initFoot: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+              std::cout << "initFoot: WARNING FOUR - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
             }
             else {
-              std::cout << "initFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//            std::cout << "initFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
               rnewub[l] = std::conj(rnewub[i_cpy]);
             }
 
@@ -1074,6 +1077,8 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
         } // end for loop in l
 
+//    assert (n1n2c == i_ua + n1);
+        std::cout << "initFoot: i_ua = " << i_ua << " for rank = " << rank << std::endl; 
       l_reset_success   = physics_data.reset("trcount", trcount);
 
       } // srun = 1 new
@@ -2846,13 +2851,18 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
   int np;         run.palette.fetch(    "np"   , &np       );
   RealVar dtau;   run.palette.fetch(    "dtau" , &dtau     );
 
+  int n1n2;       run.stack_data.fetch( "n1n2",  &n1n2     );
   int n1n2c;      run.stack_data.fetch( "n1n2c", &n1n2c    );
+  int n1;         run.stack_data.fetch( "n1"   , &n1       );
   int n2;         run.stack_data.fetch( "n2"   , &n2       );
   int iu3;        run.stack_data.fetch("iu3"   , &iu3      );
   int n_layers;   run.stack_data.fetch( "n3"   , &n_layers );
 
   RealVar t_cur;  physics_data.fetch(   "t_cur", &t_cur    );
 
+  int i_ua = 0;
+
+  int i_cpy;
   int oldnum, num;
 
   RealVar    ffp, kc;
@@ -2894,14 +2904,14 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
         Z[k]                 = czero;
         }
         ++idx;
-
       }
 
       num                    = oldnum;
      
       while (  (num * dtau) <= t_cur ) { ++num; }
 
-      run.palette.fetch("ffp", &ffp);
+//    run.palette.fetch("ffp", &ffp);
+
       num                    = num - 1; 
       lowtau                 = (num    * dtau) - t_cur;
       bigtau                 =((num+1) * dtau) - t_cur;
@@ -2967,7 +2977,7 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
           ++idx;
         }
 //      std::cout << "applyBC: i_ua = " << i_ua << std::endl;
-      }
+      } // num is oldnum
       else {
 
         int brcount; physics_data.fetch("brcount", &brcount);
@@ -2979,29 +2989,85 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
 
           for (unsigned l = 0; l < nc; l++) { roldlb[l] = rnewlb[l]; }
 
+////      for (unsigned l = 0; l < nc; l++ ) {
+////        if ( sqrt(k2[l]) <= kc ) {
+
+////            dummy        = ((double) rand() / RAND_MAX ); ++brcount;
+////            dummy        = ((double) rand() / RAND_MAX ); ++brcount;
+
+////        }
+////      }
+
+          i_ua = 0;
           for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
 
-                dummy        = ((double) rand() / RAND_MAX );
-                ++brcount;
-                dummy        = ((double) rand() / RAND_MAX );
-                ++brcount;
-            }
-          }
+// ~ fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  */
 
-          for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
+            if (l  < (n1n2c - (n2/2)-1)) {
+              if ((l == 0) || (l %((n2/2)+1) !=0) ) {
 
-                next_real    = ffp * (((double) rand() / RAND_MAX) * two - one);
-                ++brcount;
-                next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
-                ++brcount;
-                tuple        = ComplexVar(next_real, next_imag);
-                rnewlb[l]    = tuple;
+                if ( sqrt(k2[l]) <= kc ) {
 
-            }
-          }
-        }
+                    dummy        = ((double) rand() / RAND_MAX ); ++brcount; // why not just here?
+                    dummy        = ((double) rand() / RAND_MAX ); ++brcount;
+
+                    next_real    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                    ++brcount;
+                    next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                    ++brcount;
+                    tuple        = ComplexVar(next_real, next_imag);
+                    rnewlb[l]    = tuple;
+
+                }
+                ++i_ua;
+              } // not copying
+              else {
+                i_cpy    = (l/((n2/2)+1));
+//              if (i_cpy < 0 || i_cpy > n2/2-1) {
+//                std::cout << "applyFoot: WARNING - i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//              } // i_cpy out of range
+//              else {
+                  if ( i_cpy < n2/2 ) {
+                    rnewlb[l] = rnewlb[i_cpy];
+                  } // really copying
+                  else {
+                    if ( sqrt(k2[l]) <= kc ) {
+
+                        dummy        = ((double) rand() / RAND_MAX ); ++brcount; // why not just here?
+                        dummy        = ((double) rand() / RAND_MAX ); ++brcount;
+
+                        next_real    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                        ++brcount;
+                        next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                        ++brcount;
+                        tuple        = ComplexVar(next_real, next_imag);
+                        rnewlb[l]    = tuple;
+
+                    }
+                    ++i_ua;
+                  } // not really copying
+//              }   // i_cpy in range
+              }     //copying
+            }       // l is <  (n1n2c - (n2/2) - 1
+            else {
+              i_cpy = (l - n1n2c + n2/2+2);
+              if (i_cpy < 0 || i_cpy > n2/2+1) {
+                std::cout << "applyFoot: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+              }
+              else {
+//              std::cout << "applyFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+                rnewlb[l] = std::conj(rnewlb[i_cpy]);
+              }
+            }       // l is >= (n1n2c - (n2/2) - 1
+
+/* ~ fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  */
+
+          } // end of for loop in l
+
+          if ( k == 0 ) { std::cout << "applyFoot: i_ua = " << i_ua << std::endl;}
+//        assert(n1n2c == i_ua + n1);
+        } // loop in k
+
         idx = 0;
         for (unsigned k = strt_idx; k < stop_idx; k++) {
 
@@ -3009,18 +3075,19 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
 
           U0[k]              = (a * roldlb[k]) + (b * rnewlb[k]);
           O[k]               = U0[k];
+
           if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
           if (iu3 > 2){ 
             Z[k]             = czero;
           }
           ++idx;
-        }
-        physics_data.reset("brcount", brcount);
-      }
-      run.palette.reset("oldnumlb", num);
+        } // end second loop in k
 
-    }
-    else if ( rank == np - 1 && bdrys == 2) {
+        physics_data.reset("brcount", brcount);
+      } // num is not oldnum
+      run.palette.reset("oldnumlb", num);
+    }  //rank is zero
+    else if ( rank == (np - 1) && (bdrys == 2)) {
 
       run.palette.fetch("oldnumub", &oldnum ); /* ~ "oldnum" ~ */
       strt_idx               = n_layers * nc;
@@ -3031,12 +3098,14 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
         if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
         U0[k]                = czero;
         O[k]                 = U0[k];
-        if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
+        P[k]                 = czero;
+
         if (iu3 > 2) {
           Z[k]               = czero;
         }
         ++idx;
       }
+
       num                    = oldnum;
 
       while (  (num * dtau) <= t_cur ) { ++num; }                 /* ~~~~~~~~~~~~~~~~~~~~~ */
@@ -3050,18 +3119,19 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
 
       if (num == oldnum) {
     
-        int kdk              = 0;
+//      int kdk              = 0;
         int idx              = 0;
         for (unsigned k = strt_idx; k < stop_idx; k++) {
         if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
-           U0[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
+//         U0[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
+           U0[k]              = (a * roldub[idx]) + (b * rnewub[idx]);
             O[k]              = U0[k];
             if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
 
           if (iu3 > 2) {
             Z[k]             = czero;
           }
-          ++kdk;
+//        ++kdk;
           ++idx;
         }
 
@@ -3069,54 +3139,108 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
 
       else {
 
-        int trcount;
-        physics_data.fetch("trcount", &trcount);
+        int trcount; physics_data.fetch("trcount", &trcount);
+
         run.palette.fetch("ffp",      &ffp);
         run.palette.fetch("kc",       &kc);
 
         for (unsigned k = 0; k < num - oldnum; k++) {
+
           for (unsigned l = 0; l < nc; l++) { roldub[l] = rnewub[l]; }
+
+////      for (unsigned l = 0; l < nc; l++ ) {
+////        if ( sqrt(k2[l]) <= kc ) {
+
+////            dummy        = ((double) rand() / RAND_MAX);
+////            ++trcount;
+////            dummy        = ((double) rand() / RAND_MAX);
+////            ++trcount;
+////        }
+////      }
+
+          i_ua = 0;
           for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
 
-                dummy        = ((double) rand() / RAND_MAX);
-                ++trcount;
-                dummy        = ((double) rand() / RAND_MAX);
-                ++trcount;
-            }
-          }
+// ~ fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  */
 
-          for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
+            if (l  < (n1n2c - (n2/2)-1)) {
+              if ((l == 0) || (l %((n2/2)+1) !=0) ) {
 
-                next_real    = ffp * (((double) rand() / RAND_MAX ) * two - one);
-                ++trcount;
-                next_imag    = ffp * (((double) rand() / RAND_MAX ) * two - one);
-                ++trcount;
-                tuple        = std::complex<double>(next_real, next_imag);
-                rnewub[l]    = tuple;
+                if ( sqrt(k2[l]) <= kc ) {
 
-            }
-          }
-        }
-        int kdk              = 0;
+                    next_real    = ffp * (((double) rand() / RAND_MAX ) * two - one);
+                    ++trcount;
+                    next_imag    = ffp * (((double) rand() / RAND_MAX ) * two - one);
+                    ++trcount;
+                    tuple        = std::complex<double>(next_real, next_imag);
+                    rnewub[l]    = tuple;
+
+                }
+                ++i_ua;
+              } // not copying
+              else {
+                i_cpy    = (l/((n2/2)+1));
+                  if ( i_cpy < n2/2 ) {
+                    rnewub[l] = rnewub[i_cpy];
+                  } // really copying
+                  else {
+                    if ( sqrt(k2[l]) <= kc ) {
+
+                        dummy        = ((double) rand() / RAND_MAX ); ++trcount; // why not just here?
+                        dummy        = ((double) rand() / RAND_MAX ); ++trcount;
+
+                        next_real    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                        ++trcount;
+                        next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                        ++trcount;
+                        tuple        = ComplexVar(next_real, next_imag);
+                        rnewub[l]    = tuple;
+
+                    }
+                    ++i_ua;
+                  } // not really copying
+//
+              }     //copying
+            }       // l is <  (n1n2c - (n2/2) - 1
+            else {
+              i_cpy = (l - n1n2c + n2/2+2);
+              if (i_cpy < 0 || i_cpy > n2/2+1) {
+                std::cout << "applyFoot: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+              }
+              else {
+////            std::cout << "applyFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+                rnewub[l] = std::conj(rnewub[i_cpy]);
+              }
+            }       // l is >= (n1n2c - (n2/2) - 1
+
+// ~ fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  */
+
+          } // end of for loop in l
+
+          if ( k == 0 ) { std::cout << "applyFoot: i_ua = " << i_ua << std::endl;}
+////      assert(n1n2c == i_ua + n1);
+
+        }   // loop in k
+
+//      int kdk              = 0;
         int idx              = 0;
         for (unsigned k = strt_idx; k < stop_idx; k++) {
           if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
-          U0[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
+//        U0[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
+          U0[k]              = (a * roldub[idx]) + (b * rnewub[idx]);
            O[k]              = U0[k];
           if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
           if (iu3 > 2) {
             Z[k]             = czero;
           }
-          ++kdk;
+//        ++kdk;
           ++idx;
         }
         physics_data.reset("trcount", trcount);
       }
         run.palette.reset("oldnumub", num);
-    }
-  }
+    } // rank is np - 1 and bdrys is 2
+  }   // rank is one of zero or  np - 1
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

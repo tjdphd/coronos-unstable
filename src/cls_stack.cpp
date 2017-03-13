@@ -73,9 +73,7 @@ stack::stack(std::string coronos_in) : canvas::canvas(coronos_in) {
 
 void stack::init_stack_data() {                     /* ~ gather/infer information to be           ~ */
                                                     /* ~ included in stack_data container         ~ */
-
   int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-
 
   /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
   /* ~ incoming parameters from palette            ~ */
@@ -100,14 +98,6 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
   int n1           = std::pow(2.0, p1);             /* ~ number of x-coordinates in a layer        ~ */
   int n2           = std::pow(2.0, p2);             /* ~ number of y-coordinates in a layer        ~ */
   int n3           =               p3 ;             /* ~ number of interior layers per process     ~ */
-
-  if (rank == 0) {
-
-  std::cout << "init_stack_data: for rank-" << rank << ":n1 = " << n1 << std::endl;
-  std::cout << "init_stack_data: for rank-" << rank << ":n2 = " << n2 << std::endl;
-  std::cout << "init_stack_data: for rank-" << rank << ":n3 = " << n3 << std::endl;
-
-  }
 
   int n1n2         = n1*n2;                         /* ~ total number points on a (real) layer     ~ */
   int n1n2c        = n1 * (((int)(half * n2)) + 1); /* ~ total number points on a (Fourier) layer  ~ */
@@ -145,30 +135,16 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
   
   padjust.assign("rfx"  );                          /* ~ assigning parameters that are run-fixed   ~ */
 
-  pname.assign("n1"     );
-  stack_data.emplace(pname, n1,         padjust);
-  pname.assign("n2"     );
-  stack_data.emplace(pname, n2,         padjust);
-  pname.assign("n3"     );
-  stack_data.emplace(pname, n3,         padjust);
-  pname.assign("n1n2"   );
-  stack_data.emplace(pname, n1n2,       padjust);
-  pname.assign("n1n2c"  );
-  stack_data.emplace(pname, n1n2c,      padjust);
-  pname.assign("iu1"    );
-  stack_data.emplace(pname, iu1,        padjust);
-  pname.assign("iu2"    );
-  stack_data.emplace(pname, iu2,        padjust);
-  pname.assign("iu3"    );
-  stack_data.emplace(pname, iu3,        padjust);
-  pname.assign("dz"     );
-  stack_data.emplace(pname, dz,         padjust);
-
-
-
-  pname.assign("res_str");
-  stack_data.emplace(pname, resolution, padjust);
-
+  pname.assign("n1"     ); stack_data.emplace(pname, n1,         padjust);
+  pname.assign("n2"     ); stack_data.emplace(pname, n2,         padjust);
+  pname.assign("n3"     ); stack_data.emplace(pname, n3,         padjust);
+  pname.assign("n1n2"   ); stack_data.emplace(pname, n1n2,       padjust);
+  pname.assign("n1n2c"  ); stack_data.emplace(pname, n1n2c,      padjust);
+  pname.assign("iu1"    ); stack_data.emplace(pname, iu1,        padjust);
+  pname.assign("iu2"    ); stack_data.emplace(pname, iu2,        padjust);
+  pname.assign("iu3"    ); stack_data.emplace(pname, iu3,        padjust);
+  pname.assign("dz"     ); stack_data.emplace(pname, dz,         padjust);
+  pname.assign("res_str"); stack_data.emplace(pname, resolution, padjust);
 
 }
 
