@@ -76,46 +76,45 @@ redhallmhd::redhallmhd(stack& run ) {
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-  if (srun == 1) { 
-                   int iu2;  run.stack_data.fetch("iu2" , &iu2 );
-                   int n1n2; run.stack_data.fetch("n1n2", &n1n2);
+//if (srun == 1) { 
+//                 int iu2;  run.stack_data.fetch("iu2" , &iu2 );
+//                 int n1n2; run.stack_data.fetch("n1n2", &n1n2);
 
-                   applyBC("predict", run);
+//                 applyBC("predict", run);
 
-                   if ( rank == 0) { std::cout << "redhallmhd: P[1] = " << P[1] << std::endl;}
-                   
-                   checkState(0,      run);
-                   RealArray realP(iu2*n1n2,zero);
+//                 if ( rank == 0) { std::cout << "redhallmhd: P[1] = " << P[1] << std::endl;}
+//                 
+//                 checkState(0,      run);
+//                 RealArray realP(iu2*n1n2,zero);
 
-                   fftw.fftwReverseRaw(run, P, realP); 
-                   fftw.fftwForwardRaw(run, realP, P); 
+//                 fftw.fftwReverseRaw(run, P, realP); 
+//                 fftw.fftwForwardRaw(run, realP, P); 
 
-                   ++srun; run.palette.reset( "srun", srun );
-                   checkState(0, run);
+//                 ++srun; run.palette.reset( "srun", srun );
+//                 checkState(0, run);
 
-                   fftw.fftwReverseRaw(run, P, realP); 
-                   fftw.fftwForwardRaw(run, realP, P); 
-                   ++srun; run.palette.reset( "srun", srun );
-                   checkState(0, run);
+//                 fftw.fftwReverseRaw(run, P, realP); 
+//                 fftw.fftwForwardRaw(run, realP, P); 
+//                 ++srun; run.palette.reset( "srun", srun );
+//                 checkState(0, run);
 
-                   --srun; --srun; run.palette.reset( "srun", srun );
+//                 --srun; --srun; run.palette.reset( "srun", srun );
 
-                   if (rank == 0 ){std::cout << "redhallmhd: srun = " << srun << std::endl;}
+//                 if (rank == 0 ){std::cout << "redhallmhd: srun = " << srun << std::endl;}
 
-                 }
+//               }
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
 //OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
                                                            /* ~ and vorticity O. For historical reasons,    ~ */
-                                                           /* ~ U0 containts P after call to fftwForwardAll ~ */
+                                                           /* ~ U0 contains P after call to fftwForwardAll  ~ */
                                                            /* ~ but lcsolve assumes U0 contains O. This     ~ */
                                                            /* ~ procedure copies U0 to P then puts O in U0  ~ */
                                                            /* ~ for subrun 1 it also initializes O. for     ~ */
                                                            /* ~ later subruns, O is already initialized by  ~ */
                                                            /* ~ retrieveOJ, so OfromP does a check that the ~ */
                                                            /* ~ values in U0 match the values in O.         ~ */
-
 
   HfromA(                run   );
   evalValf(              run   );
@@ -3517,6 +3516,10 @@ void redhallmhd::checkState( int pair, stack &run) {
   RealVar next;
   c_state_pa           = state_pa.c_str();
   std::ofstream ofs;
+
+  if (rank == 0 ) {
+    std::cout << "checkState: smallish = " << smallish << std::endl;
+  }
 
   ofs.open( c_state_pa, std::ios::out );
 
