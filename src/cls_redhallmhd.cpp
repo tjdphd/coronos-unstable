@@ -73,6 +73,7 @@ redhallmhd::redhallmhd(stack& run ) {
   initBoundaries(        run   );                          /* ~ initialization of quantities needed for     ~ */
 
   OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
+  HfromA(                run   );
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
@@ -116,7 +117,7 @@ redhallmhd::redhallmhd(stack& run ) {
                                                            /* ~ retrieveOJ, so OfromP does a check that the ~ */
                                                            /* ~ values in U0 match the values in O.         ~ */
 
-  HfromA(                run   );
+//HfromA(                run   );
   evalValf(              run   );
   evalUmean(             run   );
   evalElls(              run   );
@@ -1275,56 +1276,31 @@ void redhallmhd::OfromP( stack& run )  {
   assert(P.size()  == usize);
   assert(O.size()  == usize);
   
-//if (srun == 1) { 
-//  for (unsigned k = 0; k <usize; k++) {P[k] = U0[k];}    
-//}
-//else {
+  int kstart;
+  int kstop;
 
-    int kstart;
-    int kstop;
+  if ( rank == 0 )          { kstart = n1n2c;               /* ~ layer 0 of P and O handled by BC's for process 0     ~ */
+                              kstop  = usize;
+  }
+  else if (rank = (np - 1)) { kstart = 0;                   /* ~ layer n3 of P and O handled by BC's for process np-1 ~ */
+                              kstop  = (n_layers-2)*n1n2c;
+  } 
+  else {                      kstart = 0;                   /* ~ interior layers/processes                            ~ */
+                              kstop  = usize;
+  }
 
-    if ( rank == 0 ) {
-
-      kstart = n1n2c; 
-      kstop  = usize;
-
-    }
-    else if (rank = (np - 1)) {
-
-      kstart = 0; 
-      kstop  = (n_layers-2)*n1n2c;
-
-    } 
-    else {
-
-      kstart = 0;
-      kstop  = usize;
-
-    }
-
-    for (unsigned k = kstart; k <kstop; k++) { P[k] = U0[k];} /* ~ copy of the stream function and place it in P   ~ */
+  for (unsigned k = kstart; k <kstop; k++) { P[k] = U0[k];} /* ~ copy the stream function and place it in P           ~ */
      
-//}
-
-  unsigned  idx    = 0;                                    /* ~ index for k2                                    ~ */
+  unsigned  idx    = 0;                                     /* ~ index for k2                                         ~ */
 
   for (unsigned k  = 0; k < usize; k++) {
 
-    if (k % n1n2c  == 0 ) { idx = 0; }                     /* ~ reset idx when starting new layer               ~ */
+    if (k % n1n2c  == 0 ) { idx = 0; }                     /* ~ reset idx when starting new layer                     ~ */
   
-    U0[k] = k2[idx] * P[k];                                /* ~ Omega = - delperp^2 P                           ~ */
+    U0[k] = k2[idx] * P[k];                                /* ~ Omega = - delperp^2 P                                 ~ */
      O[k] = U0[k];
-
-//  if (srun == 1) {                                       /* ~ for subrun 1 the only source of info on O is    ~ */
-                                                           /* ~ U0 which has been calculated by fftwForward     ~ */ 
-//    if (k2[idx] != zero) { O[k]  = U0[k]; }              /* ~ for subsequent runs, O (in real space) can also ~ */
-//    else                 { U0[k] = czero;                /* ~ be read in directly from the data files. This   ~ */
-//                           O[k]  = czero; }              /* ~ bit of code ensures that both sources contain   ~ */
-//  }                                                      /* ~ identical information. note as well that since  ~ */
-                                                           /* ~ O = k^2P, non-zero O for k^2 = 0 is a numerical ~ */
-                                                           /* ~ error. The conditional corrects for this        ~ */
-//  else { assert(U0[k] == O[k]); }
     ++idx;
+
   }
 }
 
@@ -1337,24 +1313,24 @@ void redhallmhd::HfromA( stack& run )  {
   int n1n2c;    run.stack_data.fetch("n1n2c", &n1n2c   );  /* ~ number of complex elements per layer       ~ */
   int n_layers; run.stack_data.fetch("iu2",   &n_layers);  /* ~ number of layers in stack                  ~ */
   
-  RealArray& k2    = run.k2;                               /* ~ square magnitude of k-space vectors        ~ */
+  RealArray&    k2 = run.k2;                               /* ~ square magnitude of k-space vectors        ~ */
   ComplexArray& U1 = run.U1;                               /* ~ holds A (flux function) at this point      ~ */
+//ComplexArray JT;                                         /* ~ defined to test stored J values against    ~ */
+                                                           /* ~ newly calculated values                    ~ */ 
   ComplexArray::size_type usize;
   usize            = U1.capacity();                        /* ~ current capacity of U1 - should be known   ~ */
   assert(usize     == (n1n2c * n_layers));                 /* ~ test usize                                 ~ */
-  ComplexArray JT;                                         /* ~ defined to test stored J values against    ~ */
-                                                           /* ~ newly calculated values                    ~ */ 
-//A.assign(usize,czero);                                   /* ~ members A and J (current density) needed   ~ */
+  assert(A.size()  == usize);
+  assert(J.size()  == usize);
 
-  if (     srun == 1) { /* J.assign( usize,czero)*/ ; }
-  else if (srun >  1) { JT.assign(usize,czero); }
+//if (srun >  1) { JT.assign(usize,czero); }
   
   RealVar ssqd;      run.palette.fetch(  "ssqd",  &ssqd ); /* ~ parameter sigma^2 needed for H             ~ */
   std::string model; run.palette.fetch(  "model", &model); 
 
-  int cnt_jj_tiny  = 0;
-  RealVar diffJJ;
-  RealVar modJ, modJT;
+//int cnt_jj_tiny  = 0;
+//RealVar diffJJ;
+//RealVar modJ, modJT;
 
   for (unsigned k  = 0; k < usize; k++) { A[k] = U1[k]; }  /* ~ preserve flux function in A                ~ */
 
@@ -1376,7 +1352,9 @@ void redhallmhd::HfromA( stack& run )  {
     }
     ++idx;
   }
-  if (srun > 1) {JT.resize(0);}
+
+//if (srun > 1) {JT.resize(0);}
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -1458,18 +1436,13 @@ void redhallmhd::AfromH( stack& run )  {
       U1[k]        = A[k];
     }
     else if( model.compare("rmhd") == 0 || model.compare("inhm") == 0 ) {
-//      assert(A[k] == H[k]);
+
       A[k]         = U1[k];
 
     }
       J[k]         = k2[idx] * A[k];                       /* ~ J = -delperp A                             ~ */
     ++idx;
   }
-
-//  for (unsigned k = 0; k < usize; k++) {U1[k] = A[k];}    /* ~  U1 now holds Fourier transform of A       ~ */
-
-//  H.resize(0);                                          /* ~ H is discarded...                          ~ */
-                                                          /* ~ ...or perhaps not.                         ~ */
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

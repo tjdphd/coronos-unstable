@@ -127,15 +127,14 @@ void lcsolve::Loop( stack& run ) {
  }
 
   physics.updatePAOJ( "predict",   run            );
-
   physics.PfromO (                 run            );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
   physics.AfromH (                 run            );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
-  physics.fftw.fftwReverseAll(     run, O, J      );
 
-  physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
-  physics.fftw.fftwReverseAll(     run            );
-  physics.reportQtyVsZ(            run            );
-  physics.reportPowerSpectra(      run            );
+//physics.fftw.fftwReverseAll(     run, O, J      );
+//physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+//physics.fftw.fftwReverseAll(     run            );
+//physics.reportQtyVsZ(            run            );
+//physics.reportPowerSpectra(      run            );
 
 //run.palette.reset(   "tstart", t_cur            );
 
@@ -162,12 +161,13 @@ void lcsolve::Loop( stack& run ) {
 //physics.updatePAOJ(  "predict",   run           );
 //physics.PfromO (                  run           );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
 //physics.AfromH (                  run           );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
-//physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
 
-//physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
-//physics.fftw.fftwReverseAll(     run            );
-//physics.reportQtyVsZ(            run            );
-//physics.reportPowerSpectra(      run            );
+  physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
+  physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+  physics.fftw.fftwReverseAll(     run            );
+
+  physics.reportQtyVsZ(            run            );
+  physics.reportPowerSpectra(      run            );
 
   run.palette.reset(   "tstart", t_cur            );
 

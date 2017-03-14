@@ -206,14 +206,11 @@ void fft::fftwrtInit(stack& run) {             /* ~ initialize de-aliasing array
   RealArray& kx = run.kx;
   RealArray& ky = run.ky;
 
-  int n1;                                        /* ~ number of x-coordinates                   ~ */
-  run.stack_data.fetch("n1",    &n1);
-  int n2;
-  run.stack_data.fetch("n2",    &n2);                /* ~ number of y-coordinates                   ~ */
-  int n1n2c;
-  run.stack_data.fetch("n1n2c", &n1n2c);             /* ~ number of Fourier space points per layer  ~ */
+  int n1;    run.stack_data.fetch("n1",    &n1);    /* ~ number of x-coordinates                   ~ */
+  int n2;    run.stack_data.fetch("n2",    &n2);    /* ~ number of y-coordinates                   ~ */
+  int n1n2c; run.stack_data.fetch("n1n2c", &n1n2c); /* ~ number of Fourier space points per layer  ~ */
 
-  RealArray::size_type nc;                       /* ~ a vector size-type version of n1n2c       ~ */
+  RealArray::size_type nc;                          /* ~ a vector size-type version of n1n2c       ~ */
   nc  = n1n2c;
 
   int n1h = (((int)(half*n1)) + 1);
@@ -228,11 +225,11 @@ void fft::fftwrtInit(stack& run) {             /* ~ initialize de-aliasing array
 
   RealVar threshold = two_thirds * k_max;
 
-  rt.assign(nc, zero);                                /* ~ create space in rt                        ~ */
+  rt.assign(nc, zero);                              /* ~ create space in rt                        ~ */
 
   RealArray::size_type ndx;
 
-  for (unsigned i = 0; i < n1; i++) {            /* ~ initialization                            ~ */
+  for (unsigned i = 0; i < n1; i++) {               /* ~ initialization                            ~ */
     for (unsigned j = 0; j < n1h; j++) {
 
       ndx = i * n2h + j;
@@ -253,7 +250,7 @@ void fft::fftwrtInit(stack& run) {             /* ~ initialize de-aliasing array
       else {
         rt[ndx] = one;
       }
-//    if (rank == 0) {std::cout << "rtInit: rt[" << ndx << "] = " << rt[ndx] << std::endl;}
+
   }
  }
 }
@@ -294,11 +291,11 @@ void fft::fftwForwardAll( stack& run ) {
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-  if ((srun > 1) && (rank == 0)) {
-    for (unsigned k = 0; k < n1n2; k++) {
-      if (U[k][0][0] != zero) { std::cout << "U[" << k << "][0][0] = " << U[k][0][0] << std::endl; }
-    }
-  }
+//if ((srun > 1) && (rank == 0)) {
+//  for (unsigned k = 0; k < n1n2; k++) {
+//    if (U[k][0][0] != zero) { std::cout << "U[" << k << "][0][0] = " << U[k][0][0] << std::endl; }
+//  }
+//}
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
@@ -558,23 +555,17 @@ void fft::fftwReverseLayerofField ( stack& run, int i_l, int i_f) {
 
   InputOutputArray& U = run.U;               /* ~ raw input array                         ~ */
 
-  ComplexArray& U0 = run.U0;
-  ComplexArray& U1 = run.U1;
-  ComplexArray& U2 = run.U2;
-  ComplexArray& U3 = run.U3;
+  ComplexArray&    U0 = run.U0;
+  ComplexArray&    U1 = run.U1;
+  ComplexArray&    U2 = run.U2;
+  ComplexArray&    U3 = run.U3;
 
-  int n1; 
-  run.stack_data.fetch("n1"   , &n1      );
-  int n2; 
-  run.stack_data.fetch("n2"   , &n2      );
-  int n1n2c; 
-  run.stack_data.fetch("n1n2c", &n1n2c   );
-  int n1n2; 
-  run.stack_data.fetch("n1n2" , &n1n2    );
-  int n_layers; 
-  run.stack_data.fetch("iu2"  , &n_layers);
-  int n_flds;
-  run.stack_data.fetch("iu3"  , &n_flds  );
+  int n1;       run.stack_data.fetch("n1"   , &n1      );
+  int n2;       run.stack_data.fetch("n2"   , &n2      );
+  int n1n2c;    run.stack_data.fetch("n1n2c", &n1n2c   );
+  int n1n2;     run.stack_data.fetch("n1n2" , &n1n2    );
+  int n_layers; run.stack_data.fetch("iu2"  , &n_layers);
+  int n_flds;   run.stack_data.fetch("iu3"  , &n_flds  );
 
   ComplexArray::size_type nc = n1n2c;
 
@@ -615,12 +606,9 @@ void fft::fftwReverseLayerofField ( stack& run, int i_l, int i_f) {
 
 void fft::fftwForwardRaw( stack& run, RealArray& Rin, ComplexArray& Cout) {
 
-  int n1n2c; 
-  run.stack_data.fetch("n1n2c", &n1n2c   );
-  int n1n2; 
-  run.stack_data.fetch("n1n2" , &n1n2    );
-  int iu2;
-  run.stack_data.fetch("iu2"  , &iu2     );
+  int n1n2c; run.stack_data.fetch("n1n2c", &n1n2c   );
+  int n1n2;  run.stack_data.fetch("n1n2" , &n1n2    );
+  int iu2;   run.stack_data.fetch("iu2"  , &iu2     );
 
   RealVar scale       = ((RealVar) one)/((RealVar) (n1n2));
 
@@ -717,8 +705,8 @@ void fft::fftwForwardIC( RealArray& Rin, ComplexArray& Cout) {
 
   int n1n2c; n1n2c = Cout.size();
   int n1n2;  n1n2  = Rin.size();
-  assert(n1n2    == 64*64);
-  assert(n1n2c   == 64*65);
+  assert(n1n2     == 64*64);
+  assert(n1n2c    == 64*65);
   RealVar scale    = (RealVar) one/((RealVar) (n1n2));
 
   for (unsigned k = 0 ; k < n1n2 ; k++) {r_in[k]     =  zero;       }
