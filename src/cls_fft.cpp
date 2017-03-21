@@ -127,12 +127,9 @@ void fft::fftwKInit(stack& run) {               /* ~ initialize the wave number 
   RealArray& k2     = run.k2; 
   RealArray& inv_k2 = run.inv_k2;
 
-  int n1;                                        /* ~ number of coordinates in x                               ~ */
-  run.stack_data.fetch("n1",    &n1);
-  int n2; 
-  run.stack_data.fetch("n2",    &n2);            /* ~ number of coordinates in y                               ~ */
-  int nc;
-  run.stack_data.fetch("n1n2c", &nc);            /* ~ number of Fourier space points per layer                 ~ */
+  int n1; run.stack_data.fetch("n1",    &n1);    /* ~ number of coordinates in x                               ~ */
+  int n2; run.stack_data.fetch("n2",    &n2);    /* ~ number of coordinates in y                               ~ */ 
+  int nc; run.stack_data.fetch("n1n2c", &nc);    /* ~ number of Fourier space points per layer                 ~ */
 
   int n1h    = (((int)(half*n1)) + 1);
   int n2h    = (((int)(half*n2)) + 1);
@@ -148,6 +145,7 @@ void fft::fftwKInit(stack& run) {               /* ~ initialize the wave number 
 
                                                  /* ~ the initialization as done in gpu port of old code       ~ */
   int ndx;
+  int i_cpy;
 
   for (int i = 0;   i < n1h; i++ ) kp[i] = ((RealVar) i) * two_pi;
   for (int i = n1h; i < n1;  i++ ) kp[i] = -kp[n1 - i];
@@ -161,24 +159,53 @@ void fft::fftwKInit(stack& run) {               /* ~ initialize the wave number 
     }
   }
 
+  for (int l = 0; l < nc; ++l) {
+
+        if (l  < (nc - (n2/2)-1)) {
+          if ((l == 0) || (l %((n2/2)+1) !=0) ){
+            ; // do nothing
+          }
+          else {
+                 i_cpy    = (l/((n2/2)+1));
+                 if ( i_cpy < n2/2 ) {
+                   kx[l] = kx[i_cpy];
+                   ky[l] = ky[i_cpy];
+                 }
+          }
+        }
+        else {
+                 i_cpy    = (l - nc + n2/2+2);
+               if (i_cpy < 0 || i_cpy > n2/2+1) {
+                 std::cout << "fftwKInit: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+               }
+               else {
+
+                   kx[l] = kx[i_cpy];
+                   ky[l] = ky[i_cpy];
+               }
+        }
+  }
+
   kp.resize(0);
 
-  for (int i = 0; i < n1; i++) {
-    for (int j = 0; j < n1h; j++) {
-
-      ndx     = (i * n2h) + j;
-      k2[ndx] = (kx[ndx] * kx[ndx]) + (ky[ndx] * ky[ndx]);
-
-      if (std::abs(k2[ndx]) > teensy) inv_k2[ndx] = one / k2[ndx];
 /* ~ TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~ */
 
+  for ( int l = 0; l < nc; ++ l) { k2[l] = (kx[l] * kx[l]) + (ky[l] * ky[l]); }
+//for (int i = 0; i < n1; i++) {
+//  for (int j = 0; j < n1h; j++) {
+
+//    ndx     = (i * n2h) + j;
+//    k2[ndx] = (kx[ndx] * kx[ndx]) + (ky[ndx] * ky[ndx]);
+
+
+//    if (std::abs(k2[ndx]) > teensy) inv_k2[ndx] = one / k2[ndx];
 //    else inv_k2[ndx] = zero;
-      else inv_k2[ndx] = huge;
-//
-/* ~ TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~ */
+//    else inv_k2[ndx] = huge;
 
-    }
-  }
+
+//  }
+//}
+/* ~ TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~ */
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -678,11 +705,13 @@ void fft::fftwReverseIC(ComplexArray& Cin, RealArray& Rout ) {
  int n1n2c; n1n2c = Cin.size();
  int n1n2;  n1n2  = Rout.size();
 
-  assert(n1n2    == 64*64);
-  assert(n1n2c   == 64*65);
+//assert(n1n2    == 64*64);
+//assert(n1n2c   == 64*65);
 
     RealVar scale      = ((RealVar) (n1n2));
     RealVar one_ov_scl = one / scale;
+
+  Cin[0].real()=zero;
 
   for (unsigned k = 0 ; k < n1n2c; k++) { cplx_in[k]  = czero;        }
   for (unsigned k = 0 ; k < n1n2 ; k++) { r_out[k]    = zero;         }
@@ -705,8 +734,8 @@ void fft::fftwForwardIC( RealArray& Rin, ComplexArray& Cout) {
 
   int n1n2c; n1n2c = Cout.size();
   int n1n2;  n1n2  = Rin.size();
-  assert(n1n2     == 64*64);
-  assert(n1n2c    == 64*65);
+//assert(n1n2     == 64*64);
+//assert(n1n2c    == 64*65);
   RealVar scale    = (RealVar) one/((RealVar) (n1n2));
 
   for (unsigned k = 0 ; k < n1n2 ; k++) {r_in[k]     =  zero;       }
@@ -720,7 +749,7 @@ void fft::fftwForwardIC( RealArray& Rin, ComplexArray& Cout) {
 #endif
 
  for (unsigned k = 0 ; k < n1n2c; k++) {Cout[k]     = scale * cplx_out[k]*rt[k]; }
-  Cout[0].real()=zero;
+ Cout[0].real()=zero;
 
 }
 

@@ -191,88 +191,88 @@ cur_dir           = GETENV('PWD')
 
    str_title      = str_title + ' For ' + case_res_str
 
-IF (out_dev EQ 'X') THEN BEGIN
-   SET_PLOT, 'X'
-ENDIF ELSE BEGIN
-
-          eps_out = cur_dir + '/ffts' + case_file_str + '.eps'
-
-          SET_PLOT, 'PS'
-          DEVICE  , /ENCAPSULATED
-          DEVICE  ,  FILENAME       = eps_out
-      ENDELSE
-
-PLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
-      CHARSIZE    = 1.1,                                           $
-      LINESTYLE   = 0,                                             $
-      YTICKFORMAT = '(E7.1)',                                      $
-;     XMARGIN     = [12,4],                                        $
-;     YMARGIN     = [4,4],                                         $
-      TITLE       = str_title,                                     $
-      XTITLE      = 't',                                           $
-      YTITLE      = ' ',                                           $
-      XRANGE      = t_range,                                       $
-      YRANGE      = y_range,                                       $
-      THICK       = 2;,                                            $
-;     /YLOG
-
-  OPLOT, E_case[0:(n_lines-1),i_time], AVL[0:(n_lines-1)],         $
-  LINESTYLE = 1,                                                   $
-  THICK     = 5
-
-IF (fld_two NE '0') THEN BEGIN
-  i_field = fld_two
-  OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
-         LINESTYLE   = 2
-  i_field = fld_one
-ENDIF
-
-Q = ''
-READ, Q, PROMPT = 'Save to postscript? [y/n]:'
-
-IF ( Q EQ 'y') THEN BEGIN
-
-   eps_out        = cur_dir + '/ffts' + case_file_str + '.eps'
-
-   SET_PLOT, 'PS'
-   DEVICE  , /ENCAPSULATED
-   DEVICE  ,  FILENAME = eps_out, /COLOR, BITS_PER_PIXEL=8
-   LOADCT, 13
-
-   PLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
-         CHARSIZE    = 0.9,                                           $
-         LINESTYLE   = 0,                                             $
-         YTICKFORMAT = '(E7.1)',                                      $
-         XMARGIN     = [12,4],                                        $
-         YMARGIN     = [4,4],                                         $
-         TITLE       = str_title,                                     $
-         XTITLE      = 't',                                           $
-         YTITLE      = ' ',                                           $
-         XRANGE      = t_range,                                       $
-         YRANGE      = y_range,                                       $
-         THICK       = 2,                                             $
-         /NODATA       ;,                                             $
-;        /YLOG,                                                       $
-
-   OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field],   $
-         COLOR       = 255
-   
-   IF (fld_two NE '0') THEN BEGIN
-
-     i_field = fld_two
-     OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
-         COLOR       = 219
-     i_field = fld_one
-
-   ENDIF
-
-   PRINT, 'Plotted to file ', eps_out
-
-   DEVICE, /CLOSE
-
-   SET_PLOT, 'X'
-
-ENDIF
+;;IF (out_dev EQ 'X') THEN BEGIN
+;;   SET_PLOT, 'X'
+;;ENDIF ELSE BEGIN
+;;
+;;          eps_out = cur_dir + '/ffts' + case_file_str + '.eps'
+;;
+;;          SET_PLOT, 'PS'
+;;          DEVICE  , /ENCAPSULATED
+;;          DEVICE  ,  FILENAME       = eps_out
+;;      ENDELSE
+;;
+;;PLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
+;;      CHARSIZE    = 1.1,                                           $
+;;      LINESTYLE   = 0,                                             $
+;;      YTICKFORMAT = '(E7.1)',                                      $
+;;;     XMARGIN     = [12,4],                                        $
+;;;     YMARGIN     = [4,4],                                         $
+;;      TITLE       = str_title,                                     $
+;;      XTITLE      = 't',                                           $
+;;      YTITLE      = ' ',                                           $
+;;      XRANGE      = t_range,                                       $
+;;      YRANGE      = y_range,                                       $
+;;      THICK       = 2;,                                            $
+;;;     /YLOG
+;;
+;;  OPLOT, E_case[0:(n_lines-1),i_time], AVL[0:(n_lines-1)],         $
+;;  LINESTYLE = 1,                                                   $
+;;  THICK     = 5
+;;
+;;IF (fld_two NE '0') THEN BEGIN
+;;  i_field = fld_two
+;;  OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
+;;         LINESTYLE   = 2
+;;  i_field = fld_one
+;;ENDIF
+;;
+;;Q = ''
+;;READ, Q, PROMPT = 'Save to postscript? [y/n]:'
+;;
+;;IF ( Q EQ 'y') THEN BEGIN
+;;
+;;   eps_out        = cur_dir + '/ffts' + case_file_str + '.eps'
+;;
+;;   SET_PLOT, 'PS'
+;;   DEVICE  , /ENCAPSULATED
+;;   DEVICE  ,  FILENAME = eps_out, /COLOR, BITS_PER_PIXEL=8
+;;   LOADCT, 13
+;;
+;;   PLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
+;;         CHARSIZE    = 0.9,                                           $
+;;         LINESTYLE   = 0,                                             $
+;;         YTICKFORMAT = '(E7.1)',                                      $
+;;         XMARGIN     = [12,4],                                        $
+;;         YMARGIN     = [4,4],                                         $
+;;         TITLE       = str_title,                                     $
+;;         XTITLE      = 't',                                           $
+;;         YTITLE      = ' ',                                           $
+;;         XRANGE      = t_range,                                       $
+;;         YRANGE      = y_range,                                       $
+;;         THICK       = 2,                                             $
+;;         /NODATA       ;,                                             $
+;;;        /YLOG,                                                       $
+;;
+;;   OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field],   $
+;;         COLOR       = 255
+;;   
+;;   IF (fld_two NE '0') THEN BEGIN
+;;
+;;     i_field = fld_two
+;;     OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
+;;         COLOR       = 219
+;;     i_field = fld_one
+;;
+;;   ENDIF
+;;
+;;   PRINT, 'Plotted to file ', eps_out
+;;
+;;   DEVICE, /CLOSE
+;;
+;;   SET_PLOT, 'X'
+;;
+;;ENDIF
 
 READ, Q, PROMPT = 'enter <Return> to quit: '
               

@@ -16,7 +16,7 @@ eta         5.000000000000000e-04     dbl rfx
 ffp         0.000000000000000e+00     dbl sfx 
 igen        1                         int rfx 
 ilnr        0                         int rfx 
-initMode    fourierspace              str rfx 
+initMode    fourier                   str rfx 
 iptest      0                         int rfx 
 kappa       5.000000000000000e-03     dbl rfx 
 kc          1.200000000000000e+01     dbl rfx 
