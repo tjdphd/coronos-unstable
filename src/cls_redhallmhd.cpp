@@ -72,20 +72,20 @@ redhallmhd::redhallmhd(stack& run ) {
                                                            /* ~ them and puts them into fourier space       ~ */
   initBoundaries(        run   );                          /* ~ initialization of quantities needed for     ~ */
 
-  OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
-  HfromA(                run   );
+//OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
+//HfromA(                run   );
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-//if (srun == 1) {
+//if (srun == 2) {
 //                 int iu2;  run.stack_data.fetch("iu2" , &iu2 );
 //                 int n1n2; run.stack_data.fetch("n1n2", &n1n2);
 
 //                 applyBC("predict", run);
 
-////               if ( rank == 0) { std::cout << "redhallmhd: P[1] = " << P[1] << std::endl;}
-//                 
-//                 checkState(0,      run);
+  //               if ( rank == 0) { std::cout << "redhallmhd: P[1] = " << P[1] << std::endl;}
+                   
+//                 checkState(2,      run);
 
 //                 RealArray realP(iu2*n1n2,zero);
 //                 fftw.fftwReverseRaw(run, P, realP); 
@@ -114,7 +114,7 @@ redhallmhd::redhallmhd(stack& run ) {
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-//OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
+  OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
                                                            /* ~ and vorticity O. For historical reasons,    ~ */
                                                            /* ~ U0 contains P after call to fftwForwardAll  ~ */
                                                            /* ~ but lcsolve assumes U0 contains O. This     ~ */
@@ -124,7 +124,7 @@ redhallmhd::redhallmhd(stack& run ) {
                                                            /* ~ retrieveOJ, so OfromP does a check that the ~ */
                                                            /* ~ values in U0 match the values in O.         ~ */
 
-//HfromA(                run   );
+  HfromA(                run   );
   evalValf(              run   );
   evalUmean(             run   );
   evalElls(              run   );
@@ -1271,7 +1271,7 @@ void redhallmhd::OfromP( stack& run )  {
   if ( rank == 0 )          { kstart = n1n2c;               /* ~ layer 0 of P and O handled by BC's for process 0     ~ */
                               kstop  = usize;
   }
-  else if (rank = (np - 1)) { kstart = 0;                   /* ~ layer n3 of P and O handled by BC's for process np-1 ~ */
+  else if (rank == (np-1))  { kstart = 0;                   /* ~ layer n3 of P and O handled by BC's for process np-1 ~ */
                               kstop  = (n_layers-2)*n1n2c;
   } 
   else {                      kstart = 0;                   /* ~ interior layers/processes                            ~ */
@@ -1328,8 +1328,9 @@ void redhallmhd::HfromA( stack& run )  {
   for (unsigned k  = 0; k < usize; k++) {
   
     if (k % n1n2c  == 0 ) { idx = 0; }                     /* ~ reset idx when starting new layer          ~ */
+    J[k]           = k2[idx] * A[k];
 
-    if (srun == 1) { J[k] = k2[idx] * A[k]; }              /* ~ For subrun 1 J must be initialized from A  ~ */
+//  if (srun == 1) { J[k] = k2[idx] * A[k]; }              /* ~ For subrun 1 J must be initialized from A  ~ */
 //  else           {JT[k] = k2[idx] * A[k];                /* ~ but for subsequent subruns J has been      ~ */
 //                  assert (J[k] == JT[k]); }              /* ~ stored in the data and is initialized by   ~ */
                                                            /* ~ retrieveOJ. The purpose of JT is to run a  ~ */
@@ -2546,7 +2547,8 @@ double redhallmhd::evalTotalCurrentSqd( stack& run ) {
 
     if (kdx % n1n2c  == 0) { idx = 0; }
 
-      ce              = ce + k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+//    ce              = ce + k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+      ce              = ce + k2[idx] * k2[idx] * ((A[kdx].real() * A[kdx].real()) + (A[kdx].imag()*A[kdx].imag()));
       ++idx;
   }
 
@@ -2584,7 +2586,8 @@ double redhallmhd::evalTotalGradCurrentSqd( stack& run ) {
 
     if (kdx % n1n2c  == 0) { idx = 0; }
 
-      cee             = cee + k2[idx] * k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+//    cee             = cee + k2[idx] * k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+      cee             = cee + k2[idx] * k2[idx] * k2[idx] * ( (A[kdx].real()*A[kdx].real()) +(A[kdx].imag()*A[kdx].imag()) );
       ++idx;
   }
 
@@ -2622,7 +2625,8 @@ double redhallmhd::evalTotalFootPointKE( stack& run ) {
 
     for (unsigned kdx = kstart; kdx < kstop; kdx++) {
 
-      fp              = fp + k2[kdx] * pow(std::abs(P[kdx]), 2);
+//    fp              = fp + k2[kdx] * pow(std::abs(P[kdx]), 2);
+      fp              = fp + k2[kdx] * ((P[kdx].real() * P[kdx].real()) + (P[kdx].imag() * P[kdx].imag()));
 //    fp              = fp + pow(std::abs(O[kdx]), 2);
     }
 
@@ -3213,7 +3217,7 @@ void redhallmhd::updatePAOJ( std::string str_step, stack& run ) {
     else if (rank == (np - 1)) {
 
       kstart  = 0;                                 /* ~ lower and upper loop limits on k            ~ */
-      kstop   = (n_layers-2) * n1n2c;              /* ~ note: pbot and atop boundary layers incl.'d ~ */
+      kstop   = (n_layers - 1 ) * n1n2c;           /* ~ note: pbot and atop boundary layers incl.'d ~ */
 
     }
   }
@@ -3225,28 +3229,20 @@ void redhallmhd::updatePAOJ( std::string str_step, stack& run ) {
 
        if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
 
-//     O[k]         = UO[k];
+         if (rank != (np - 1)) {
 
-       if (k2[idx] != 0) { O[k]  = U0[k];
-                           P[k]  = O[k] / k2[idx]; 
-                         }
-//     else              { // P[k]  = czero; // or chuge ?          
-//                            O[k]  = czero; // ????
-//                            UO[k] = czero; // ????
-//                       }
+         if (k2[idx] != 0) { O[k]  = U0[k];               /* ~ last layer of highest process is an         ~ */
+                             P[k]  = O[k] / k2[idx];      /* ~ boundary for P and O, but not A             ~ */
+                           }                              /* ~ so we must be careful not to clobber A      ~ */
+                                                          /* ~ while preserving boundary conditions        ~ */
+         }
+         else if ( rank == (np - 1) && k < (n3*n1n2c)){
 
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+         if (k2[idx] != 0) { O[k]  = U0[k];               /* ~ last layer of highest process is an         ~ */
+                             P[k]  = O[k] / k2[idx];      /* ~ boundary for P and O, but not A             ~ */
+                           }                              /* ~ so we must be careful not to clobber A      ~ */
 
-//        if (rank == 0 && k == 65) {
-
-//          std::cout << "updatePAOJ: P[" << k << "].real() = " << P[k].real() << std::endl;
-//          std::cout << "updatePAOJ: P[" << k << "].imag() = " << P[k].imag() << std::endl;
-
-//        }
-
-//     else              { P[k] = chuge;          }
-
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+         }
 
        A[k] = H[k] / ( one + ssqd*k2[idx] );
        J[k] = k2[idx] * A[k];                             /* ~ J = -delperp^2 A                            ~ */
@@ -3254,63 +3250,32 @@ void redhallmhd::updatePAOJ( std::string str_step, stack& run ) {
        ++idx;
 
     }
-  }
+  } // predict
   else if(str_step.compare("correct") == 0 ) {            /* ~ do as above using predictor results         ~ */
     for (unsigned k = kstart; k < kstop; k++) {
 
       if (k % n1n2c == 0){ idx = 0;}
 
-       if (k2[idx] != 0) {tU0[k]  = U0[k];
-                           P[k]   = tU0[k] / k2[idx]; 
-                         }
-//     else              { 
-                       //  P[k]   = czero; // or chuge ?          
-//                         tO[k]  = czero; // ????
-//                         tUO[k] = czero; // ????
-//                       }
+         if (rank != (np - 1) ) {
 
-//      if (rank != 0 && rank != (np - 1)) {
-//        if (k2[idx] != 0) { P[k] = tO[k] / k2[idx];}
-//        else              { P[k] = czero;}
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-////      else              { P[k] = chuge;}
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//      }
-//      else {
-//        if (rank == 0 && k >= n1n2c){
-//          if (k2[idx] != 0) { P[k] = tO[k] / k2[idx];}
-//          else              { P[k] = czero;          }
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-////      else              { P[k] = chuge;}
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//        }
-//        if (rank == (np - 1) && k < (kstop - n1n2c)) {
-//          if (k2[idx] != 0) { P[k] = tO[k] / k2[idx];}
-//          else              { P[k] = czero;          }
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-////      else              { P[k] = chuge;}
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//        }
-//      }
+         if (k2[idx] != 0) { O[k]  = tU0[k];
+                             P[k]  = O[k] / k2[idx]; 
+                           }
+         }
+         else if ( rank == (np - 1) && k < (n3*n1n2c)) {
 
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+         if (k2[idx] != 0) { O[k]  = tU0[k];
+                             P[k]  = O[k] / k2[idx]; 
+                           }
 
-      if (rank == 0 && k == 0) {
-
-        std::cout << "updatePAOJ: P[" << k << "].real() = " << P[k].real() << std::endl;
-        std::cout << "updatePAOJ: P[" << k << "].imag() = " << P[k].imag() << std::endl;
-        std::cout << "updatePAOJ: O[" << k << "].real() = " << O[k].real() << std::endl;
-        std::cout << "updatePAOJ: O[" << k << "].imag() = " << O[k].imag() << std::endl;
-
-      }
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+         }
 
       A[k] = tH[k] / ( one + ssqd*k2[idx] );
       J[k] = k2[idx] * A[k];
 
       ++idx;
     }
-  }
+  } // correct
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

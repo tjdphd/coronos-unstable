@@ -191,42 +191,42 @@ cur_dir           = GETENV('PWD')
 
    str_title      = str_title + ' For ' + case_res_str
 
-;;IF (out_dev EQ 'X') THEN BEGIN
-;;   SET_PLOT, 'X'
-;;ENDIF ELSE BEGIN
-;;
-;;          eps_out = cur_dir + '/ffts' + case_file_str + '.eps'
-;;
-;;          SET_PLOT, 'PS'
-;;          DEVICE  , /ENCAPSULATED
-;;          DEVICE  ,  FILENAME       = eps_out
-;;      ENDELSE
-;;
-;;PLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
-;;      CHARSIZE    = 1.1,                                           $
-;;      LINESTYLE   = 0,                                             $
-;;      YTICKFORMAT = '(E7.1)',                                      $
-;;;     XMARGIN     = [12,4],                                        $
-;;;     YMARGIN     = [4,4],                                         $
-;;      TITLE       = str_title,                                     $
-;;      XTITLE      = 't',                                           $
-;;      YTITLE      = ' ',                                           $
-;;      XRANGE      = t_range,                                       $
-;;      YRANGE      = y_range,                                       $
-;;      THICK       = 2;,                                            $
-;;;     /YLOG
-;;
-;;  OPLOT, E_case[0:(n_lines-1),i_time], AVL[0:(n_lines-1)],         $
-;;  LINESTYLE = 1,                                                   $
-;;  THICK     = 5
-;;
-;;IF (fld_two NE '0') THEN BEGIN
-;;  i_field = fld_two
-;;  OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
-;;         LINESTYLE   = 2
-;;  i_field = fld_one
-;;ENDIF
-;;
+  IF (out_dev EQ 'X') THEN BEGIN
+     SET_PLOT, 'X'
+  ENDIF ELSE BEGIN
+  
+            eps_out = cur_dir + '/ffts' + case_file_str + '.eps'
+  
+            SET_PLOT, 'PS'
+            DEVICE  , /ENCAPSULATED
+            DEVICE  ,  FILENAME       = eps_out
+        ENDELSE
+  
+  PLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
+        CHARSIZE    = 1.1,                                           $
+        LINESTYLE   = 0,                                             $
+        YTICKFORMAT = '(E7.1)',                                      $
+  ;     XMARGIN     = [12,4],                                        $
+  ;     YMARGIN     = [4,4],                                         $
+        TITLE       = str_title,                                     $
+        XTITLE      = 't',                                           $
+        YTITLE      = ' ',                                           $
+        XRANGE      = t_range,                                       $
+        YRANGE      = y_range,                                       $
+        THICK       = 2;,                                            $
+  ;     /YLOG
+  
+    OPLOT, E_case[0:(n_lines-1),i_time], AVL[0:(n_lines-1)],         $
+    LINESTYLE = 1,                                                   $
+    THICK     = 5
+  
+  IF (fld_two NE '0') THEN BEGIN
+    i_field = fld_two
+    OPLOT, E_case[0:(n_lines-1),i_time], E_case[0:(n_lines-1),i_field], $
+           LINESTYLE   = 2
+    i_field = fld_one
+  ENDIF
+  
 ;;Q = ''
 ;;READ, Q, PROMPT = 'Save to postscript? [y/n]:'
 ;;
@@ -294,6 +294,6 @@ READ, Q, PROMPT = 'enter <Return> to quit: '
 ;XYOUTS, CHARSIZE  = 1.5, 0.31, 8.0e-03, 'No Noise'
 ;XYOUTS, CHARSIZE  = 1.5, 0.31, 7.0e-03, case_legend_str
 
-IF (out_dev EQ 'PS') THEN DEVICE, /CLOSE
+;IF (out_dev EQ 'PS') THEN DEVICE, /CLOSE
 
 END

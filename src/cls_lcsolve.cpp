@@ -79,27 +79,29 @@ void lcsolve::Loop( stack& run ) {
 
   /* ~ iptest conditional goes here              ~ */
 
-//  passAdjacentLayers( "predict",    run         );
-//  physics.applyBC(    "predict",    run         );
-//  physics.updatePAOJ( "predict",    run         );   /* ~ P, A, and J contain un-updated/corrector-updated values ~ */
+    passAdjacentLayers( "predict",    run         );
+    physics.applyBC(    "predict",    run         );
+    physics.updatePAOJ( "predict",    run         );   /* ~ P, A, and J contain un-updated/corrector-updated values ~ */
+
+//  physics.trackQtyVsZ(       t_cur, run         );
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-    if (srun == 2 && l == 0) {
+    if ((srun == 1 && l == 24) || (srun == 2 && l == 0)) {
+//  if (srun == 2 && l == 0 )  {
 
-      physics.checkState(0,           run         );
-      physics.trackEnergies(   t_cur, run         );
+      physics.checkState(2,           run         );
+//    physics.trackEnergies(   t_cur, run         );
 
     }
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-    passAdjacentLayers( "predict",    run         );
-    physics.applyBC(    "predict",    run         );
-    physics.updatePAOJ( "predict",    run         );   /* ~ P, A, and J contain un-updated/corrector-updated values ~ */
+//  passAdjacentLayers( "predict",    run         );
+//  physics.applyBC(    "predict",    run         );
+//  physics.updatePAOJ( "predict",    run         );   /* ~ P, A, and J contain un-updated/corrector-updated values ~ */
 
     physics.trackQtyVsZ(       t_cur, run         );
-
     physics.trackEnergies(     t_cur, run         );
     physics.trackPowerSpectra( t_cur, run         );
     if ( l % nw == 0 ) { run.reportEnergyQs( t_cur ); }
@@ -126,15 +128,17 @@ void lcsolve::Loop( stack& run ) {
 
  }
 
+  passAdjacentLayers( "predict",    run           );
+//physics.applyBC(    "predict",    run         );
   physics.updatePAOJ( "predict",   run            );
+
   physics.PfromO (                 run            );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
   physics.AfromH (                 run            );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
-
-//physics.fftw.fftwReverseAll(     run, O, J      );
-//physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
-//physics.fftw.fftwReverseAll(     run            );
-//physics.reportQtyVsZ(            run            );
-//physics.reportPowerSpectra(      run            );
+  physics.fftw.fftwReverseAll(     run, O, J      );
+  physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+  physics.fftw.fftwReverseAll(     run            );
+  physics.reportQtyVsZ(            run            );
+  physics.reportPowerSpectra(      run            );
 
 //run.palette.reset(   "tstart", t_cur            );
 
@@ -143,31 +147,27 @@ void lcsolve::Loop( stack& run ) {
     
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-  if (srun == 1)  {
+//if (srun == 1)  {
 
-    physics.checkState(0,             run         );
-    physics.trackEnergies(     t_cur, run         );
+//  physics.checkState(0,           run           );
+//  physics.trackEnergies(     t_cur, run         );
 
-  }
-
-//RealArray realP(iu2*n1n2,zero);
-//physics.fftw.fftwReverseRaw(run, physics.P, realP); 
-//physics.fftw.fftwForwardRaw(run, realP, physics.P); 
+//}
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
 // Whatever the state of U0, U1, etc, and P,A,J these are needed for restarts here //
 
 //physics.updatePAOJ(  "predict",   run           );
+
 //physics.PfromO (                  run           );   /* ~ O still in U0. Replacing with P for Primary data output ~ */
 //physics.AfromH (                  run           );   /* ~ H still in U1. Replacing with A for Primary data output ~ */
+//physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
+//physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
+//physics.fftw.fftwReverseAll(     run            );
 
-  physics.fftw.fftwReverseAll(     run, physics.O, physics.J );
-  physics.physicsFinalize(         run            );   /* ~ if driving footpoints, stores layer 0 of vorticity      ~ */
-  physics.fftw.fftwReverseAll(     run            );
-
-  physics.reportQtyVsZ(            run            );
-  physics.reportPowerSpectra(      run            );
+//physics.reportQtyVsZ(            run            );
+//physics.reportPowerSpectra(      run            );
 
   run.palette.reset(   "tstart", t_cur            );
 
