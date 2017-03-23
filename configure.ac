@@ -222,12 +222,17 @@ else # -> IF NOT-CUDA ==>
                FFTW_H="fftw3.h"
             FFTW_LIBS="-lm -lfftw3"
 
-  AC_MSG_CHECKING([whether FFTW_PATH is set])
 
   if test -n "$FFTWHOME"
   then
   FFTW_PATH=$FFTWHOME
   fi
+  if test -n "$FFTW_ROOT"
+  then
+  FFTW_PATH=$FFTW_ROOT
+  fi
+
+  AC_MSG_CHECKING([whether FFTW_PATH is set])
 
   if test -n "$FFTW_PATH"
   then
