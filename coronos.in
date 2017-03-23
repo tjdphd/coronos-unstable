@@ -16,13 +16,13 @@ eta         5.000000000000000e-04     dbl rfx
 ffp         0.000000000000000e+00     dbl sfx 
 igen        1                         int rfx 
 ilnr        0                         int rfx 
-initMode    fourierspace              str rfx 
+initMode    fourier                   str rfx 
 iptest      0                         int rfx 
 kappa       5.000000000000000e-03     dbl rfx 
 kc          1.200000000000000e+01     dbl rfx 
 model       rmhd                      str rfx 
 n0          1.000000000000000e+01     dbl rfx 
-ndt         1                         int rfx 
+ndt         24                        int rfx 
 nf          0                         int sfx 
 ninf        9.900000000000000e-01     dbl rfx 
 nnodes      1                         int rfx 
@@ -56,7 +56,7 @@ sigma_x     2.209708691207961e-02     dbl rfx
 sigma_y     2.209708691207961e-02     dbl rfx 
 sigma_z     2.000000000000000e-01     dbl rfx 
 spout_pref  spectra                   str rfx 
-srun        1                         int sfx 
+srun        1                         int adj 
 ssqd        0.000000000000000e+00     dbl rfx 
 tauC        1.000000000000000e+01     dbl rfx 
 tauE        9.500000000000000e+00     dbl rfx 

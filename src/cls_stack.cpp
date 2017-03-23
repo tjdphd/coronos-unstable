@@ -73,23 +73,21 @@ stack::stack(std::string coronos_in) : canvas::canvas(coronos_in) {
 
 void stack::init_stack_data() {                     /* ~ gather/infer information to be           ~ */
                                                     /* ~ included in stack_data container         ~ */
+  int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
   /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
   /* ~ incoming parameters from palette            ~ */
   /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-  std::string model;                                /* ~ reduced mhd or hall-mrhd                 ~ */
-  palette.fetch("model",&model);
-  int p1;                                           /* ~ power of 2 specifying resolution in x    ~ */
-  palette.fetch("p1"   ,&p1   );
-  int p2;                                           /* ~ power of 2 specifying resolution in y    ~ */
-  palette.fetch("p2"   ,&p2   );
-  int p3;                                           /* ~ total number of layers in z              ~ */
-  palette.fetch("p3"   ,&p3   );
-  int np;                                           /* ~ np number of processes                   ~ */
-  palette.fetch("np"   ,&np   );
-  RealVar zl;                                       /* ~ length in z of computational domain      ~ */
-  palette.fetch("zl"   ,&zl   );
+  std::string model; palette.fetch("model",&model); /* ~ reduced mhd or hall-mrhd                 ~ */
+  int         p1;    palette.fetch("p1"   ,&p1   ); /* ~ power of 2 specifying resolution in x    ~ */
+  int         p2;    palette.fetch("p2"   ,&p2   ); /* ~ power of 2 specifying resolution in y    ~ */
+  int         p3;    palette.fetch("p3"   ,&p3   ); /* ~ total number of layers in z              ~ */
+
+ 
+  int         np;    palette.fetch("np"   ,&np   ); /* ~ np number of processes                   ~ */
+
+  RealVar     zl;    palette.fetch("zl"   ,&zl   ); /* ~ length in z of computational domain      ~ */
 
   /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
   /* ~ to be made parameters of stack_data         ~ */
@@ -97,9 +95,9 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
 
   std::string resolution;                           /* ~ full 3-d resolution string                ~ */
 
-  int n1           = (int) pow(2.0, p1);            /* ~ number of x-coordinates in a layer        ~ */
-  int n2           = (int) pow(2.0, p2);            /* ~ number of y-coordinates in a layer        ~ */
-  int n3           =                p3 ;            /* ~ number of interior layers per process     ~ */
+  int n1           = std::pow(2.0, p1);             /* ~ number of x-coordinates in a layer        ~ */
+  int n2           = std::pow(2.0, p2);             /* ~ number of y-coordinates in a layer        ~ */
+  int n3           =               p3 ;             /* ~ number of interior layers per process     ~ */
 
   int n1n2         = n1*n2;                         /* ~ total number points on a (real) layer     ~ */
   int n1n2c        = n1 * (((int)(half * n2)) + 1); /* ~ total number points on a (Fourier) layer  ~ */
@@ -122,7 +120,6 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
   if (model.compare("hall") == 0) iu3 = 4;
 
   RealVar dz       = zl/((RealVar)(n3*np));         /* ~ layer separation in z                     ~ */
-
   int izres        = (int) (n3 * np)/zl;            /* ~ integer effective resolution in z         ~ */
 
   std::string xres = static_cast<std::ostringstream*>( &(std::ostringstream() << n1   ) ) -> str();
@@ -132,31 +129,22 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
   if (xres.compare(yres) == 0 ) resolution.assign(xres + "_" + zres);
   else             resolution.assign(xres + "_" + yres + "_" + zres);
 
+
   std::string pname;                                /* ~ for containing parameter names            ~ */
   std::string padjust;                              /* ~ for specifying adjustability              ~ */
   
   padjust.assign("rfx"  );                          /* ~ assigning parameters that are run-fixed   ~ */
 
-  pname.assign("n1"     );
-  stack_data.emplace(pname, n1,         padjust);
-  pname.assign("n2"     );
-  stack_data.emplace(pname, n2,         padjust);
-  pname.assign("n3"     );
-  stack_data.emplace(pname, n3,         padjust);
-  pname.assign("n1n2"   );
-  stack_data.emplace(pname, n1n2,       padjust);
-  pname.assign("n1n2c"  );
-  stack_data.emplace(pname, n1n2c,      padjust);
-  pname.assign("iu1"    );
-  stack_data.emplace(pname, iu1,        padjust);
-  pname.assign("iu2"    );
-  stack_data.emplace(pname, iu2,        padjust);
-  pname.assign("iu3"    );
-  stack_data.emplace(pname, iu3,        padjust);
-  pname.assign("dz"     );
-  stack_data.emplace(pname, dz,         padjust);
-  pname.assign("res_str");
-  stack_data.emplace(pname, resolution, padjust);
+  pname.assign("n1"     ); stack_data.emplace(pname, n1,         padjust);
+  pname.assign("n2"     ); stack_data.emplace(pname, n2,         padjust);
+  pname.assign("n3"     ); stack_data.emplace(pname, n3,         padjust);
+  pname.assign("n1n2"   ); stack_data.emplace(pname, n1n2,       padjust);
+  pname.assign("n1n2c"  ); stack_data.emplace(pname, n1n2c,      padjust);
+  pname.assign("iu1"    ); stack_data.emplace(pname, iu1,        padjust);
+  pname.assign("iu2"    ); stack_data.emplace(pname, iu2,        padjust);
+  pname.assign("iu3"    ); stack_data.emplace(pname, iu3,        padjust);
+  pname.assign("dz"     ); stack_data.emplace(pname, dz,         padjust);
+  pname.assign("res_str"); stack_data.emplace(pname, resolution, padjust);
 
 }
 
@@ -373,7 +361,7 @@ void stack::writeUData() {
       }
 
       ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_p << " ";
-      ofs   << std::setw(25) << std::right << std::setprecision(20) << std::scientific << next_a << " ";
+      ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_a << " ";
 
       if (iu3 < 3)  {
 

@@ -64,17 +64,59 @@ redhallmhd::redhallmhd(stack& run ) {
   init_physics_data(     run   );                          /* ~ physics - specific parameters               ~ */
   initU(                 run   );                          /* ~ initialization of layers 1 - n3 of U        ~ */
                                                            /* ~ for srun > 1 AUX has real space O and J now ~ */
-
   initTimeInc(           run   );
   fftw.fftwForwardAll(   run   );                          /* ~ puts real-space fields into Fourier space   ~ */
 
-  if (srun > 1) { retrieveOJ( run ); }                     /* ~ for srun > 1 real space O and J are stored  ~ */
+//if (srun > 1) { retrieveOJ( run ); }                     /* ~ for srun > 1 real space O and J are stored  ~ */
                                                            /* ~ in data files. This procedures retrieves    ~ */
                                                            /* ~ them and puts them into fourier space       ~ */
+  initBoundaries(        run   );                          /* ~ initialization of quantities needed for     ~ */
+
+//OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
+//HfromA(                run   );
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+
+//if (srun == 2) {
+//                 int iu2;  run.stack_data.fetch("iu2" , &iu2 );
+//                 int n1n2; run.stack_data.fetch("n1n2", &n1n2);
+
+//                 applyBC("predict", run);
+
+  //               if ( rank == 0) { std::cout << "redhallmhd: P[1] = " << P[1] << std::endl;}
+                   
+//                 checkState(2,      run);
+
+//                 RealArray realP(iu2*n1n2,zero);
+//                 fftw.fftwReverseRaw(run, P, realP); 
+//                 fftw.fftwForwardRaw(run, realP, P); 
+
+//                 RealArray realA(iu2*n1n2,zero);
+//                 fftw.fftwReverseRaw(run, A, realA); 
+//                 fftw.fftwForwardRaw(run, realA, A); 
+
+//                 ++srun; run.palette.reset( "srun", srun );
+//                 checkState(0, run);
+
+//                 fftw.fftwReverseRaw(run, P, realP); 
+//                 fftw.fftwForwardRaw(run, realP, P); 
+//                 fftw.fftwReverseRaw(run, A, realA); 
+//                 fftw.fftwForwardRaw(run, realA, A); 
+
+//                 ++srun; run.palette.reset( "srun", srun );
+//                 checkState(0, run);
+
+//                 --srun; --srun; run.palette.reset( "srun", srun );
+
+//                 if (rank == 0 ){std::cout << "redhallmhd: srun = " << srun << std::endl;}
+
+//               }
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
   OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
                                                            /* ~ and vorticity O. For historical reasons,    ~ */
-                                                           /* ~ U0 containts P after call to fftwForwardAll ~ */
+                                                           /* ~ U0 contains P after call to fftwForwardAll  ~ */
                                                            /* ~ but lcsolve assumes U0 contains O. This     ~ */
                                                            /* ~ procedure copies U0 to P then puts O in U0  ~ */
                                                            /* ~ for subrun 1 it also initializes O. for     ~ */
@@ -82,72 +124,7 @@ redhallmhd::redhallmhd(stack& run ) {
                                                            /* ~ retrieveOJ, so OfromP does a check that the ~ */
                                                            /* ~ values in U0 match the values in O.         ~ */
 
-
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//
-//   if (srun == 2) {
-//
-//     int n1n2c;    run.stack_data.fetch("n1n2c", &n1n2c    ); /* ~ number of complex elements per layer       ~ */
-//     int n_layers; run.stack_data.fetch("iu2",   &n_layers ); /* ~ number of layers in stack                  ~ */
-//
-//     RealVar diffOUreal;
-//     RealVar diffOUimag;
-//     unsigned idx     = 0;                                    /* ~ index for k2                               ~ */
-//
-////   fftw.fftwReverseAll( run);
-////   fftw.fftwForwardAll( run);
-//     
-///* ~ as of this test, srun 2 gets its O from fftwForwardAll(run, O, J) for all layers except the z=0 boundary which
-// * comes from  initBoundaries later. (in absence of test, srun two starts out with P values determined from end of 
-// * srun 1 * via PfromO. Then O is calculated using k2).
-// * U0 comes from fftwForwardAll( run ) which takes the read values from U and does
-// * and FFT on all layers. Note that here too U0 should be czero prior to the BC initialization.
-// *
-// * so for all layers at this point O and U0 should be equal. 
-// * This seems to be at the heart of it:  Let O_s1 = real space O read from subrun 1 data files then FFT'd to O[k]
-// *                                       Let O_s2 = real space P is read from subrun 1 data FFT'd then calculated as
-// *                                       O[k] = k2*P 
-// *                                       small differences in O_s1 and O_s2 arise across subruns.
-// *                                       the differences appear at very specific locations in k. They
-// *                                       appear to have to do with those locations where k2 = 0.
-// *                                       precision of FFT does not appear to be a factor.
-// * ~ */
-//
-//     if (rank ==  0) {
-//
-//       for (unsigned k = 0; k < ( n1n2c*n_layers); ++k ) {
-//
-//         if (k % n1n2c  == 0 ) { idx = 0; }                     /* ~ reset idx when starting new layer          ~ */
-////       if (k < n1n2c) { assert(O[k]      == czero);}
-////       if (k < n1n2c) { assert(run.U0[k] == O[k] );}
-//         if (std::abs(run.U0[k].real()) > tiny && std::abs(O[k].real()) > tiny) {
-//
-//           diffOUreal = run.U0[k].real() - O[k].real();
-//           diffOUimag = run.U0[k].imag() - O[k].imag();
-//
-//if (run.U0[k]!=czero)
-//{std::cout << "on process " << rank << ": U0[" << k << "] = " << run.U0[k] << " for k2[" << idx << "] = " << run.k2[idx]<<std::endl;}
-//if (O[k]     !=czero)
-//{std::cout << "on_process " << rank << " : O[" << k << "] = " <<      O[k] << " for k2[" << idx << "] = " << run.k2[idx]<<std::endl;}
-//std::cout  << " " << std::endl;
-//if (diffOUreal  != zero) 
-//{std::cout << "on process " << rank << ": real parts differ at k = " << k << " by diffOUreal = " << diffOUreal << std::endl;}
-//if (diffOUimag  != zero) 
-//{std::cout << "on process " << rank << ": imag parts differ at k = " << k << " by diffOUimag = " << diffOUimag << std::endl;}
-//if (diffOUreal != zero && diffOUimag !=zero) 
-//{std::cout << "on process " << rank << ": run.k2[" << idx << "] = " << run.k2[idx] << " for k = " << k << std::endl; }
-//
-//         }
-//       }
-//     }
-//  }
-//
-///* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
   HfromA(                run   );
-
-  initBoundaries(        run   );                          /* ~ initialization of quantities needed for     ~ */
-                                                           /* ~ boundary condition application              ~ */
   evalValf(              run   );
   evalUmean(             run   );
   evalElls(              run   );
@@ -207,8 +184,14 @@ void redhallmhd::initU( stack& run ) {
   }
   else if (scenario.compare("parker") == 0 ) {
 
-    run.zeroU();
-    if (srun >  1) { readUData( run ); }
+    if (srun == 1) {
+
+      std::string init; run.palette.fetch("initMode", &init);
+      if (init.compare("from_data" )  == 0 ) readUData(       run );
+      else { run.zeroU(); }
+
+    }
+    else { readUData( run ); }
 
   }
   else if (scenario.compare("gauss")  == 0 ) {
@@ -218,8 +201,18 @@ void redhallmhd::initU( stack& run ) {
 
   }
 
-  int n3;      run.palette.fetch("p3", &n3);
-  int np;      run.palette.fetch("np", &np);
+  int n3;      run.palette.fetch("p3",       &n3    );
+  int iu2;     run.stack_data.fetch("iu2",   &iu2   );
+  int np;      run.palette.fetch("np",       &np    );
+  int n1n2c;   run.stack_data.fetch("n1n2c", &n1n2c );
+  
+
+  int usize = iu2*n1n2c;
+
+  P.assign(usize,czero);
+  A.assign(usize,czero);
+  O.assign(usize,czero);
+  J.assign(usize,czero);
 
   int calcqvz; run.palette.fetch("calcqvz", &calcqvz);
   int calcsvz; run.palette.fetch("calcsvz", &calcsvz);
@@ -562,14 +555,14 @@ void redhallmhd::computeFourierU( stack& run ) {
 
      case(0) :
        idx            =        0 * (n2/2 + 1) + 1;
-       real_part      =  1.0e-03L;
+       real_part      =  1.6e-03L;
        imag_part      =  0.0L;
        tuple          = ComplexVar(real_part, imag_part);
 //     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        idx            =        1 * (n2/2 + 1);
-       real_part      = -1.0e-03L;
+       real_part      = -1.6e-03L;
        imag_part      =  0.0L;
          tuple          = ComplexVar(real_part, imag_part);
 //     tuple.real(real_part); tuple.imag(imag_part);
@@ -765,6 +758,7 @@ void redhallmhd::initBoundaries( stack& run) {
   if ( rank == 0 || rank == np - 1 ) {
     
     int bdrys; run.palette.fetch("bdrys", &bdrys);
+
     if (bdrys > 0 ) { initFootPointDriving( run ); }
     else            { initNoDrive(          run ); }
 
@@ -821,6 +815,7 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
   int tag_old           = 0;
   int tag_new           = 1;
+  int tag_ptop          = 2;
 
   countModes( run );
 
@@ -847,16 +842,26 @@ void redhallmhd::initFootPointDriving( stack& run ) {
   if (rcount > 0) { for (int l = 0; l < rcount; ++l) { dummy = (double) rand() / RAND_MAX; }}
 
   int srun;   run.palette.fetch(     "srun", &srun  );
+  int n1;     run.stack_data.fetch(   "n1",  &n1    );
+  int n2;     run.stack_data.fetch(   "n2",  &n2    );
   int n1n2c;  run.stack_data.fetch( "n1n2c", &n1n2c );
   RealVar kc; run.palette.fetch(       "kc", &kc    );
   int np;     run.palette.fetch(       "np", &np    );
   int bdrys;  run.palette.fetch(    "bdrys", &bdrys );
+  int n3;     run.palette.fetch(       "p3", &n3    );
+
+  int i_ua;
+  int i_cpy;
+
+  ComplexArray Ptop(n1n2c, czero);
 
   RealArray& k2         = run.k2;
 
   RealVar    next_real; 
   RealVar    next_imag;
   ComplexVar tuple;
+
+  i_ua = 0;
 
   if (rank == 0 || rank == np - 1 ) {
 
@@ -872,24 +877,78 @@ void redhallmhd::initFootPointDriving( stack& run ) {
     int brcount; physics_data.fetch("brcount", &brcount);
 
     if (srun == 1) {
+
       for (int l = 0; l < n1n2c; ++l) {
 
-        if ( sqrt(k2[l]) < kc ) {
+/* ~ fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  */
 
-            next_real   = ffp * ( ((double) rand() / RAND_MAX ) * two - one); ++brcount;
-            dummy       =         ((double) rand() / RAND_MAX ) * two - one;  ++brcount;
-            next_imag   = ffp * ( ((double) rand() / RAND_MAX ) * two - one); ++brcount;
-            dummy       =         ((double) rand() / RAND_MAX ) * two - one;  ++brcount;
+        if (l  < (n1n2c - (n2/2)-1)) {
+          if ((l == 0) || (l %((n2/2)+1) !=0) ){
 
-            tuple       = ComplexVar(next_real, next_imag);
-            rnewlb[l]   = tuple;
+            if ( sqrt(k2[l]) < kc ) {
 
-        }
-    }
-  
+                next_real   = ffp * ( ((double) rand() / RAND_MAX ) * two - one); ++brcount;
+                dummy       =         ((double) rand() / RAND_MAX ) * two - one;  ++brcount;
+                next_imag   = ffp * ( ((double) rand() / RAND_MAX ) * two - one); ++brcount;
+                dummy       =         ((double) rand() / RAND_MAX ) * two - one;  ++brcount;
+
+                tuple       = ComplexVar(next_real, next_imag);
+                rnewlb[l]   = tuple;
+
+            }
+            if ( l == 0) { rnewlb[l] = czero; }
+            ++i_ua;
+          } // not copying
+          else { i_cpy    = (l/((n2/2)+1));
+//          if (i_cpy < 0 || i_cpy > n2/2-1) {
+//            std::cout << "initFoot: WARNING ONE - i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//          } // i_cpy out of range
+//          else { old
+              if ( i_cpy < n2/2 ) {
+                rnewlb[l] = rnewlb[i_cpy];
+//              rnewlb[l] =  std::conj(rnewlb[i_cpy]);
+              } // really copying
+              else {
+                if ( sqrt(k2[l]) < kc ) {
+
+                  next_real   = ffp * ( ((double) rand() / RAND_MAX ) * two - one); ++brcount;
+                  dummy       =         ((double) rand() / RAND_MAX ) * two - one;  ++brcount;
+                  next_imag   = ffp * ( ((double) rand() / RAND_MAX ) * two - one); ++brcount;
+                  dummy       =         ((double) rand() / RAND_MAX ) * two - one;  ++brcount;
+
+                  tuple       = ComplexVar(next_real, next_imag);
+                  rnewlb[l]   = tuple;
+
+                }
+                ++i_ua;
+              } // not really copying
+//          }   // i_cpy in range
+          }     // copying
+        }       // l is <  (n1n2c - (n2/2) - 1
+        else {
+
+          i_cpy = (l - n1n2c + n2/2+2);
+          if (i_cpy < 0 || i_cpy > n2/2+1) {
+            std::cout << "initFoot: WARNING TWO - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+          }
+          else {
+//          std::cout << "initFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+            if ( l != (n1n2c - 1)) {
+              rnewlb[l] = std::conj(rnewlb[i_cpy]);
+            }
+            else { rnewlb[l] = czero;}
+          }
+        }       // l is >= (n1n2c - (n2/2) - 1
+
+/* ~ fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  */
+
+      }        // for loop in l
+
+      std::cout << "initFoot: i_ua = " << i_ua << " for rank = " << rank << std::endl; 
+
     l_reset_success     = physics_data.reset("brcount", brcount);
 
-   }
+   }           // srun = 1
    else {
       
       std::string data_dir;  run.palette.fetch(    "data_dir",   &data_dir  );
@@ -912,7 +971,7 @@ void redhallmhd::initFootPointDriving( stack& run ) {
 
         while ( !ifs.eof() && line_count < n1n2c ){
 
-          if (fld_count == 5) { ++line_count; fld_count = 0; }
+          if (fld_count == 6) { ++line_count; fld_count = 0; }
 
           ifs >> next_real;
           ifs >> next_imag;
@@ -926,79 +985,131 @@ void redhallmhd::initFootPointDriving( stack& run ) {
           case(1) : rnewlb[line_count] = tuple; ++fld_count; break;
           case(2) : roldub[line_count] = tuple; ++fld_count; break;
           case(3) : rnewub[line_count] = tuple; ++fld_count; break;
-          case(4) : O[line_count]      = tuple; ++fld_count; break;
+          case(4) : P[line_count]      = tuple; ++fld_count; break;
+          case(5) : Ptop[line_count]   = tuple; ++fld_count; break;
 
           default : std::cout << "initFootPointDriving: WARNING - fld_count maximum exceeded." << std::endl;
 
           }
-
         }
 
         ifs.close();
 
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
-//    for (unsigned k = 0; k < n1n2c; k++) {               /* ~ order: roldlb rnewlb roldub rnewub pbot ~ */
-
-//      if (srun == 2) {
-//        std::cout << "roldlb[" << k << "] = " << roldlb[k] << " ";
-//        std::cout << "rnewlb[" << k << "] = " << rnewlb[k] << std::endl;
-//      }
-//    }
-
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
-        MPI_Send( &roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np - 1, tag_old, MPI_COMM_WORLD );
-        MPI_Send( &rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np - 1, tag_new, MPI_COMM_WORLD );
-
+       if ( bdrys == 2 ) {
+         MPI_Send( &roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np - 1, tag_old,  MPI_COMM_WORLD );
+         MPI_Send( &rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np - 1, tag_new,  MPI_COMM_WORLD );
+         MPI_Send( &Ptop.front(),   n1n2c, MPI::DOUBLE_COMPLEX, np - 1, tag_ptop, MPI_COMM_WORLD );
+       }
      }
      else { std::cout << "initFootPointDriving: WARNING - could not open file " << boundary_data_file << std::endl; }
-    }
-  }
+
+    } // srun > 1
+  }   //rank is zero
 
   if ( rank == np - 1 ) {
     if (bdrys  == 2) {
 
       int trcount; physics_data.fetch("trcount", &trcount);
 
-      for (int l = 0; l < n1n2c; ++l) {
+      if (srun == 1) {
+        for (int l = 0; l < n1n2c; ++l) {
 
-        if ( sqrt(k2[l]) < kc ) {
+          if (l  < (n1n2c - (n2/2)-1)) {
+            if ((l == 0) || (l %((n2/2)+1) !=0) ) {
 
-          if (srun == 1) {
+/* ~ fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  */
 
-            dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
-            dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
-            dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
-            next_real   = ffp * (((double) rand() / RAND_MAX ) * two - one); ++trcount;
-            dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
-            next_imag   = ffp * (((double) rand() / RAND_MAX ) * two - one); ++trcount;
-            dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+              if ( sqrt(k2[l]) < kc ) {
 
-            tuple       = ComplexVar(next_real, next_imag);
-//          tuple.real(next_real); tuple.imag(next_imag);
-            rnewub[l]   = tuple;
+                  dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                  dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                  dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                  next_real   = ffp * (((double) rand() / RAND_MAX ) * two - one); ++trcount;
+                  dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                  next_imag   = ffp * (((double) rand() / RAND_MAX ) * two - one); ++trcount;
+                  dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
 
-          }
+                  tuple       = ComplexVar(next_real, next_imag);
+                  rnewub[l]   = tuple;
+
+              }
+              if ( l == 0) { rnewub[l] = czero; }
+              ++i_ua;
+            } // not copying
+            else { i_cpy    = (l/((n2/2)+1));
+//            if (i_cpy < 0 || i_cpy > n2/2-1) {
+//              std::cout << "initFoot: WARNING THREE - i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//            } // i_cpy out of range
+//            else {
+                if ( i_cpy < n2/2 ) {
+                  rnewub[l] = rnewub[i_cpy];
+                } // really copying
+                else {
+
+                  if ( sqrt(k2[l]) < kc ) {
+
+                      dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                      dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                      dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                      next_real   = ffp * (((double) rand() / RAND_MAX ) * two - one); ++trcount;
+                      dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+                      next_imag   = ffp * (((double) rand() / RAND_MAX ) * two - one); ++trcount;
+                      dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+
+                      tuple       = ComplexVar(next_real, next_imag);
+                      rnewub[l]   = tuple;
+
+                  }
+
+                  ++i_ua;
+                }  // not really copying
+//            }    // i_cpy in range
+            }      // copying
+          } // l  < (n1n2c - (n2/2)-1)
           else {
 
-            dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
-            dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+            i_cpy = (l - n1n2c + n2/2+2);
+            if (i_cpy < 0 || i_cpy > n2/2+1) {
+              std::cout << "initFoot: WARNING FOUR - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+            }
+            else {
+//            std::cout << "initFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+              if (l != (n1n2c - 1)) {
+              rnewub[l] = std::conj(rnewub[i_cpy]);
+              }
+              else { rnewub[l] = czero; }
+            }
+          } //l  >= (n1n2c - (n2/2)-1)
 
-          }
-        }
-      }
+/* ~ fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  */
 
+        } // end for loop in l
+
+//    assert (n1n2c == i_ua + n1);
+        std::cout << "initFoot: i_ua = " << i_ua << " for rank = " << rank << std::endl; 
       l_reset_success   = physics_data.reset("trcount", trcount);
-    }
-    if ( srun > 1) {
-       
-       MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_old, MPI_COMM_WORLD, &status);
-       MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_new, MPI_COMM_WORLD, &status);
 
-      }
-    }
-  }
+      } // srun = 1 new
+      else {
+        for (int l = 0; l < n1n2c; ++l) {
+          if ( sqrt(k2[l]) < kc ) {
+  
+              dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+              dummy       =        ((double) rand() / RAND_MAX );              ++trcount;
+
+          } // k < kc for srun > 1
+        }
+
+         MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_old,  MPI_COMM_WORLD, &status);
+         MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_new,  MPI_COMM_WORLD, &status);
+         MPI_Recv(&Ptop.front(),   n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_ptop, MPI_COMM_WORLD, &status);
+
+         for (unsigned k = 0; k < n1n2c; ++k) { P[(n3*n1n2c) + k] = Ptop[k]; }
+
+      }  // srun > 1  (else) new
+    }    // bdrys = 2
+  }      // rank is np - 1
+}        // end initFoot
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -1011,21 +1122,26 @@ void redhallmhd::finalizeFootPointDriving( stack& run ) {
   int brcount;  physics_data.fetch( "brcount", &brcount );
   int trcount;  physics_data.fetch( "trcount", &trcount );
 
-  rcount = rcount + ( (brcount) > (trcount) ? (brcount) : (trcount) );
+  rcount              = rcount + ( (brcount) > (trcount) ? (brcount) : (trcount) );
 
   run.palette.reset("rcount", rcount);
 
+  int n3;     run.palette.fetch(    "p3",        &n3    );
   int np;     run.palette.fetch(    "np",      &np      );
   int n1n2c;  run.stack_data.fetch( "n1n2c",   &n1n2c   );
   int srun;   run.palette.fetch(    "srun",    &srun    );
 
+  ComplexArray Ptop(n1n2c, czero);
+
   int tag_old         = 0;
   int tag_new         = 1;
-
+  int tag_ptop        = 2;
+  
   if (rank            == 0)      {
      
-    MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_old, MPI_COMM_WORLD, &status);
-    MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_new, MPI_COMM_WORLD, &status);
+    MPI_Recv(&roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_old,  MPI_COMM_WORLD, &status);
+    MPI_Recv(&rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_new,  MPI_COMM_WORLD, &status);
+    MPI_Recv(&Ptop.front(),   n1n2c, MPI::DOUBLE_COMPLEX, np -1, tag_ptop, MPI_COMM_WORLD, &status);
 
     std::string data_dir;  run.palette.fetch(    "data_dir",   &data_dir  );
     std::string prefix;    run.palette.fetch(    "prefix",     &prefix    );
@@ -1042,25 +1158,18 @@ void redhallmhd::finalizeFootPointDriving( stack& run ) {
     if ( ofs.good() ) {
       for (unsigned k = 0; k < n1n2c; k++) {               /* ~ order: roldlb rnewlb roldub rnewub pbot ~ */
 
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-
-//      if (srun == 1) {
-//        std::cout << "roldlb[" << k << "] = " << roldlb[k] << " ";
-//        std::cout << "rnewlb[" << k << "] = " << rnewlb[k] << std::endl;
-//      }
-
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-        
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << roldlb[k].real() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << roldlb[k].imag() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << rnewlb[k].real() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << rnewlb[k].imag() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << roldub[k].real() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << roldub[k].imag() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << rnewub[k].real() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << rnewub[k].imag() << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << O[k].real()      << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << O[k].imag()      << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << roldlb[k].real() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << roldlb[k].imag() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << rnewlb[k].real() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << rnewlb[k].imag() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << roldub[k].real() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << roldub[k].imag() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << rnewub[k].real() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << rnewub[k].imag() << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << P[k].real()      << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << P[k].imag()      << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << Ptop[k].real()   << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << Ptop[k].imag()   << " ";
         ofs << std::endl;
 
       }
@@ -1073,8 +1182,11 @@ void redhallmhd::finalizeFootPointDriving( stack& run ) {
     assert (roldub.size() == n1n2c);
     assert (rnewub.size() == n1n2c);
 
-    MPI_Send( &roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_old, MPI_COMM_WORLD );
-    MPI_Send( &rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_new, MPI_COMM_WORLD );
+    for (unsigned k = 0; k < n1n2c; ++k) { Ptop[k] = P[(n3*n1n2c) + k]; }
+
+    MPI_Send( &roldub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_old,  MPI_COMM_WORLD );
+    MPI_Send( &rnewub.front(), n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_new,  MPI_COMM_WORLD );
+    MPI_Send( &Ptop.front(),   n1n2c, MPI::DOUBLE_COMPLEX, 0, tag_ptop, MPI_COMM_WORLD );
 
   }
 }
@@ -1129,19 +1241,19 @@ void redhallmhd::retrieveOJ( stack& run )  {
 
   ComplexArray::size_type usize;
   usize = n1n2c *n_layers;
-  O.assign(usize, czero);
-  J.assign(usize, czero);
   fftw.fftwForwardAll( run, O, J); /* ~ resulting O and J should compare well with OfromP and HfromA output below ~ */
 
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 void redhallmhd::OfromP( stack& run )  {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD,     &rank     ); /* ~ possibly needed for debugging                   ~ */
   int srun;     run.palette.fetch(   "srun",  &srun     ); /* ~ for srun > 1 we are restarting.                 ~ */
   int n1n2c;    run.stack_data.fetch("n1n2c", &n1n2c    ); /* ~ number of complex elements per layer            ~ */
   int n_layers; run.stack_data.fetch("iu2",   &n_layers ); /* ~ number of layers in stack                       ~ */
+  int np;       run.palette.fetch(    "np"  , &np       ); /* ~ number of processes ~ */
   
   RealArray&    k2 = run.k2;                               /* ~ square magnitudes of k-space vectors            ~ */
   ComplexArray& U0 = run.U0;                               /* ~ holds phi (i.e. P ) at this point               ~ */ 
@@ -1149,33 +1261,35 @@ void redhallmhd::OfromP( stack& run )  {
   ComplexArray::size_type usize;
   usize            = U0.capacity();                        /* ~ current capacity of U0 - should be known        ~ */
   
-  assert(usize     == (n1n2c * n_layers));                 /* ~ test usize                                      ~ */
+  assert(usize     == (n1n2c * n_layers));               /* ~ test usize                                      ~ */
+  assert(P.size()  == usize);
+  assert(O.size()  == usize);
   
-  if (srun == 1) { O.assign(usize,czero);}                 /* ~ physics's copy of vorticity O is alread known   ~ */
-                                                           /* ~ when srun > 1                                   ~ */ 
+  int kstart;
+  int kstop;
 
-  P.assign(usize,czero);                                   /* ~ prior to this proceedure U0 contains values of  ~ */
-                                                           /* ~ of P. But Loop assumes U0 = O. So we make a     ~ */
-  for (unsigned k = 0; k <usize; k++) {P[k] = U0[k];}      /* ~ copy of the stream function and place it in P   ~ */
-                                                           /* ~ because we also need to know P for Loop.        ~ */
+  if ( rank == 0 )          { kstart = n1n2c;               /* ~ layer 0 of P and O handled by BC's for process 0     ~ */
+                              kstop  = usize;
+  }
+  else if (rank == (np-1))  { kstart = 0;                   /* ~ layer n3 of P and O handled by BC's for process np-1 ~ */
+                              kstop  = (n_layers-2)*n1n2c;
+  } 
+  else {                      kstart = 0;                   /* ~ interior layers/processes                            ~ */
+                              kstop  = usize;
+  }
 
-  unsigned  idx    = 0;                                    /* ~ index for k2                                    ~ */
+  for (unsigned k = kstart; k <kstop; k++) { P[k] = U0[k];} /* ~ copy the stream function and place it in P           ~ */
+     
+  unsigned  idx    = 0;                                     /* ~ index for k2                                         ~ */
+
   for (unsigned k  = 0; k < usize; k++) {
 
-    if (k % n1n2c  == 0 ) { idx = 0; }                     /* ~ reset idx when starting new layer               ~ */
+    if (k % n1n2c  == 0 ) { idx = 0; }                     /* ~ reset idx when starting new layer                     ~ */
   
-    U0[k] = k2[idx] * P[k];                                /* ~ Omega = - delperp^2 P                           ~ */
-
-    if (srun == 1) {                                       /* ~ for subrun 1 the only source of info on O is    ~ */
-                                                           /* ~ U0 which has been calculated by fftwForward     ~ */ 
-      if (k2[idx] != zero) { O[k]  = U0[k]; }              /* ~ for subsequent runs, O (in real space) can also ~ */
-      else                 { U0[k] = czero;                /* ~ be read in directly from the data files. This   ~ */
-                             O[k]  = czero; }              /* ~ bit of code ensures that both sources contain   ~ */
-    }                                                      /* ~ identical information. note as well that since  ~ */
-                                                           /* ~ O = k^2P, non-zero O for k^2 = 0 is a numerical ~ */
-                                                           /* ~ error. The conditional corrects for this        ~ */
-//  else { assert(U0[k] == O[k]); }
+    U0[k] = k2[idx] * P[k];                                /* ~ Omega = - delperp^2 P                                 ~ */
+     O[k] = U0[k];
     ++idx;
+
   }
 }
 
@@ -1188,24 +1302,24 @@ void redhallmhd::HfromA( stack& run )  {
   int n1n2c;    run.stack_data.fetch("n1n2c", &n1n2c   );  /* ~ number of complex elements per layer       ~ */
   int n_layers; run.stack_data.fetch("iu2",   &n_layers);  /* ~ number of layers in stack                  ~ */
   
-  RealArray& k2    = run.k2;                               /* ~ square magnitude of k-space vectors        ~ */
+  RealArray&    k2 = run.k2;                               /* ~ square magnitude of k-space vectors        ~ */
   ComplexArray& U1 = run.U1;                               /* ~ holds A (flux function) at this point      ~ */
+//ComplexArray JT;                                         /* ~ defined to test stored J values against    ~ */
+                                                           /* ~ newly calculated values                    ~ */ 
   ComplexArray::size_type usize;
   usize            = U1.capacity();                        /* ~ current capacity of U1 - should be known   ~ */
   assert(usize     == (n1n2c * n_layers));                 /* ~ test usize                                 ~ */
-  ComplexArray JT;                                         /* ~ defined to test stored J values against    ~ */
-                                                           /* ~ newly calculated values                    ~ */ 
-  A.assign(usize,czero);                                   /* ~ members A and J (current density) needed   ~ */
+  assert(A.size()  == usize);
+  assert(J.size()  == usize);
 
-  if (     srun == 1) { J.assign( usize,czero); }
-  else if (srun >  1) { JT.assign(usize,czero); }
+//if (srun >  1) { JT.assign(usize,czero); }
   
   RealVar ssqd;      run.palette.fetch(  "ssqd",  &ssqd ); /* ~ parameter sigma^2 needed for H             ~ */
   std::string model; run.palette.fetch(  "model", &model); 
 
-  int cnt_jj_tiny  = 0;
-  RealVar diffJJ;
-  RealVar modJ, modJT;
+//int cnt_jj_tiny  = 0;
+//RealVar diffJJ;
+//RealVar modJ, modJT;
 
   for (unsigned k  = 0; k < usize; k++) { A[k] = U1[k]; }  /* ~ preserve flux function in A                ~ */
 
@@ -1214,8 +1328,9 @@ void redhallmhd::HfromA( stack& run )  {
   for (unsigned k  = 0; k < usize; k++) {
   
     if (k % n1n2c  == 0 ) { idx = 0; }                     /* ~ reset idx when starting new layer          ~ */
+    J[k]           = k2[idx] * A[k];
 
-    if (srun == 1) { J[k] = k2[idx] * A[k]; }              /* ~ For subrun 1 J must be initialized from A  ~ */
+//  if (srun == 1) { J[k] = k2[idx] * A[k]; }              /* ~ For subrun 1 J must be initialized from A  ~ */
 //  else           {JT[k] = k2[idx] * A[k];                /* ~ but for subsequent subruns J has been      ~ */
 //                  assert (J[k] == JT[k]); }              /* ~ stored in the data and is initialized by   ~ */
                                                            /* ~ retrieveOJ. The purpose of JT is to run a  ~ */
@@ -1227,7 +1342,9 @@ void redhallmhd::HfromA( stack& run )  {
     }
     ++idx;
   }
-  if (srun > 1) {JT.resize(0);}
+
+//if (srun > 1) {JT.resize(0);}
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -1245,30 +1362,22 @@ void redhallmhd::PfromO( stack& run )  {
   usize                = U0.capacity();                      /* ~ current capacity of U0 - should be known    ~ */
 
   assert(usize         == (n1n2c * n_layers));               /* ~ test usize                                  ~ */
-  O.assign(usize,czero);                                     /* ~ needed to preserve vorticity for output     ~ */
 
   unsigned idx         = 0;                                  /* ~ index for inv_k2                            ~ */
 
   for (unsigned k = 0; k < usize; k++) {
 
-    O[k]               = U0[k];                              /* ~ preserve vorticity for output               ~ */
-
     if ( k % n1n2c == 0) { idx = 0; }                        /* ~ reset idx when starting new layer           ~ */
 
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//  P[k]               = inv_k2[idx]*U0[k];                  /* ~ Omega = - delperp^2 P                       ~ */
+    if ( k2[idx] != zero) { P[k]  = U0[k] / k2[idx];}        /* ~ Omega = - delperp^2 P                       ~ */
+    else                  { U0[k] = czero;          }
 
-    if ( k2[idx] != zero) { P[k] = U0[k] / k2[idx];}         /* ~ Omega = - delperp^2 P                       ~ */
-//  else                  { P[k] = czero;          }         /* ~ not +/-huge?                                ~ */
-    else                  { P[k] = chuge;          }         /* ~ not +/-huge?                                ~ */
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+    O[k]               = U0[k];                              /* ~ preserve vorticity for output               ~ */
+    U0[k]              = P[k];
 
     ++idx;
 
   }
-
-  for (unsigned k = 0; k <usize; k++) {U0[k] = P[k];}        /* ~ U0 now holds Fourier transform of P         ~ */
-
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -1286,14 +1395,8 @@ void redhallmhd::AfromH( stack& run )  {
 
   assert(usize     == (n1n2c * n_layers));                /* ~ test usize                                 ~ */
 
-//  ComplexArray H;                                       /* ~ temporary storage for H-function           ~ */
-//  H.assign(usize, czero);
-                                                          /* ~ note: current values of A and J are known  ~ */
-
   RealVar ssqd;      run.palette.fetch("ssqd",   &ssqd ); /* ~ parameter sigma^2 needed for A             ~ */
   std::string model; run.palette.fetch( "model", &model);
-
-//  for (unsigned k = 0; k < usize; k++) {H[k] = U1[k];}
 
   unsigned idx     = 0;                                   /* ~ index for k2                               ~ */
   for (unsigned k  = 0; k < usize; k++) {
@@ -1305,18 +1408,13 @@ void redhallmhd::AfromH( stack& run )  {
       U1[k]        = A[k];
     }
     else if( model.compare("rmhd") == 0 || model.compare("inhm") == 0 ) {
-//      assert(A[k] == H[k]);
+
       A[k]         = U1[k];
 
     }
       J[k]         = k2[idx] * A[k];                       /* ~ J = -delperp A                             ~ */
     ++idx;
   }
-
-//  for (unsigned k = 0; k < usize; k++) {U1[k] = A[k];}    /* ~  U1 now holds Fourier transform of A       ~ */
-
-//  H.resize(0);                                          /* ~ H is discarded...                          ~ */
-                                                          /* ~ ...or perhaps not.                         ~ */
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -1707,6 +1805,7 @@ void redhallmhd::trackEnergies( RealVar t_cur, stack& run ) {
     std::cout << "trackEn: he      =  " << he      << std::endl;
     std::cout << "trackEn: heold   =  " << heold   << std::endl;
     std::cout << "trackEn: dt_old  =  " << dt_old  << std::endl;
+    std::cout << "trackEn: t_cur   =  " << t_cur   << std::endl;
     std::cout << " " <<std::endl;
 
     mo                                  = zero;
@@ -2448,7 +2547,8 @@ double redhallmhd::evalTotalCurrentSqd( stack& run ) {
 
     if (kdx % n1n2c  == 0) { idx = 0; }
 
-      ce              = ce + k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+//    ce              = ce + k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+      ce              = ce + k2[idx] * k2[idx] * ((A[kdx].real() * A[kdx].real()) + (A[kdx].imag()*A[kdx].imag()));
       ++idx;
   }
 
@@ -2486,7 +2586,8 @@ double redhallmhd::evalTotalGradCurrentSqd( stack& run ) {
 
     if (kdx % n1n2c  == 0) { idx = 0; }
 
-      cee             = cee + k2[idx] * k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+//    cee             = cee + k2[idx] * k2[idx] * k2[idx] * pow(std::abs(A[kdx]), 2);
+      cee             = cee + k2[idx] * k2[idx] * k2[idx] * ( (A[kdx].real()*A[kdx].real()) +(A[kdx].imag()*A[kdx].imag()) );
       ++idx;
   }
 
@@ -2524,7 +2625,8 @@ double redhallmhd::evalTotalFootPointKE( stack& run ) {
 
     for (unsigned kdx = kstart; kdx < kstop; kdx++) {
 
-      fp              = fp + k2[kdx] * pow(std::abs(P[kdx]), 2);
+//    fp              = fp + k2[kdx] * pow(std::abs(P[kdx]), 2);
+      fp              = fp + k2[kdx] * ((P[kdx].real() * P[kdx].real()) + (P[kdx].imag() * P[kdx].imag()));
 //    fp              = fp + pow(std::abs(O[kdx]), 2);
     }
 
@@ -2694,11 +2796,20 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
 
   int bdrys;      run.palette.fetch(    "bdrys", &bdrys    );
   int np;         run.palette.fetch(    "np"   , &np       );
-  int n1n2c;      run.stack_data.fetch( "n1n2c", &n1n2c    );
-  int n_layers;   run.stack_data.fetch( "n3"   , &n_layers );
   RealVar dtau;   run.palette.fetch(    "dtau" , &dtau     );
+
+  int n1n2;       run.stack_data.fetch( "n1n2",  &n1n2     );
+  int n1n2c;      run.stack_data.fetch( "n1n2c", &n1n2c    );
+  int n1;         run.stack_data.fetch( "n1"   , &n1       );
+  int n2;         run.stack_data.fetch( "n2"   , &n2       );
+  int iu3;        run.stack_data.fetch("iu3"   , &iu3      );
+  int n_layers;   run.stack_data.fetch( "n3"   , &n_layers );
+
   RealVar t_cur;  physics_data.fetch(   "t_cur", &t_cur    );
 
+  int i_ua = 0;
+
+  int i_cpy;
   int oldnum, num;
 
   RealVar    ffp, kc;
@@ -2712,18 +2823,13 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
   RealVar    a, b;                                /* ~ i.e. Gilson's "a" and "b" ~ */
 
   ComplexArray::size_type nc = n1n2c;
+  unsigned strt_idx, stop_idx, idx;
 
-  int iu3;
-  run.stack_data.fetch("iu3", &iu3);
-
-  unsigned strt_idx, stop_idx;
 
   if ( rank  == 0 || rank == (np - 1) ) {         /* ~ pevol "starts" here        ~ */
 
     RealArray&    k2         = run.k2;
-
-    ComplexArray& UO         = run.U0;
-//   ComplexArray& O         = run.U0;
+    ComplexArray& U0         = run.U0;
     ComplexArray& Z          = run.U2; 
 
     if ( rank  == 0 ) {
@@ -2732,13 +2838,21 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
       strt_idx               = 0;
       stop_idx               = strt_idx + n1n2c;
 
+      idx = 0;
       for (unsigned k = strt_idx; k < stop_idx; k++) {
-        UO[k]                = czero;
-//        O[k]                = czero;
+
+        if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
+
+        U0[k]                = czero;
+        O[k]                 = czero;
+        P[k]                 = czero;
+
         if (iu3 > 2){ 
         Z[k]                 = czero;
         }
+        ++idx;
       }
+
       num                    = oldnum;
      
       while (  (num * dtau) <= t_cur ) { ++num; }
@@ -2749,19 +2863,23 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
       a                      = cos((pi*lowtau)/( two * dtau)); /* ~ Gilson's "interp" ~ */
       b                      = cos((pi*bigtau)/( two * dtau));
 
-//    std::cout << "applyFoot: a = " << a << std::endl;
-//    std::cout << "applyFoot: b = " << b << std::endl;
-
       if (num == oldnum) {
     
+        idx        = 0;
+
         for (unsigned k = strt_idx; k < stop_idx; k++) {
-          UO[k]              = (a * roldlb[k]) + (b * rnewlb[k]);
-//          O[k]              = (a * roldlb[k]) + (b * rnewlb[k]);
-          if (iu3 > 2){ 
-            Z[k]             = czero;
-          }
+          
+          if (k % n1n2c == 0){ idx  = 0; }                    /* ~ reset idx when starting new layer           ~ */
+      
+          U0[k]    = (a * roldlb[k]) + (b * rnewlb[k]); ++i_ua;
+          O[k]     = U0[k];
+
+          if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
+          if (iu3 > 2)      { Z[k]  = czero;          }
+
+          ++idx;
         }
-      }
+      }   // num is oldnum
       else {
 
         int brcount; physics_data.fetch("brcount", &brcount);
@@ -2773,54 +2891,117 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
 
           for (unsigned l = 0; l < nc; l++) { roldlb[l] = rnewlb[l]; }
 
+          i_ua = 0;
           for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
 
-                dummy        = ((double) rand() / RAND_MAX );
-                ++brcount;
-                dummy        = ((double) rand() / RAND_MAX );
-                ++brcount;
-            }
-          }
+/* ~ fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  */
 
-          for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
+            if (l  < (n1n2c - (n2/2)-1)) {
+              if ((l == 0) || (l %((n2/2)+1) !=0) ) {
 
-                next_real    = ffp * (((double) rand() / RAND_MAX) * two - one);
-                ++brcount;
-                next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
-                ++brcount;
-                tuple        = ComplexVar(next_real, next_imag);
-//              tuple.real(next_real); tuple.imag(next_imag);
-                rnewlb[l]    = tuple;
+                if ( sqrt(k2[l]) <= kc ) {
 
-            }
-          }
-        }
+                    dummy        = ((double) rand() / RAND_MAX ); ++brcount; // why not just here?
+                    dummy        = ((double) rand() / RAND_MAX ); ++brcount;
+
+                    next_real    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                    ++brcount;
+                    next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                    ++brcount;
+                    tuple        = ComplexVar(next_real, next_imag);
+                    rnewlb[l]    = tuple;
+
+                }
+                if ( l == 0) { rnewlb[l] = czero; }
+                ++i_ua;
+              } // not copying
+              else {
+                i_cpy    = (l/((n2/2)+1));
+//              if (i_cpy < 0 || i_cpy > n2/2-1) {
+//                std::cout << "applyFoot: WARNING - i_cpy = " << i_cpy << " for l = " << l << std::endl;
+//              } // i_cpy out of range
+//              else {
+                  if ( i_cpy < n2/2 ) {
+                    rnewlb[l] = rnewlb[i_cpy];
+                  } // really copying
+                  else {
+                    if ( sqrt(k2[l]) <= kc ) {
+
+                        dummy        = ((double) rand() / RAND_MAX ); ++brcount; // why not just here?
+                        dummy        = ((double) rand() / RAND_MAX ); ++brcount;
+
+                        next_real    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                        ++brcount;
+                        next_imag    = ffp * (((double) rand() / RAND_MAX) * two - one);
+                        ++brcount;
+                        tuple        = ComplexVar(next_real, next_imag);
+                        rnewlb[l]    = tuple;
+
+                    }
+                    ++i_ua;
+                  } // not really copying
+//              }   // i_cpy in range
+              }     //copying
+            }       // l is <  (n1n2c - (n2/2) - 1
+            else {
+              i_cpy = (l - n1n2c + n2/2+2);
+              if (i_cpy < 0 || i_cpy > n2/2+1) {
+                std::cout << "applyFoot: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+              }
+              else {
+//              std::cout << "applyFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+                if ( l != (n1n2c - 1)) {
+                  rnewlb[l] = std::conj(rnewlb[i_cpy]);
+                }
+                else { rnewlb[l] = czero;}
+              }
+            }       // l is >= (n1n2c - (n2/2) - 1
+
+/* ~ fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  fill rnewlb ~  */
+
+          } // end of for loop in l
+
+          if ( k == 0 ) { std::cout << "applyFoot: i_ua = " << i_ua << std::endl;}
+        } // loop in k
+
+        idx = 0;
         for (unsigned k = strt_idx; k < stop_idx; k++) {
-          UO[k]              = (a * roldlb[k]) + (b * rnewlb[k]);
- //          O[k]              = (a * roldlb[k]) + (b * rnewlb[k]);
+
+          if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
+
+          U0[k]              = (a * roldlb[k]) + (b * rnewlb[k]);
+          O[k]               = U0[k];
+
+          if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
           if (iu3 > 2){ 
             Z[k]             = czero;
           }
-        }
+          ++idx;
+        } // end second loop in k
+
         physics_data.reset("brcount", brcount);
-      }
+      } // num is not oldnum
       run.palette.reset("oldnumlb", num);
-    }
-    else if ( rank == np - 1 && bdrys == 2) {
+    }  //rank is zero
+    else if ( rank == (np - 1) && (bdrys == 2)) {
 
       run.palette.fetch("oldnumub", &oldnum ); /* ~ "oldnum" ~ */
       strt_idx               = n_layers * nc;
       stop_idx               = strt_idx + n1n2c;
 
+      idx = 0;
       for (unsigned k = strt_idx; k < stop_idx; k++) { 
-        UO[k]                = czero;
-//        O[k]                = czero;
+        if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
+        U0[k]                = czero;
+        O[k]                 = U0[k];
+        P[k]                 = czero;
+
         if (iu3 > 2) {
           Z[k]               = czero;
         }
+        ++idx;
       }
+
       num                    = oldnum;
 
       while (  (num * dtau) <= t_cur ) { ++num; }                 /* ~~~~~~~~~~~~~~~~~~~~~ */
@@ -2834,63 +3015,113 @@ void redhallmhd::applyFootPointDrivingBC( std::string str_step, stack& run ) {
 
       if (num == oldnum) {
     
-        int kdk              = 0;
+        int idx              = 0;
         for (unsigned k = strt_idx; k < stop_idx; k++) {
-           UO[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
-//         O[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
+        if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
+           U0[k]             = (a * roldub[idx]) + (b * rnewub[idx]);
+            O[k]             = U0[k];
+            if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
+
           if (iu3 > 2) {
             Z[k]             = czero;
           }
-          ++kdk;
+          ++idx;
         }
       }
+
       else {
 
-        int trcount;
-        physics_data.fetch("trcount", &trcount);
+        int trcount; physics_data.fetch("trcount", &trcount);
+
         run.palette.fetch("ffp",      &ffp);
         run.palette.fetch("kc",       &kc);
 
         for (unsigned k = 0; k < num - oldnum; k++) {
+
           for (unsigned l = 0; l < nc; l++) { roldub[l] = rnewub[l]; }
+
+          i_ua = 0;
           for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
 
-                dummy        = ((double) rand() / RAND_MAX);
-                ++trcount;
-                dummy        = ((double) rand() / RAND_MAX);
-                ++trcount;
-            }
-          }
+// ~ fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  */
 
-          for (unsigned l = 0; l < nc; l++ ) {
-            if ( sqrt(k2[l]) <= kc ) {
+            if (l  < (n1n2c - (n2/2)-1)) {
+              if ((l == 0) || (l %((n2/2)+1) !=0) ) {
 
-                next_real    = ffp * (((double) rand() / RAND_MAX ) * two - one);
-                ++trcount;
-                next_imag    = ffp * (((double) rand() / RAND_MAX ) * two - one);
-                ++trcount;
-                tuple        = std::complex<double>(next_real, next_imag);
-//              tuple.real(next_real); tuple.imag(next_imag);
-                rnewub[l]    = tuple;
+                if ( sqrt(k2[l]) <= kc ) {
 
-            }
-          }
-        }
-        int kdk              = 0;
+                    next_real    = ffp * (((double) rand() / RAND_MAX ) * two - one);
+                    ++trcount;
+                    next_imag    = ffp * (((double) rand() / RAND_MAX ) * two - one);
+                    ++trcount;
+                    tuple        = std::complex<double>(next_real, next_imag);
+                    rnewub[l]    = tuple;
+
+                }
+                if ( l == 0) { rnewub[l] = czero; }
+                ++i_ua;
+              } // not copying
+              else {
+
+                i_cpy               = (l/((n2/2)+1));
+
+                if ( i_cpy < n2/2 ) {
+                  rnewub[l]         = rnewub[i_cpy];
+                } // really copying
+                else {
+                  if ( sqrt(k2[l]) <= kc ) {
+
+                      dummy         = ((double) rand() / RAND_MAX ); ++trcount; // why not just here?
+                      dummy         = ((double) rand() / RAND_MAX ); ++trcount;
+
+                      next_real     = ffp * (((double) rand() / RAND_MAX) * two - one);
+                      ++trcount;
+                      next_imag     = ffp * (((double) rand() / RAND_MAX) * two - one);
+                      ++trcount;
+                      tuple         = ComplexVar(next_real, next_imag);
+                      rnewub[l]     = tuple;
+
+                  }
+                  ++i_ua;
+                }   // not really copying
+              }     //copying
+            }       // l is <  (n1n2c - (n2/2) - 1
+            else {
+              i_cpy = (l - n1n2c + n2/2+2);
+              if (i_cpy < 0 || i_cpy > n2/2+1) {
+                std::cout << "applyFoot: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+              }
+              else {
+////            std::cout << "applyFoot: l >= n1n2c - n2/2 <-> i_cpy = " << i_cpy << " for l = " << l << std::endl;
+                if (l != (n1n2c - 1)) {
+                rnewub[l] = std::conj(rnewub[i_cpy]);
+                }
+                else { rnewub[l] = czero; }
+              }
+            }       // l is >= (n1n2c - (n2/2) - 1
+
+// ~ fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  fill rnewub ~  */
+
+          } // end of for loop in l
+
+          if ( k == 0 ) { std::cout << "applyFoot: i_ua = " << i_ua << std::endl;}
+        }   // loop in k
+
+        int idx              = 0;
         for (unsigned k = strt_idx; k < stop_idx; k++) {
-          UO[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
-//         O[k]              = (a * roldub[kdk]) + (b * rnewub[kdk]);
-          if (iu3 > 2) {
-            Z[k]             = czero;
-          }
-          ++kdk;
+
+          if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
+          U0[k]               = (a * roldub[idx]) + (b * rnewub[idx]);
+           O[k]               = U0[k];
+          if (k2[idx] != 0) { P[k]  = O[k] / k2[idx]; }
+          if (iu3 > 2) { Z[k] = czero; }
+          ++idx;
         }
         physics_data.reset("trcount", trcount);
       }
         run.palette.reset("oldnumub", num);
-    }
-  }
+    } // rank is np - 1 and bdrys is 2
+  }   // rank is one of zero or  np - 1
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -2947,18 +3178,19 @@ void redhallmhd::applyLineTiedBC( std::string str_step, stack& run ) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void redhallmhd::updatePAJ( std::string str_step, stack& run ) {
+void redhallmhd::updatePAOJ( std::string str_step, stack& run ) {
 
   int rank;     MPI_Comm_rank(MPI_COMM_WORLD, &rank );
   int  np;      MPI_Comm_size(MPI_COMM_WORLD, &np);
 
   int n1n2c;    run.stack_data.fetch("n1n2c", &n1n2c);    /* ~ number complex elements in layer            ~ */
   int n_layers; run.stack_data.fetch("iu2",   &n_layers); /* ~ number of layers in stack                   ~ */
+  int n3;       run.palette.fetch(   "p3",    &n3);       /* ~ number of layers in stack                   ~ */
 
-  ComplexArray&   UO = run.U0;                            /* ~ for predictor case                          ~ */
+  ComplexArray&   U0 = run.U0;                            /* ~ for predictor case                          ~ */
   ComplexArray&    H = run.U1;
 
-  ComplexArray&   tO = run.tU0;                           /* ~ for corrector case                          ~ */
+  ComplexArray&  tU0 = run.tU0;                           /* ~ for corrector case                          ~ */
   ComplexArray&   tH = run.tU1;
 
   RealArray&      k2 = run.k2;                            /* ~ square-magnitude of k-space vectors         ~ */
@@ -2966,8 +3198,29 @@ void redhallmhd::updatePAJ( std::string str_step, stack& run ) {
 
   RealVar ssqd; run.palette.fetch(  "ssqd",  &ssqd);      /* ~ parameter sigma^2 relating A to H           ~ */
 
-  unsigned kstart    = 0;                                 /* ~ lower and upper loop limits on k            ~ */
-  unsigned kstop     = n_layers * n1n2c;                  /* ~ note: pbot and atop boundary layers incl.'d ~ */
+  unsigned kstart;                                        /* ~ lower and upper loop limits on k            ~ */
+  unsigned kstop;                                         /* ~ note: pbot and atop boundary layers incl.'d ~ */
+
+  if ( rank != 0 && rank != (np - 1)) {
+
+    kstart    = 0;                                 /* ~ lower and upper loop limits on k            ~ */
+    kstop     = n_layers * n1n2c;                  /* ~ note: pbot and atop boundary layers incl.'d ~ */
+
+  }
+  else {
+    if (rank == 0 ) {
+
+      kstart  = n1n2c;                             /* ~ lower and upper loop limits on k            ~ */
+      kstop   = n_layers * n1n2c;                  /* ~ note: pbot and atop boundary layers incl.'d ~ */
+
+    }
+    else if (rank == (np - 1)) {
+
+      kstart  = 0;                                 /* ~ lower and upper loop limits on k            ~ */
+      kstop   = (n_layers - 1 ) * n1n2c;           /* ~ note: pbot and atop boundary layers incl.'d ~ */
+
+    }
+  }
 
   unsigned idx       = 0;                                 /* ~ index for k2 and inv_k2                     ~ */
 
@@ -2976,62 +3229,53 @@ void redhallmhd::updatePAJ( std::string str_step, stack& run ) {
 
        if (k % n1n2c == 0){ idx = 0; }                    /* ~ reset idx when starting new layer           ~ */
 
-//     O[k] = UO[k];
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+         if (rank != (np - 1)) {
 
-//     P[k] = inv_k2[idx] * UO[k];                        /* ~ O = -delperp^2 P                            ~ */
-       if (k2[idx] != 0) { P[k] = UO[k] / k2[idx];}
-//     else              { P[k] = czero;          }
-       else              { P[k] = chuge;          }
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+         if (k2[idx] != 0) { O[k]  = U0[k];               /* ~ last layer of highest process is an         ~ */
+                             P[k]  = O[k] / k2[idx];      /* ~ boundary for P and O, but not A             ~ */
+                           }                              /* ~ so we must be careful not to clobber A      ~ */
+                                                          /* ~ while preserving boundary conditions        ~ */
+         }
+         else if ( rank == (np - 1) && k < (n3*n1n2c)){
+
+         if (k2[idx] != 0) { O[k]  = U0[k];               /* ~ last layer of highest process is an         ~ */
+                             P[k]  = O[k] / k2[idx];      /* ~ boundary for P and O, but not A             ~ */
+                           }                              /* ~ so we must be careful not to clobber A      ~ */
+
+         }
+
        A[k] = H[k] / ( one + ssqd*k2[idx] );
        J[k] = k2[idx] * A[k];                             /* ~ J = -delperp^2 A                            ~ */
 
        ++idx;
 
     }
-  }
+  } // predict
   else if(str_step.compare("correct") == 0 ) {            /* ~ do as above using predictor results         ~ */
     for (unsigned k = kstart; k < kstop; k++) {
 
       if (k % n1n2c == 0){ idx = 0;}
 
-      if (rank != 0 && rank != np-1) {
-//      O[k] = tO[k];
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//      P[k] = inv_k2[idx] * tO[k];                         /* ~ P, A, and J are now ready for use in        ~ */
-       if (k2[idx] != 0) { P[k] = tO[k] / k2[idx];}
-//     else              { P[k] = czero;}
-       else              { P[k] = chuge;}
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-      }
-      else {
-        if (rank == 0 && k >= n1n2c ) {
-//        if (rank == 0 && k < n1n2c ) {
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//        P[k] = inv_k2[idx] * tO[k];                     /* ~ P, A, and J are now ready for use in        ~ */
-       if (k2[idx] != 0) { P[k] = tO[k] / k2[idx];}
-//     else              { P[k] = czero;}
-       else              { P[k] = chuge;}
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-        }
-        else if (rank == np-1 && k < 4*n1n2c ) {
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-//        P[k] = inv_k2[idx] * tO[k];                     /* ~ P, A, and J are now ready for use in        ~ */
-       if (k2[idx] != 0) { P[k] = tO[k] / k2[idx];}
-//     else              { P[k] = czero;}
-       else              { P[k] = chuge;}
-/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
-        }
-      }
+         if (rank != (np - 1) ) {
+
+         if (k2[idx] != 0) { O[k]  = tU0[k];
+                             P[k]  = O[k] / k2[idx]; 
+                           }
+         }
+         else if ( rank == (np - 1) && k < (n3*n1n2c)) {
+
+         if (k2[idx] != 0) { O[k]  = tU0[k];
+                             P[k]  = O[k] / k2[idx]; 
+                           }
+
+         }
 
       A[k] = tH[k] / ( one + ssqd*k2[idx] );
       J[k] = k2[idx] * A[k];
 
       ++idx;
-
     }
-  }
+  } // correct
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -3083,11 +3327,148 @@ void redhallmhd::updateTimeInc( stack& run ) {
     }
 }
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+void redhallmhd::checkState( int pair, stack &run) {
+
+  int          rank  ; MPI_Comm_rank(MPI_COMM_WORLD ,   &rank  );
+  int          srun  ; run.palette.fetch(    "srun" ,   &srun  );
+  int          n1n2c ; run.stack_data.fetch( "n1n2c",   &n1n2c );
+  int          iu2   ; run.stack_data.fetch( "iu2"  ,   &iu2   );
+
+  unsigned     usize = iu2*n1n2c;
+  ComplexArray Q0(usize,czero);
+  ComplexArray Q1(usize,czero);
+
+  switch(pair) {
+    case(0) :
+      for (unsigned k = 0; k < usize; ++k) { Q0[k] = P[k];      Q1[k] = A[k];     }
+      break;
+    case(1) :
+      for (unsigned k = 0; k < usize; ++k) { Q0[k] = O[k];      Q1[k] = A[k];     }
+    break;
+    case(2) :
+      for (unsigned k = 0; k < usize; ++k) { Q0[k] = run.U0[k]; Q1[k] = run.U1[k];}
+    break;
+  }
+
+  std::string str_srun = static_cast<std::ostringstream*>( &(std::ostringstream() << srun)  ) -> str();
+  std::string str_rank = static_cast<std::ostringstream*>( &(std::ostringstream() << rank)  ) -> str();
+  std::string state_pa = "state_pa_rnk-" + str_rank + "_srun-" + str_srun;
+  const char *c_state_pa;
+  RealVar next;
+  c_state_pa           = state_pa.c_str();
+  std::ofstream ofs;
+
+  if (rank == 0 ) {
+    std::cout << "checkState: smallish = " << smallish << std::endl;
+  }
+
+  ofs.open( c_state_pa, std::ios::out );
+
+  for (unsigned k = 0; k < iu2*n1n2c;++k) {
+
+    if (std::abs(Q0[k].real()) > smallish ){
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << Q0[k].real() << " ";
+    }
+    else {
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero         << " ";
+    }
+    if (std::abs(Q0[k].imag()) > smallish ){
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << Q0[k].imag() << " ";
+    }
+    else {
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero         << " ";
+    }
+    if (std::abs(Q1[k].real()) > smallish ){
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << Q1[k].real() << " ";
+    }
+    else {
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero         << " ";
+    }
+    if (std::abs(Q1[k].imag()) > smallish ){
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << Q1[k].imag() << " ";
+    }
+    else {
+      ofs << std::setw(24) << std::right << std::setprecision(16) << std::scientific << zero         << " ";
+    }
+    ofs << std::endl;
+
+  }
+
+  ofs.close();
+}
+
 #endif
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void redhallmhd::physicsFinalize ( stack& run) {
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
+
+//  int rank; MPI_Comm_rank(MPI_COMM_WORLD,       &rank );
+//  int srun; run.palette.fetch(         "srun",  &srun );
+//
+//  if (srun == 1) { 
+//                   int iu2;   run.stack_data.fetch("iu2" ,  &iu2  );
+//                   int n1n2;  run.stack_data.fetch("n1n2",  &n1n2 );
+//                   int n1n2c; run.stack_data.fetch("n1n2c", &n1n2c);
+//
+//                   applyBC("predict", run);
+//
+////                 if ( rank == 0) { 
+////                                   std::cout << "physicsFinalize: BEFORE - O[8449]  = " << O[8449]  << std::endl;
+////                                   std::cout << "physicsFinalize: BEFORE - O[16639] = " << O[16639] << std::endl;
+
+////                                   std::cout << "physicsFinalize: BEFORE - A[8449]  = " << A[8449]  << std::endl;
+////                                   std::cout << "physicsFinalize: BEFORE - A[16639] = " << A[16639] << std::endl;
+////                                 }
+//                   
+//                   checkState(1,      run);
+
+//                   RealArray realO(iu2*n1n2,zero);
+//                   fftw.fftwReverseRaw(run, O, realO); 
+//                   fftw.fftwForwardRaw(run, realO, O); 
+
+//                   RealArray realA(iu2*n1n2,zero);
+//                   fftw.fftwReverseRaw(run, A, realA); 
+//                   fftw.fftwForwardRaw(run, realA, A); 
+//
+////                 if ( rank == 0) { 
+////                                   std::cout << "physicsFinalize: AFT 1  - O[8449]  = " << O[8449]  << std::endl;
+////                                   std::cout << "physicsFinalize: AFT 1  - O[16639] = " << O[16639] << std::endl;
+
+////                                   std::cout << "physicsFinalize: AFT 1  - A[8449]  = " << A[8449]  << std::endl;
+////                                   std::cout << "physicsFinalize: AFT 1  - A[16639] = " << A[16639] << std::endl;
+////                                 }
+//
+//                   ++srun; run.palette.reset( "srun", srun );
+//                   checkState(1, run);
+//
+//                   fftw.fftwReverseRaw(run, O, realO); 
+//                   fftw.fftwForwardRaw(run, realO, O); 
+//                   fftw.fftwReverseRaw(run, A, realA); 
+//                   fftw.fftwForwardRaw(run, realA, A); 
+//
+////                 if ( rank == 0) { 
+////                                   std::cout << "physicsFinalize: AFT 2  - O[8449]  = " << O[8449]  << std::endl;
+////                                   std::cout << "physicsFinalize: AFT 2  - O[16639] = " << O[16639] << std::endl;
+
+////                                   std::cout << "physicsFinalize: AFT 2  - A[8449]  = " << A[8449]  << std::endl;
+////                                   std::cout << "physicsFinalize: AFT 2  - A[16639] = " << A[16639] << std::endl;
+////                                 }
+//
+//                   ++srun; run.palette.reset( "srun", srun );
+//                   checkState(1, run);
+//
+//                   --srun; --srun; run.palette.reset( "srun", srun );
+//
+//                   if (rank == 0 ){std::cout << "physicsFinalize: srun = " << srun << std::endl;}
+//
+//                 }
+
+/* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
   finalizeBoundaries( run );
 
