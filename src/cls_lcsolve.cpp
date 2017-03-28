@@ -87,13 +87,13 @@ void lcsolve::Loop( stack& run ) {
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-    if ((srun == 1 && l == 24) || (srun == 2 && l == 0)) {
+//  if ((srun == 1 && l == 24) || (srun == 2 && l == 0)) {
 //  if (srun == 2 && l == 0 )  {
 
-      physics.checkState(2,           run         );
+//    physics.checkState(2,           run         );
 //    physics.trackEnergies(   t_cur, run         );
 
-    }
+//  }
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 

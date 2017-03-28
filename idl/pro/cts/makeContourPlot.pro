@@ -36,8 +36,8 @@ FUNCTION  makeContourPlot, n_slice,           $
   ELSE: i_qty          = -1
   ENDCASE
 
-  ip1                  = scan_parameters('ip1', 0, desc_label)
-  ip2                  = scan_parameters('ip2', 0, desc_label)
+  ip1                  = scan_parameters('p1', 0, desc_label)
+  ip2                  = scan_parameters('p2', 0, desc_label)
   
   n1                   = 2^ip1
   n2                   = 2^ip2   
@@ -51,6 +51,9 @@ FUNCTION  makeContourPlot, n_slice,           $
   Q                    = REFORM(SLB[*,i_qty], n1, n2)
   XX                   = REFORM(SLB[*,0    ], n1, n2)
   YY                   = REFORM(SLB[*,1    ], n1, n2)
+
+  xmin                 = MIN(XX)
+  xmax                 = MAX(XX)
 
   X                    = REFORM(XX[0,*])
   Y                    = REFORM(YY[*,0])
@@ -76,15 +79,8 @@ FUNCTION  makeContourPlot, n_slice,           $
   Y                    = YY
   Q                    = QQ
 
-  xmin                 = MIN(X)
-  xmax                 = MAX(X)
-
-  x_range              = [xmin, xmax]
-
   ymin                 = MIN(Y)
   ymax                 = MAX(Y)
-
-  y_range              = [ymin, ymax]
 
   size_q               = SIZE(Q,/DIMENSIONS)
 
@@ -127,6 +123,15 @@ FUNCTION  makeContourPlot, n_slice,           $
   ctr_thick            = INTARR(size_q_cntrs)
   ctr_thick[*]         =  1.5
 
+  qmax                 = MAX(Q)
+  qmin                 = MIN(Q)
+  xmax                 = MAX(X)
+  xmin                 = MIN(X)
+  ymax                 = MAX(Y)
+  ymin                 = MIN(Y)
+  cmax                 = MAX(Q_CNTRS)
+  cmin                 = MIN(Q_CNTRS)
+  
   QCont                = OBJ_NEW( 'IDLgrContour',            $
                                    DATA_VALUES = Q,          $
                                    GEOMX       = X,          $

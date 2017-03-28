@@ -72,20 +72,20 @@ redhallmhd::redhallmhd(stack& run ) {
                                                            /* ~ them and puts them into fourier space       ~ */
   initBoundaries(        run   );                          /* ~ initialization of quantities needed for     ~ */
 
-//OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
-//HfromA(                run   );
+  OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
+  HfromA(                run   );
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-//if (srun == 2) {
-//                 int iu2;  run.stack_data.fetch("iu2" , &iu2 );
-//                 int n1n2; run.stack_data.fetch("n1n2", &n1n2);
+  if (srun == 1) {
+                   int iu2;  run.stack_data.fetch("iu2" , &iu2 );
+                   int n1n2; run.stack_data.fetch("n1n2", &n1n2);
 
 //                 applyBC("predict", run);
 
   //               if ( rank == 0) { std::cout << "redhallmhd: P[1] = " << P[1] << std::endl;}
                    
-//                 checkState(2,      run);
+                   checkState(0,      run);
 
 //                 RealArray realP(iu2*n1n2,zero);
 //                 fftw.fftwReverseRaw(run, P, realP); 
@@ -110,11 +110,11 @@ redhallmhd::redhallmhd(stack& run ) {
 
 //                 if (rank == 0 ){std::cout << "redhallmhd: srun = " << srun << std::endl;}
 
-//               }
+                 }
 
 /* ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ TEST ~ */
 
-  OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
+//OfromP(                run   );                          /* ~ the data files contain both stream func. P  ~ */
                                                            /* ~ and vorticity O. For historical reasons,    ~ */
                                                            /* ~ U0 contains P after call to fftwForwardAll  ~ */
                                                            /* ~ but lcsolve assumes U0 contains O. This     ~ */
@@ -124,7 +124,7 @@ redhallmhd::redhallmhd(stack& run ) {
                                                            /* ~ retrieveOJ, so OfromP does a check that the ~ */
                                                            /* ~ values in U0 match the values in O.         ~ */
 
-  HfromA(                run   );
+//HfromA(                run   );
   evalValf(              run   );
   evalUmean(             run   );
   evalElls(              run   );
@@ -392,10 +392,10 @@ void redhallmhd::computeRealU( stack& run ) {
     }
   }
 
-  for (int i_f = 0; i_f < n_flds; ++i_f) {
+  for (  int i_f = 0; i_f < n_flds;     ++i_f) {
     for (int i_l = 1; i_l < n_lyrs + 1; ++i_l) {
     
-    for (int k = 0; k< n1n2; ++k) { U[k][i_l][i_f] = U[k][n3][i_f]; }
+    for (int   k = 0; k< n1n2; ++k) { U[k][i_l][i_f] = U[k][n3][i_f]; }
 
     }
   }
@@ -555,17 +555,15 @@ void redhallmhd::computeFourierU( stack& run ) {
 
      case(0) :
        idx            =        0 * (n2/2 + 1) + 1;
-       real_part      =  1.6e-03L;
+       real_part      =  1.0e-03L;
        imag_part      =  0.0L;
        tuple          = ComplexVar(real_part, imag_part);
-//     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        idx            =        1 * (n2/2 + 1);
-       real_part      = -1.6e-03L;
+       real_part      = -1.0e-03L;
        imag_part      =  0.0L;
-         tuple          = ComplexVar(real_part, imag_part);
-//     tuple.real(real_part); tuple.imag(imag_part);
+       tuple          = ComplexVar(real_part, imag_part);
        Cin[idx]       = tuple;
 
        idx            = (n1-1) * (n2/2 + 1);
@@ -583,7 +581,6 @@ void redhallmhd::computeFourierU( stack& run ) {
        real_part      =     0.1L;
        imag_part      =     0.0L;
        tuple          = ComplexVar(real_part, imag_part);
-//     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        break;
@@ -601,12 +598,9 @@ void redhallmhd::computeFourierU( stack& run ) {
 
   }
 
-  for (  int i_f = 0; i_f < n_flds; ++i_f) {
-
-    for (int i_l = 1; i_l < n_lyrs ; ++i_l) {
-    
-    for (int k   = 0; k< n1n2; ++k) { U[k][i_l][i_f] = U[k][n3][i_f]; }
-
+  for (     int i_f = 0; i_f < n_flds; ++i_f) {
+    for (   int i_l = 1; i_l < n3;     ++i_l) {
+      for ( int k   = 0;   k < n1n2;   ++k)   { U[k][i_l][i_f] = U[k][n3][i_f]; }
     }
   }
 }

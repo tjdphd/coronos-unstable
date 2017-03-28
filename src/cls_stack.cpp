@@ -360,22 +360,22 @@ void stack::writeUData() {
 
       }
 
-      ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_p << " ";
-      ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_a << " ";
+      ofs   << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_p << " ";
+      ofs   << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_a << " ";
 
       if (iu3 < 3)  {
 
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_o << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_j << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_o << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_j << " ";
 
       }
 
       if (iu3 > 2)  {
 
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_bz << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_vz << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_o  << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_j  << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_bz << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_vz << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_o  << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_j  << " ";
 
       }
 

@@ -7,6 +7,7 @@ PRO cts,  desc_label,       $
           PREFIX  = prefix, $
           N_CNTRS = n_cntrs
 
+
   total_steps        = last_step - first_step + 1
 
   IF (total_steps LT 100) THEN total_steps = 999
@@ -17,8 +18,8 @@ PRO cts,  desc_label,       $
   IF (NOT KEYWORD_SET(PREFIX) ) THEN prefix   = 'rmct2'
   IF (NOT KEYWORD_SET(N_CNTRS)) THEN n_cntrs  = 31
  
-  ip1                = scan_parameters('ip1', 0, desc_label)
-  ip2                = scan_parameters('ip2', 0, desc_label)
+  ip1                = scan_parameters('p1', 0, desc_label)
+  ip2                = scan_parameters('p2', 0, desc_label)
   n1                 = 2^ip1
   n2                 = 2^ip2
   KK                 = calcKK(n1,n2)
@@ -51,8 +52,8 @@ PRO cts,  desc_label,       $
 
       PRINT, 'glb_ext: WARNING - could not open file ', in_file, '. Assuming no global minmax given...'
 
-      ip1               = scan_parameters('ip1', 0, desc_label)
-      ip2               = scan_parameters('ip2', 0, desc_label)
+      ip1               = scan_parameters('p1', 0, desc_label)
+      ip2               = scan_parameters('p2', 0, desc_label)
 
       n1                = 2^ip1
       n2                = 2^ip2
@@ -91,6 +92,7 @@ PRO cts,  desc_label,       $
         Q_CNTRS = set_contour_levels(desc_label, qty, n_slice, n_cntrs, first_step, last_step, global_qty_minmax)
     ENDIF
 
+    PRINT, "CTS: I  = ", I
     dummy       = makeContourPlot( n_slice,           $
                                    qty,               $
                                    I,                 $
