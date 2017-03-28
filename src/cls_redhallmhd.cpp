@@ -392,10 +392,10 @@ void redhallmhd::computeRealU( stack& run ) {
     }
   }
 
-  for (int i_f = 0; i_f < n_flds; ++i_f) {
+  for (  int i_f = 0; i_f < n_flds;     ++i_f) {
     for (int i_l = 1; i_l < n_lyrs + 1; ++i_l) {
     
-    for (int k = 0; k< n1n2; ++k) { U[k][i_l][i_f] = U[k][n3][i_f]; }
+    for (int   k = 0; k< n1n2; ++k) { U[k][i_l][i_f] = U[k][n3][i_f]; }
 
     }
   }
@@ -558,14 +558,12 @@ void redhallmhd::computeFourierU( stack& run ) {
        real_part      =  1.6e-03L;
        imag_part      =  0.0L;
        tuple          = ComplexVar(real_part, imag_part);
-//     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        idx            =        1 * (n2/2 + 1);
        real_part      = -1.6e-03L;
        imag_part      =  0.0L;
-         tuple          = ComplexVar(real_part, imag_part);
-//     tuple.real(real_part); tuple.imag(imag_part);
+       tuple          = ComplexVar(real_part, imag_part);
        Cin[idx]       = tuple;
 
        idx            = (n1-1) * (n2/2 + 1);
@@ -583,7 +581,6 @@ void redhallmhd::computeFourierU( stack& run ) {
        real_part      =     0.1L;
        imag_part      =     0.0L;
        tuple          = ComplexVar(real_part, imag_part);
-//     tuple.real(real_part); tuple.imag(imag_part);
        Cin[idx]       = tuple;
 
        break;
@@ -601,12 +598,9 @@ void redhallmhd::computeFourierU( stack& run ) {
 
   }
 
-  for (  int i_f = 0; i_f < n_flds; ++i_f) {
-
-    for (int i_l = 1; i_l < n_lyrs ; ++i_l) {
-    
-    for (int k   = 0; k< n1n2; ++k) { U[k][i_l][i_f] = U[k][n3][i_f]; }
-
+  for (     int i_f = 0; i_f < n_flds; ++i_f) {
+    for (   int i_l = 1; i_l < n3;     ++i_l) {
+      for ( int k   = 0;   k < n1n2;   ++k)   { U[k][i_l][i_f] = U[k][n3][i_f]; }
     }
   }
 }

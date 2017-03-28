@@ -201,22 +201,22 @@ endif                                         # so we create it.
 # Next we load the idl module, tell it where to find IDL sources and
 # tell it the name of the batch script we want it to execute
 #
-######################################
-                                     #
-source /etc/profile.d/modules.csh    #
-module load idl                      # load idl onto the compute node
-                                     #
-set SRCDIR=$PWD/idl/pro/ff_time_series   # idl script source directory
-#setenv IDL_PATH $IDL_DIR/lib:$SRCDIR #
-setenv IDL_PATH $IDLHOME/lib:$SRCDIR        #
-setenv IDL_STARTUP $PWD/idl/bin/ffts_batch   # idl batch script to execute
-
-echo "IDL_STARTUP =" $IDL_STARTUP
-
-                                     #
-idl                                  # invoke idl
-                                     #
-######################################
+############################################
+                                           #
+source /etc/profile.d/modules.csh          #
+module load idl                            # load idl onto the compute node
+                                           #
+set SRCDIR=$PWD/idl/pro/ff_time_series     # idl script source directory
+                                           #
+setenv IDL_PATH $IDLHOME/lib:$SRCDIR       #
+setenv IDL_STARTUP $PWD/idl/bin/ffts_batch # idl batch script to execute
+                                           #
+echo "IDL_STARTUP =" $IDL_STARTUP          #
+                                           #
+                                           #
+idl                                        # invoke idl
+                                           #
+############################################
 #
 # Now clean things up.
 #
