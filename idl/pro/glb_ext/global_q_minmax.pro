@@ -16,8 +16,8 @@ FUNCTION global_q_minmax, i_qty, first_step, last_step, first_slice, last_slice,
 
   ENDIF
 
-  ip1                                          = scan_parameters('ip1', 0, label)
-  ip2                                          = scan_parameters('ip2', 0, label)
+  ip1                                          = scan_parameters('p1', 0, label)
+  ip2                                          = scan_parameters('p2', 0, label)
   n1                                           = 2^ip1
   n2                                           = 2^ip2
 
