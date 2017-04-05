@@ -5,17 +5,16 @@ FUNCTION fetch_datafile, n_slice, step, desc_label
    n3           = scan_parameters('p3',       0, desc_label)
    mp           = scan_parameters('np',       0, desc_label)
    zl           = scan_parameters('zl',       0, desc_label)
-   data_dir     = scan_parameters('data_dir', 0, desc_label)
+
    prefix       = scan_parameters('prefix',   0, desc_label)
+   data_dir     = scan_parameters('data_dir', 0, desc_label)
 
    x_res        = 2^ip1
    y_res        = 2^ip2   
    z_res        = (n3 * mp)
    
-   z_res        = (n3 * mp)
-   
    IF (n_slice EQ 1) THEN BEGIN
-      n_slc_file = 0
+     n_slc_file = 0
    ENDIF ELSE BEGIN
        IF ( n3 GT 1) THEN BEGIN
          s           = n_slice - 1
