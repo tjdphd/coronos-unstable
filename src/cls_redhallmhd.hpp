@@ -85,7 +85,7 @@ class redhallmhd
   void retrieveOJ (                     stack& run);
   void OfromP(                          stack& run );                 /* ~ Obtain vorticity from P                   ~ */
   void HfromA(                          stack& run );                 /* ~ Obtain H from A                           ~ */
-  void JfromA(                          stack& run );                 /* ~ Obtain J from A                           ~ */
+//void JfromA(                          stack& run );                 /* ~ Obtain J from A                           ~ */
 
 
   void applyFootPointDrivingBC(std::string str_stp, stack& run );     /* ~ "pevol"                                   ~ */
@@ -93,6 +93,7 @@ class redhallmhd
 
   void finalizeBoundaries(              stack& run );
   void finalizeFootPointDriving(        stack& run );                 /* ~                                           ~ */
+  void finalizeLineTiedBoundaries(      stack& run );                 /* ~                                           ~ */
 
   public:
 
@@ -139,7 +140,7 @@ class redhallmhd
   int         nk;
 
   void updatePAOJ( std::string str_step, stack& run );
-  void checkState( int pair, stack &run); 
+  void checkState( int pair, stack &run, std::string roc); 
   void applyBC(    std::string str_step, stack& run );                 /* ~ Apply Boundary Conditions at current step ~ */
   void updateTimeInc(                    stack& run );
 

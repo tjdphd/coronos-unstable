@@ -156,41 +156,57 @@ void fft::fftwKInit(stack& run) {               /* ~ initialize the wave number 
       ndx     = (i * n2h) + j;
       kx[ndx] = kp[j];
       ky[ndx] = kp[i];
+
     }
   }
 
-  for (int l = 0; l < nc; ++l) {
+//for (int i = 0; i < n1; i++) {
+//  for (int j = 0; j < n1h; j++) {
 
-        if (l  < (nc - (n2/2)-1)) {
-          if ((l == 0) || (l %((n2/2)+1) !=0) ){
-            ; // do nothing
-          }
-          else {
-                 i_cpy    = (l/((n2/2)+1));
-                 if ( i_cpy < n2/2 ) {
-                   kx[l] = kx[i_cpy];
-                   ky[l] = ky[i_cpy];
-                 }
-          }
-        }
-        else {
-                 i_cpy    = (l - nc + n2/2+2);
-               if (i_cpy < 0 || i_cpy > n2/2+1) {
-                 std::cout << "fftwKInit: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
-               }
-               else {
+//    ndx     = (i * n2h) + j;
+//    k2[ndx] = (kx[ndx] * kx[ndx]) +  (ky[ndx] * ky[ndx]);
 
-                   kx[l] = kx[i_cpy];
-                   ky[l] = ky[i_cpy];
-               }
-        }
-  }
+//    if (std::abs(k2[ndx]) > teensy) inv_k2[ndx] = one / k2[ndx];
+//    else inv_k2[ndx] = zero;
 
-  kp.resize(0);
+//  }
+//}
+
+//for (int l = 0; l < nc; ++l) {
+
+//      if (l  < (nc - (n2/2)-1)) {
+//        if ((l == 0) || (l %((n2/2)+1) !=0) ){
+//          ; // do nothing
+//        }
+//        else {
+//               i_cpy    = (l/((n2/2)+1));
+//               if ( i_cpy < n2/2 ) {
+//                 kx[l] = kx[i_cpy];
+//                 ky[l] = ky[i_cpy];
+//               }
+//        }
+//      }
+//      else {
+//               i_cpy    = (l - nc + n2/2+2);
+//             if (i_cpy < 0 || i_cpy > n2/2+1) {
+//               std::cout << "fftwKInit: WARNING - i_cpy = "             << i_cpy << " for l = " << l <<  std::endl;
+//             }
+//             else {
+
+//                 kx[l] = kx[i_cpy];
+//                 ky[l] = ky[i_cpy];
+//             }
+//      }
+//}
+
+//kp.resize(0);
 
 /* ~ TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~  TEST ~ */
 
-  for ( int l = 0; l < nc; ++ l) { k2[l] = (kx[l] * kx[l]) + (ky[l] * ky[l]); }
+  for ( int l = 0; l < nc; ++ l) { k2[l] = (kx[l] * kx[l]) + (ky[l] * ky[l]); 
+                                   if (k2[l] > teensy) { inv_k2[l] = one /  k2[l]; }
+                                   else                { inv_k2[l] = zero;         }
+                                 }
 //for (int i = 0; i < n1; i++) {
 //  for (int j = 0; j < n1h; j++) {
 
@@ -356,10 +372,9 @@ void fft::fftwForwardAll( stack& run ) {
         break;
       case(3) :  
         for (unsigned k = 0; k < nc;   k++) { U3[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
-        U2[(strt_idx)].real()=zero;
+        U3[(strt_idx)].real()=zero;
         break;
       }
-
     }
   }
 }
@@ -704,16 +719,11 @@ void fft::fftwReverseIC(ComplexArray& Cin, RealArray& Rout ) {
   int n1n2c; n1n2c   = Cin.size();
   int n1n2;  n1n2    = Rout.size();
 
-  RealVar scale      = ((RealVar) (n1n2));
-  RealVar one_ov_scl = one / scale;
-
-  Cin[0].real()      = zero;
+//Cin[0].real()      = zero;
 
   for (unsigned k = 0 ; k < n1n2c; k++) { cplx_in[k]  = czero;        }
   for (unsigned k = 0 ; k < n1n2 ; k++) { r_out[k]    = zero;         }
   for (unsigned k = 0 ; k < n1n2c; k++) { cplx_in[k]  = Cin[k];       }
-
-  cplx_in[0].real()  = zero;
 
 #ifdef LD_PRECISION_H
   fftwl_execute(p_lay_rev);
@@ -746,7 +756,7 @@ void fft::fftwForwardIC( RealArray& Rin, ComplexArray& Cout) {
 
   for (unsigned k = 0 ; k < n1n2c; k++) {Cout[k]     = scale * cplx_out[k]*rt[k]; }
 
-  Cout[0].real()   = zero;
+//Cout[0].real()   = zero;
 
 }
 

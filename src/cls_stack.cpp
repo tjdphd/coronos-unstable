@@ -341,7 +341,9 @@ void stack::writeUData() {
       next_o               = AUX[to_row_maj_idx][slab_index][0];
       ++point_count;
       next_a               =   U[to_row_maj_idx][slab_index][1];
+/* ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ */
       next_j               = AUX[to_row_maj_idx][slab_index][1];
+/* ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ */
 
 //    if (next_p <= teensy) {next_p = zero;}
 //    if (next_o <= teensy) {next_o = zero;}
