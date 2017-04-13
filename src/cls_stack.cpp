@@ -120,7 +120,8 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
   if (model.compare("hall") == 0) iu3 = 4;
 
   RealVar dz       = zl/((RealVar)(n3*np));         /* ~ layer separation in z                     ~ */
-  int izres        = (int) (n3 * np)/zl;            /* ~ integer effective resolution in z         ~ */
+//int izres        = (int) (n3 * np)/zl;            /* ~ integer effective resolution in z         ~ */
+  int izres        = (int) (n3 * np);               /* ~ integer effective resolution in z         ~ */
 
   std::string xres = static_cast<std::ostringstream*>( &(std::ostringstream() << n1   ) ) -> str();
   std::string yres = static_cast<std::ostringstream*>( &(std::ostringstream() << n2   ) ) -> str();

@@ -180,25 +180,44 @@ void redhallmhd::initU( stack& run ) {
 
   if (calcsvz == 1) {
 
-    int isp; physics_data.fetch(    "isp", &isp);
-    int n1;  run.stack_data.fetch(   "n1", &n1 );
-    int n2;  run.stack_data.fetch(  "n2",  &n2 );
+    int isp;    physics_data.fetch(    "isp", &isp);
+    int n1;     run.stack_data.fetch(   "n1", &n1 );
+    int n2;     run.stack_data.fetch(  "n2",  &n2 );
+    RealVar kc; run.palette.fetch(     "kc",  &kc );
 
     int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank );
 
+    RealArray& k2=run.k2;
 
-    dk     = sqrt(two)*(pi * n1) / isp;
+    int size_k2=k2.size();
+    for (unsigned k = 0; k< size_k2-1;++k ) { if (k > 0 && std::sqrt(k2[k]) >= kc) { kb = std::sqrt(k2[k]); break;}}
+
+
+//  dk     = sqrt(two)*(pi * n1) / isp;
+//
+    dk     = (pi*n1) / ((RealVar) isp);
+
     dk_m1  = one / dk;
-
-    kb     = two * pi;
     kf     = kb + (isp * dk);
 
-    ikb    = (int) (kb * dk_m1);
-    ikf    = (int) (kf * dk_m1);
+//  kb     = two * pi;
+
+    ikb    = 1 + ((int) (kb * dk_m1));
+    ikf    = 1 + ((int) (kf * dk_m1));
+//  ikb    = ((int) (kb * dk_m1));
+//  ikf    = ((int) (kf * dk_m1));
 
     nk     = ikf - ikb + 1;
 
-    RealArray   SpcRecord; SpcRecord.assign(7,zero);
+//  std::cout << "initU: ikb = " << ikb << std::endl;
+//  std::cout << "initU: ikf = " << ikf << std::endl;
+//  std::cout << "initU: isp = " << isp << std::endl;
+//  std::cout << "initU: nk  = " << nk  << std::endl;
+//  std::cout << "initU: kb  = " << kb  << std::endl;
+//  std::cout << "initU: kf  = " << kf  << std::endl;
+//  std::cout << "initU: dk  = " << dk  << std::endl;
+
+    RealArray   SpcRecord; SpcRecord.assign(11,zero);
     Real2DArray SpcLayer;  SpcLayer.assign(n3,SpcRecord);
     SpcVsZ.assign(isp+1,SpcLayer);
     ke.assign(isp+1,zero);
@@ -257,10 +276,15 @@ void redhallmhd::init_physics_data( stack& run ) {
   int calcsvz; run.palette.fetch("calcsvz", &calcsvz);
 
   if (calcsvz == 1 ) {
-    int n2;      run.stack_data.fetch("n2", &n2);
-    int isp = n2/2;
+
+    int     n1;  run.stack_data.fetch("n1", &n1);
+    int     n2;  run.stack_data.fetch("n2", &n2);
+    int isp = n1/2;
+       
+
     padjust.assign("rfx");
     pname.assign("isp"); physics_data.emplace(pname, isp, padjust);
+
   }
 
   if (bdrys > 0) {
@@ -1253,7 +1277,7 @@ void redhallmhd::OfromP( stack& run )  {
        O[k] = U0[k];
       ++idx;
     }
-    std::cout << "this should not print" << std::endl;
+
   }
   else {
   for (unsigned k = kstart; k <kstop; k++) {U0[k] = O[k];}  /* ~ O already initialized just needs to be placed in U0  ~ */
@@ -1297,7 +1321,7 @@ void redhallmhd::HfromA( stack& run )  {
 
       ++idx;
     }                                                         /* ~ preserve flux function in A                ~ */
-    std::cout << "this should not print" << std::endl;
+//  std::cout << "this should not print" << std::endl;
   }
   else {
     for (unsigned k  = kstart; k < kstop; k++) { 
@@ -1855,13 +1879,17 @@ void redhallmhd::trackPowerSpectra( RealVar t_cur, stack& run ) {
      int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
      int   n3; run.palette.fetch("p3",   &n3    );
 
-     static const int i_k     = 0;
-     static const int i_spe   = 1;
-     static const int i_sae   = 2;
-     static const int i_ts    = 3;
-     static const int i_szp   = 4;
-     static const int i_szm   = 5;
-     static const int i_tz    = 6;
+     static const int i_k     =  0;
+     static const int i_spe   =  1;
+     static const int i_sae   =  2;
+     static const int i_ts    =  3;
+     static const int i_szp   =  4;
+     static const int i_szm   =  5;
+     static const int i_tz    =  6;
+     static const int i_pf    =  7;
+     static const int i_af    =  8;
+     static const int i_zpf   =  9;
+     static const int i_zmf   = 10;
 
      int n1;    run.stack_data.fetch("n1",    &n1);
      int n2;    run.stack_data.fetch("n2",    &n2);
@@ -1875,33 +1903,53 @@ void redhallmhd::trackPowerSpectra( RealVar t_cur, stack& run ) {
      RealArray szp;
      RealArray szm;
 
+//   RealArray pef;
+//   RealArray aef;
+//   RealArray zpf;
+//   RealArray zmf;
+
      assert(n1n2c == ksize);
 
      int isp;physics_data.fetch("isp", &isp);
 
      for (unsigned l = 1; l < n3 + 1; ++l ) {
 
-       spe.assign(isp+1,zero);
-       sae.assign(isp+1,zero);
-       szp.assign(isp+1,zero);
-       szm.assign(isp+1,zero);
+       spe.assign(isp+2,zero);
+       sae.assign(isp+2,zero);
+       szp.assign(isp+2,zero);
+       szm.assign(isp+2,zero);
+
+//     pef.assign(isp+1,zero);
+//     aef.assign(isp+1,zero);
+//     zpf.assign(isp+1,zero);
+//     zmf.assign(isp+1,zero);
+
+       
 
        int m;
        int idx;
 
        for (unsigned k = 0; k < n1n2c; ++k) {
 
-         m       = sqrt(k2[k]) * dk_m1;
-         idx     = (l*n1n2c) + k;
+         if (sqrt(k2[k]) >= kb && sqrt(k2[k]) <= kf) {
+           m       = sqrt(k2[k]) * dk_m1;
+           idx     = (l*n1n2c) + k;
 
-         spe[m]  = spe[m] + k2[k] * ( pow(std::norm(P[idx]),         2) );
-         sae[m]  = sae[m] + k2[k] * ( pow(std::norm(A[idx]),         2) );
-         szp[m]  = szp[m] + k2[k] * ( pow(std::norm(P[idx] + A[idx]),2) );
-         szm[m]  = szm[m] + k2[k] * ( pow(std::norm(P[idx] - A[idx]),2) );
+           if ( m <= isp+1 ) {
 
+             spe[m]  = spe[m] + k2[k] * ( pow(std::norm(P[idx]),         2) );
+             sae[m]  = sae[m] + k2[k] * ( pow(std::norm(A[idx]),         2) );
+             szp[m]  = szp[m] + k2[k] * ( pow(std::norm(P[idx] + A[idx]),2) );
+             szm[m]  = szm[m] + k2[k] * ( pow(std::norm(P[idx] - A[idx]),2) );
+
+           }
+
+           else { std::cout << "trackPowerSpectra: WARNING - index m = " << m << " this exceeds upper limit isp + 1 = " << isp + 1 << std::endl;}        
+
+         }
        }
   
-         for (unsigned j = 0; j < isp+1; ++j) {
+         for (unsigned j = 0; j < isp + 1; ++j) {
   
            spe[j] = two * spe[j] * dk_m1;
            sae[j] = two * sae[j] * dk_m1;
@@ -1916,6 +1964,19 @@ void redhallmhd::trackPowerSpectra( RealVar t_cur, stack& run ) {
            SpcVsZ[j][l-1][i_szm] = SpcVsZ[j][l-1][i_szm] + szm[j];
            SpcVsZ[j][l-1][i_tz ] = SpcVsZ[j][l-1][i_tz ] + szp[j] + szm[j];
   
+         }
+
+         for (unsigned j = 0; j < nk - 1;++j) {
+
+           if (spe[ikb+j] == zero) { SpcVsZ[j][l-1][i_pf ] = SpcVsZ[j][l-1][i_pf ] + ((RealVar) (-300.0)); }
+           else                    { SpcVsZ[j][l-1][i_pf ] = SpcVsZ[j][l-1][i_pf ] + std::log10(spe[j]  ); }
+           if (sae[ikb+j] == zero) { SpcVsZ[j][l-1][i_af ] = SpcVsZ[j][l-1][i_af ] + ((RealVar) (-300.0)); }
+           else                    { SpcVsZ[j][l-1][i_af ] = SpcVsZ[j][l-1][i_af ] + std::log10(sae[j]  ); }
+           if (szp[ikb+j] == zero) { SpcVsZ[j][l-1][i_zpf] = SpcVsZ[j][l-1][i_zpf] + ((RealVar) (-300.0)); }
+           else                    { SpcVsZ[j][l-1][i_zpf] = SpcVsZ[j][l-1][i_zpf] + std::log10(szp[j]  ); }
+           if (szm[ikb+j] == zero) { SpcVsZ[j][l-1][i_zmf] = SpcVsZ[j][l-1][i_zmf] + ((RealVar) (-300.0)); }
+           else                    { SpcVsZ[j][l-1][i_zmf] = SpcVsZ[j][l-1][i_zmf] + std::log10(szm[j]  ); }
+
          }
     }
   }
