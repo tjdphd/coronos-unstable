@@ -1968,14 +1968,14 @@ void redhallmhd::trackPowerSpectra( RealVar t_cur, stack& run ) {
 
          for (unsigned j = 0; j < nk - 1;++j) {
 
-           if (spe[ikb+j] == zero) { SpcVsZ[j][l-1][i_pf ] = SpcVsZ[j][l-1][i_pf ] + ((RealVar) (-300.0)); }
-           else                    { SpcVsZ[j][l-1][i_pf ] = SpcVsZ[j][l-1][i_pf ] + std::log10(spe[j]  ); }
-           if (sae[ikb+j] == zero) { SpcVsZ[j][l-1][i_af ] = SpcVsZ[j][l-1][i_af ] + ((RealVar) (-300.0)); }
-           else                    { SpcVsZ[j][l-1][i_af ] = SpcVsZ[j][l-1][i_af ] + std::log10(sae[j]  ); }
-           if (szp[ikb+j] == zero) { SpcVsZ[j][l-1][i_zpf] = SpcVsZ[j][l-1][i_zpf] + ((RealVar) (-300.0)); }
-           else                    { SpcVsZ[j][l-1][i_zpf] = SpcVsZ[j][l-1][i_zpf] + std::log10(szp[j]  ); }
-           if (szm[ikb+j] == zero) { SpcVsZ[j][l-1][i_zmf] = SpcVsZ[j][l-1][i_zmf] + ((RealVar) (-300.0)); }
-           else                    { SpcVsZ[j][l-1][i_zmf] = SpcVsZ[j][l-1][i_zmf] + std::log10(szm[j]  ); }
+           if (spe[ikb+j] == zero) { SpcVsZ[j][l-1][i_pf ] = SpcVsZ[j][l-1][i_pf ] + ((RealVar) (-300.0)   ); }
+           else                    { SpcVsZ[j][l-1][i_pf ] = SpcVsZ[j][l-1][i_pf ] + std::log10(spe[ikb+j] ); }
+           if (sae[ikb+j] == zero) { SpcVsZ[j][l-1][i_af ] = SpcVsZ[j][l-1][i_af ] + ((RealVar) (-300.0)   ); }
+           else                    { SpcVsZ[j][l-1][i_af ] = SpcVsZ[j][l-1][i_af ] + std::log10(sae[ikb+j] ); }
+           if (szp[ikb+j] == zero) { SpcVsZ[j][l-1][i_zpf] = SpcVsZ[j][l-1][i_zpf] + ((RealVar) (-300.0)   ); }
+           else                    { SpcVsZ[j][l-1][i_zpf] = SpcVsZ[j][l-1][i_zpf] + std::log10(szp[ikb+j] ); }
+           if (szm[ikb+j] == zero) { SpcVsZ[j][l-1][i_zmf] = SpcVsZ[j][l-1][i_zmf] + ((RealVar) (-300.0)   ); }
+           else                    { SpcVsZ[j][l-1][i_zmf] = SpcVsZ[j][l-1][i_zmf] + std::log10(szm[ikb+j] ); }
 
          }
     }
@@ -2326,7 +2326,7 @@ void redhallmhd::reportPowerSpectra ( stack& run ) {
            ofs << std::setw(24) << std::right << std::setprecision(12) << std::scientific << z[l+1] << std::endl;
 
            for (unsigned r=0; r < isp+1; ++r) {
-             for (unsigned s=0; s < 7; ++s){
+             for (unsigned s=0; s < 11; ++s){
                if (s > 0) { SpcVsZ[r][l][s] = nw_m1 * SpcVsZ[r][l][s]; }
                  ofs << std::setw(24) << std::right << std::setprecision(12) << std::scientific << SpcVsZ[r][l][s] << " ";
              }
