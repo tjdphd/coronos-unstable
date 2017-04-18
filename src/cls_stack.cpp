@@ -120,7 +120,8 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
   if (model.compare("hall") == 0) iu3 = 4;
 
   RealVar dz       = zl/((RealVar)(n3*np));         /* ~ layer separation in z                     ~ */
-  int izres        = (int) (n3 * np)/zl;            /* ~ integer effective resolution in z         ~ */
+//int izres        = (int) (n3 * np)/zl;            /* ~ integer effective resolution in z         ~ */
+  int izres        = (int) (n3 * np);               /* ~ integer effective resolution in z         ~ */
 
   std::string xres = static_cast<std::ostringstream*>( &(std::ostringstream() << n1   ) ) -> str();
   std::string yres = static_cast<std::ostringstream*>( &(std::ostringstream() << n2   ) ) -> str();
@@ -341,7 +342,9 @@ void stack::writeUData() {
       next_o               = AUX[to_row_maj_idx][slab_index][0];
       ++point_count;
       next_a               =   U[to_row_maj_idx][slab_index][1];
+/* ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ */
       next_j               = AUX[to_row_maj_idx][slab_index][1];
+/* ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ TEST  ~ */
 
 //    if (next_p <= teensy) {next_p = zero;}
 //    if (next_o <= teensy) {next_o = zero;}
@@ -360,22 +363,22 @@ void stack::writeUData() {
 
       }
 
-      ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_p << " ";
-      ofs   << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_a << " ";
+      ofs   << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_p << " ";
+      ofs   << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_a << " ";
 
       if (iu3 < 3)  {
 
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_o << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_j << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_o << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_j << " ";
 
       }
 
       if (iu3 > 2)  {
 
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_bz << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_vz << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_o  << " ";
-        ofs << std::setw(26) << std::right << std::setprecision(20) << std::scientific << next_j  << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_bz << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_vz << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_o  << " ";
+        ofs << std::setw(26) << std::right << std::setprecision(18) << std::scientific << next_j  << " ";
 
       }
 

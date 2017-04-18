@@ -168,7 +168,7 @@ then
 #
   echo "#!/bin/sh"                                                                            > $jobr
   echo " "                                                                                   >> $jobr
-  echo "#SBATCH -A $project"                                                                 >> $jobr
+# echo "#SBATCH -A $project"                                                                 >> $jobr
   echo "#SBATCH --job-name=coronos"                                                          >> $jobr
   echo "#SBATCH --output=tjd.%j.%N.out"                                                      >> $jobr
   echo "#SBATCH --partition=$partition"                                                      >> $jobr
@@ -184,8 +184,8 @@ then
   echo " "                                                                                   >> $jobr
   echo "cd $cur_dir"                                                                         >> $jobr
   echo "srun -l /bin/hostname | sort -n | awk '{print \$2}' > ./nodes.\$SLURM_ARRAY_TASK_ID" >> $jobr
-# echo "time mpirun -np 8 -machinefile ./nodes.\$SLURM_JOB_ID ./src/coronos"                 >> $jobr
-  echo "time ibrun -v ./src/coronos"                                                         >> $jobr
+  echo "time mpirun -np $np -machinefile ./nodes.\$SLURM_ARRAY_TASK_ID ./src/coronos"        >> $jobr
+# echo "time ibrun -v ./src/coronos"                                                         >> $jobr
   echo " "                                                                                   >> $jobr
   echo "#EOF "                                                                               >> $jobr
   chmod u+x $jobr
