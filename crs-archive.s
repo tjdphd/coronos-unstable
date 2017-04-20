@@ -183,7 +183,10 @@ do
         cp $energy_tracking_file     $subdir_abspath'/'$data_dir
 
         cp $sr_input_files$j         $subdir_abspath'/'$data_dir
+        if [ -e "$field_data_files$j" ]
+        then
         cp $field_data_files$j       $subdir_abspath'/'$data_dir
+        fi
         cp $field_data_files$j'.gz'  $subdir_abspath'/'$data_dir
 
         if [ "$j" -gt 0 ]
@@ -200,7 +203,14 @@ do
 #
           if [ "$bdrys" -ne 0 ]
           then
+            if [ -e "$rand_num_tracking_file$j" ]
+            then
+            cp $rand_num_tracking_file$j       $subdir_abspath
+            fi
+            if [ -e "$rand_num_tracking_file$j.tgz" ]
+            then
             cp $rand_num_tracking_file$j'.tgz' $subdir_abspath
+            fi
           fi
         fi
         
