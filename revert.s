@@ -129,6 +129,6 @@ fi
 
 cmp_data_out=$data_prefix???.o$run_label*.gz
 
-if [ -e $edata_prefix ]; then rm  $edata_prefix; fi
-if [ -e $cmp_data_out ]; then rm  $cmp_data_out; fi
-if [ -e "crs_init.in" ]; then cp "crs_init.in" "coronos.in"; fi
+if [ -e "$edata_prefix" ]; then rm  $edata_prefix; fi
+if [ -e "$cmp_data_out" ]; then rm  $cmp_data_out; fi
+if [ -e "crs_init.in"   ]; then cp "crs_init.in" "coronos.in"; fi
