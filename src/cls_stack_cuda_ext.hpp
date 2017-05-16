@@ -37,7 +37,7 @@
 
 class stack_cuda_ext
 {
-  friend class stack;
+//  friend class stack;
 
   private:
 

@@ -79,7 +79,6 @@ class stack : public canvas
 
   void     zeroU();                           /* ~ a convenience function                  ~ */
 
-#ifndef HAVE_CUDA_H
 
    ComplexArray U0;                           /* ~Fourier Space Field Arrays               ~ */
    ComplexArray U1;
@@ -95,8 +94,6 @@ class stack : public canvas
   RealArray ky;
   RealArray k2;
   RealArray inv_k2;
-
-#endif
 
   void initAUX();                             /* ~ for containing auxiliary field data     ~ */
 

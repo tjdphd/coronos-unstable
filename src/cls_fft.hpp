@@ -39,12 +39,11 @@
 #include "nsp_constants.hpp"
 #include <assert.h>
 #include "cls_stack.hpp"
+#include<fftw3.h>
 
 #ifdef HAVE_CUDA_H
   #include "cls_fft_cuda_ext.hpp"
   #include<cuda.h>
-#else
-  #include<fftw3.h>
 #endif
 
 class fft {
@@ -57,14 +56,12 @@ public:
     ComplexVar * cplx_in;
     ComplexVar * cplx_out;
 
-#ifndef HAVE_CUDA_H
 #ifdef LD_PRECISION_H
     fftwl_plan     p_lay_for;                              /* ~ For establishing plans for forward   ~ */
     fftwl_plan     p_lay_rev;                              /* ~ reverse FFT's of layers              ~ */
 #elif defined OD_PRECISION_H
     fftw_plan     p_lay_for;                               /* ~ For establishing plans for forward   ~ */
     fftw_plan     p_lay_rev;                               /* ~ reverse FFT's of layers              ~ */
-#endif
 #endif
 
     void fftwInitialize( stack& run);                      /* ~ For allocating and deallocating "in" ~ */

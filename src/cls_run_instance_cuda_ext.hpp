@@ -45,7 +45,7 @@ class run_instance_cuda_ext
 
   run_instance_cuda_ext();
 
-  static int getDeviceCount();
+  void getDeviceCount( int * devices );
 
   ~run_instance_cuda_ext();
 };

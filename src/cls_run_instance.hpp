@@ -48,6 +48,10 @@ class run_instance
 {
    private:
 
+#ifdef HAVE_CUDA_H   
+   run_instance_cuda_ext ri_cuext;
+#endif
+
    std::string getTime();
    std::string getNode();
 

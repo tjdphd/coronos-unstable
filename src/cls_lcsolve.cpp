@@ -46,15 +46,13 @@
 
 lcsolve::lcsolve( stack& run ) {
 
-#ifndef HAVE_CUDA_H
     createFields( run );
-#endif
 
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef HAVE_CUDA_H
+//#ifndef HAVE_CUDA_H
 
 void lcsolve::Loop( stack& run ) {
 
@@ -1131,17 +1129,13 @@ void lcsolve::Step( std::string str_step, stack& run ) {
   }
 }
 
-#endif
+//#endif
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
    /* ~ Destructor  ~ */
 
   lcsolve::~lcsolve( ) {
 
-#ifndef HAVE_CUDA_H
-
      destroyFields();
-
-#endif
 
   }

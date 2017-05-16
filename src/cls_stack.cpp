@@ -55,13 +55,10 @@ stack::stack(std::string coronos_in) : canvas::canvas(coronos_in) {
 
   writeParameters(srun - 1);
 
-#ifndef HAVE_CUDA_H
 
   allocUi( );
   allocAUX();
   initxyz( );
-
-#endif
 
 }
 
@@ -149,7 +146,6 @@ void stack::init_stack_data() {                     /* ~ gather/infer informatio
 
 }
 
-#ifndef HAVE_CUDA_H
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -573,8 +569,6 @@ void stack::initxyz() {                     /* ~ Calculate x, y and z coordinate
   }
 }
 
-#endif
-
 void stack::writeParameters() {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank );
@@ -614,7 +608,7 @@ void stack::writeParameters(int srun) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 stack::~stack() {
-#ifndef HAVE_CUDA_H
+
     x.resize(0);
     y.resize(0);
     z.resize(0);
@@ -630,6 +624,6 @@ stack::~stack() {
   tU3.resize(0);
 
   deallocUi();
-#endif
+
 }
 

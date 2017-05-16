@@ -55,7 +55,7 @@ redhallmhd::redhallmhd() {
 
 redhallmhd::redhallmhd(stack& run ) {
 
-#ifndef HAVE_CUDA_H
+//#ifndef HAVE_CUDA_H
 
   int rank;  MPI_Comm_rank(MPI_COMM_WORLD,          &rank );
   int srun;  run.palette.fetch(         "srun",     &srun );
@@ -94,11 +94,11 @@ redhallmhd::redhallmhd(stack& run ) {
                                                            /* ~ P and A in a "subrun zero" data file        ~ */
 }
 
-#endif
+//#endif
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef HAVE_CUDA_H
+//#ifndef HAVE_CUDA_H
 
 void redhallmhd::initTimeInc( stack& run ){
 
@@ -3481,7 +3481,7 @@ void redhallmhd::checkState( int pair, stack &run, std::string roc) {
   ofs.close();
 }
 
-#endif
+//#endif
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

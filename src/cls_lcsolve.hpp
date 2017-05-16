@@ -60,7 +60,6 @@ class lcsolve
 
    private:
 
-#ifndef HAVE_CUDA_H
 
    RealArray    SE0; /* ~ same for different layers of U's      ~ */
    RealArray    SE1;
@@ -105,8 +104,6 @@ class lcsolve
 
    void Step( std::string str_step, stack& run );
 
-#endif
-
    public:
 
 // lcsolve();                                    /* ~ Constructors                         ~ */
@@ -114,11 +111,7 @@ class lcsolve
    lcsolve( stack& run );
    void Loop(      stack& run );                /* ~ stepping and such                     ~ */
 
-#ifndef HAVE_CUDA_H
-
    void passAdjacentLayers( std::string str_step, stack& run);
-
-#endif
 
    ~lcsolve();                                   /* ~ Destructor                           ~ */
 
