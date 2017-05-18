@@ -96,6 +96,7 @@
   if  [ ! test -e "$MPI_PATH_LIB"  ||  ! test -d "$MPI_PATH_LIB" ]
   then
     MPI_PATH_LIB="$MPI_PATH/lib"
+    AC_SEARCH_LIBS([MPI_Initialized], [$MPI_PATH_LIB],[AC_MSG_NOTICE(found MPI_Initialized)],[AC_MSG_WARN([MPI_Initialized not found])],[])
   fi
 
   AC_MSG_NOTICE([MPI_PATH_LIB = $MPI_PATH_LIB])

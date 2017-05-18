@@ -36,13 +36,14 @@
 #ifndef CLS_RUN_INSTANCE
 #define CLS_RUN_INSTANCE
 
- #include "cls_parameter_map.hpp"
- #include <ctime>
- #include <unistd.h>
+#include <config.h>
+#include "cls_parameter_map.hpp"
+#include <ctime>
+#include <unistd.h>
 
- #ifdef HAVE_CUDA_H
-   #include "cls_run_instance_cuda_ext.hpp"
- #endif
+#ifdef HAVE_CUDA_H
+  #include "cls_run_instance_cuda_ext.hpp"
+#endif
 
 class run_instance
 {

@@ -33,11 +33,15 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+#ifndef CLS_CANVAS_CUDA_EXT
+#define CLS_CANVAS_CUDA_EXT
+
+#include <config.h>
 #include <cuda.h>
 
 class canvas_cuda_ext
 {
-  friend class run_instance;
+//friend class run_instance;
 
   private:
 
@@ -47,3 +51,4 @@ class canvas_cuda_ext
   ~canvas_cuda_ext();
 
 };
+#endif

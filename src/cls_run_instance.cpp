@@ -96,6 +96,10 @@ run_instance::run_instance() {
 
 run_instance::~run_instance() {
 
+#ifdef HAVE_CUDA_H
+  run_data.report("gpu_run.out");
+#endif
+
 }
 
 /* ~ utilities ~ */

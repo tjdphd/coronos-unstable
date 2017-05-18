@@ -33,28 +33,43 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef UTIL_FFT
-#define UTIL_FFT
+#ifndef CLS_FFT
+#define CLS_FFT
 
+#include <config.h>
 #include "nsp_constants.hpp"
 #include <assert.h>
 #include "cls_stack.hpp"
-#include<fftw3.h>
+
 
 #ifdef HAVE_CUDA_H
-  #include "cls_fft_cuda_ext.hpp"
+
   #include<cuda.h>
+  #include<cufft.h>
+  #include<cufftw.h>
+  #include "cls_fft_cuda_ext.hpp"
+
+#endif
+
+#ifdef DONT_HAVE_CUDA_H
+  #include<fftw3.h>
 #endif
 
 class fft {
 
-public:
+  public:
+
+#ifdef HAVE_CUDA_H
+    fft_cuda_ext fft_cuext;
+#endif
 
     RealVar    * r_in;                                     /* ~ input and output data arguments      ~ */
     RealVar    * r_out;                                    /* ~ to FFT routines.                     ~ */
 
     ComplexVar * cplx_in;
     ComplexVar * cplx_out;
+
+#ifndef HAVE_CUDA_H
 
 #ifdef LD_PRECISION_H
     fftwl_plan     p_lay_for;                              /* ~ For establishing plans for forward   ~ */
@@ -91,6 +106,9 @@ public:
     void fftwForwardIC(RealArray&    Rin, ComplexArray& Cout);
     void fftwReverseIC(ComplexArray& Cin, RealArray&    Rout);
 
+#endif
+
 };
+
 
 #endif

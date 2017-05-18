@@ -33,25 +33,28 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#include "cls_stack.hpp"
+#include <config.h>
 #include <cuda.h>
+#include <cufft.h>
+#include <cufftw.h>
 
 class fft_cuda_ext
 {
 
-  friend class fft;
+//  friend class fft;
 
   private:
   
   public:
 
-//    cufftHandle     p_lay_for;                              /* ~ For establishing plans for forward   ~ */
-//   cufftHandle     p_lay_rev;                               /* ~ reverse FFT's of layers              ~ */
+    cufftHandle     p_lay_for;                               /* ~ For establishing plans for forward   ~ */
+    cufftHandle     p_lay_rev;                               /* ~ reverse FFT's of layers              ~ */
  
-   void cufftwInitialize( stack& run);
-   void cufftwFinalize();
+//  void cufftwInitialize( stack& run);
+    void cufftwInitialize();
+    void cufftwFinalize();
 
-   fft_cuda_ext();
-  ~fft_cuda_ext();
+    fft_cuda_ext();
+   ~fft_cuda_ext();
 
 };

@@ -37,6 +37,7 @@
 #ifndef CLS_PARAMETER
 #define CLS_PARAMETER
 
+#include <config.h>
 #include <string>
 #include <sstream>
 

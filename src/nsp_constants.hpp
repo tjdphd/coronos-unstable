@@ -36,7 +36,7 @@
 #ifndef NSP_CONSTANTS
 #define NSP_CONSTANTS
 
-#include "../config.h"
+#include <config.h>
 #include <cmath>
 #include<vector>
 #include<complex>
@@ -118,6 +118,6 @@ typedef std::complex<double>                    ComplexVar;
 
 #endif
 
-}
+};
 
 #endif

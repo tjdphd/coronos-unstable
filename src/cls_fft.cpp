@@ -35,6 +35,8 @@
 
 #include "cls_fft.hpp"
 
+#ifdef DONT_HAVE_CUDA_H
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -43,21 +45,15 @@
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-//#ifndef HAVE_CUDA_H
-
 void fft::fftwInitialize( stack& run ) {
 
-//   std::cout << "Initializing fftw..." << std::endl;
+  fftwKInit(  run );
+  fftwrtInit( run );
 
-   fftwKInit(  run );
-   fftwrtInit( run );
 
-  int n1; 
-  run.stack_data.fetch("n1",   &n1);
-  int n2;
-  run.stack_data.fetch("n2",   &n2);
-  int nr_in; 
-  run.stack_data.fetch("n1n2", &nr_in);
+  int n1;    run.stack_data.fetch("n1",   &n1   );
+  int n2;    run.stack_data.fetch("n2",   &n2   );
+  int nr_in; run.stack_data.fetch("n1n2", &nr_in);
   int nc_out;
 
   nc_out    = n1 * (((int)(0.5*n2)) + 1);
@@ -67,12 +63,10 @@ void fft::fftwInitialize( stack& run ) {
 #ifdef LD_PRECISION_H
   r_in      = (RealVar *)               fftwl_malloc(sizeof(RealVar)               * nr_in  );
   cplx_out  = (ComplexVar *) fftwl_malloc(sizeof(ComplexVar) * nc_out );
-//p_lay_for = fftwl_plan_dft_r2c_2d(n1, n2, r_in, reinterpret_cast<fftwl_complex*>(cplx_out), FFTW_MEASURE);
   p_lay_for = fftwl_plan_dft_r2c_2d(n1, n2, r_in, reinterpret_cast<fftwl_complex*>(cplx_out), FFTW_EXHAUSTIVE);
 #elif defined OD_PRECISION_H
   r_in      = (RealVar *)               fftw_malloc(sizeof(RealVar)               * nr_in  );
   cplx_out  = (ComplexVar *) fftw_malloc(sizeof(ComplexVar) * nc_out );
-//p_lay_for = fftw_plan_dft_r2c_2d(n1, n2, r_in, reinterpret_cast<fftw_complex*>(cplx_out), FFTW_MEASURE);
   p_lay_for = fftw_plan_dft_r2c_2d(n1, n2, r_in, reinterpret_cast<fftw_complex*>(cplx_out), FFTW_EXHAUSTIVE);
 #endif
 
@@ -81,12 +75,10 @@ void fft::fftwInitialize( stack& run ) {
 #ifdef LD_PRECISION_H
   cplx_in   = (ComplexVar *) fftwl_malloc(sizeof(ComplexVar) * nc_out );
   r_out     = (RealVar *)    fftwl_malloc(sizeof(RealVar)    * nr_in  );
-//p_lay_rev = fftwl_plan_dft_c2r_2d(n1, n2, reinterpret_cast<fftwl_complex*>(cplx_in), r_out, FFTW_MEASURE);
   p_lay_rev = fftwl_plan_dft_c2r_2d(n1, n2, reinterpret_cast<fftwl_complex*>(cplx_in), r_out, FFTW_EXHAUSTIVE);
 #elif defined OD_PRECISION_H
   cplx_in   = (ComplexVar *) fftw_malloc(sizeof(ComplexVar) * nc_out );
   r_out     = (RealVar *)    fftw_malloc(sizeof(RealVar)    * nr_in  );
-//p_lay_rev = fftw_plan_dft_c2r_2d(n1, n2, reinterpret_cast<fftw_complex*>(cplx_in), r_out, FFTW_MEASURE);
   p_lay_rev = fftw_plan_dft_c2r_2d(n1, n2, reinterpret_cast<fftw_complex*>(cplx_in), r_out, FFTW_EXHAUSTIVE);
 #endif
 
@@ -310,6 +302,7 @@ void fft::fftwrtFree() {
 
 void fft::fftwForwardAll( stack& run ) {
 
+
   InputOutputArray& U   = run.U;               /* ~ raw input array                         ~ */
 
   ComplexArray& U0      = run.U0;
@@ -377,11 +370,14 @@ void fft::fftwForwardAll( stack& run ) {
       }
     }
   }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwReverseAll( stack& run ) {
+
 
   InputOutputArray& U  = run.U;               /* ~ raw input array                         ~ */
 
@@ -437,11 +433,14 @@ void fft::fftwReverseAll( stack& run ) {
 
     }
   }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwForwardAll( stack& run, ComplexArray& Oout, ComplexArray& Jout ) {
+
 
   InputOutputArray& AUX  = run.AUX;             /* ~ raw input array                         ~ */
 
@@ -483,11 +482,14 @@ void fft::fftwForwardAll( stack& run, ComplexArray& Oout, ComplexArray& Jout ) {
       }
     }
   }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwReverseAll( stack& run, ComplexArray& Oin, ComplexArray& Jin ) {
+
 
   InputOutputArray& AUX = run.AUX;               /* ~ raw input array                         ~ */
 
@@ -529,11 +531,14 @@ void fft::fftwReverseAll( stack& run, ComplexArray& Oin, ComplexArray& Jin ) {
 
     }
   }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwForwardLayerofField ( stack& run, int i_l, int i_f ) {
+
 
   InputOutputArray& U = run.U;               /* ~ raw input array                         ~ */
 
@@ -589,11 +594,14 @@ void fft::fftwForwardLayerofField ( stack& run, int i_l, int i_f ) {
     for (unsigned k = 0; k < nc;   k++) { U3[(strt_idx + k)] = scale*cplx_out[k]*rt[k]; }
     break;
   }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwReverseLayerofField ( stack& run, int i_l, int i_f) {
+
 
   InputOutputArray& U = run.U;               /* ~ raw input array                         ~ */
 
@@ -642,11 +650,14 @@ void fft::fftwReverseLayerofField ( stack& run, int i_l, int i_f) {
 #endif
 
   for (int k = 0; k < n1n2; k++) { U[k][i_l][i_f] = r_out[k]; }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwForwardRaw( stack& run, RealArray& Rin, ComplexArray& Cout) {
+
 
   int n1n2c; run.stack_data.fetch("n1n2c", &n1n2c   );
   int n1n2;  run.stack_data.fetch("n1n2" , &n1n2    );
@@ -677,11 +688,14 @@ void fft::fftwForwardRaw( stack& run, RealArray& Rin, ComplexArray& Cout) {
     Cout[c_strt_idx].real() = zero;
 
   }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwReverseRaw( stack& run, ComplexArray& Cin, RealArray& Rout) {
+
 
   int n1n2c; run.stack_data.fetch("n1n2c", &n1n2c );
   int n1n2;  run.stack_data.fetch("n1n2" , &n1n2  );
@@ -710,16 +724,19 @@ void fft::fftwReverseRaw( stack& run, ComplexArray& Cin, RealArray& Rout) {
     for (unsigned k = 0; k < n1n2; ++k) { Rout[r_strt_idx + k] = r_out[k];}
   
   }
+
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwReverseIC(ComplexArray& Cin, RealArray& Rout ) {
 
+
   int n1n2c; n1n2c   = Cin.size();
   int n1n2;  n1n2    = Rout.size();
 
-//Cin[0].real()      = zero;
+  Cin[0].real()      = zero;
 
   for (unsigned k = 0 ; k < n1n2c; k++) { cplx_in[k]  = czero;        }
   for (unsigned k = 0 ; k < n1n2 ; k++) { r_out[k]    = zero;         }
@@ -733,11 +750,13 @@ void fft::fftwReverseIC(ComplexArray& Cin, RealArray& Rout ) {
 
   for (unsigned k = 0 ; k < n1n2 ; k++) {Rout[k]     = (r_out[k]);}
 
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void fft::fftwForwardIC( RealArray& Rin, ComplexArray& Cout) {
+
 
   int n1n2c; n1n2c = Cout.size();
   int n1n2;  n1n2  = Rin.size();
@@ -756,10 +775,11 @@ void fft::fftwForwardIC( RealArray& Rin, ComplexArray& Cout) {
 
   for (unsigned k = 0 ; k < n1n2c; k++) {Cout[k]     = scale * cplx_out[k]*rt[k]; }
 
-//Cout[0].real()   = zero;
+  Cout[0].real()   = zero;
+
 
 }
 
-//#endif
+#endif
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

@@ -37,6 +37,7 @@
 #ifndef CLS_CANVAS
 #define CLS_CANVAS
 
+#include <config.h>
 #include "cls_run_instance.hpp"
 
 #ifdef HAVE_CUDA_H

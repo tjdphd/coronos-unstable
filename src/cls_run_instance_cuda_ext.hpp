@@ -33,11 +33,15 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+#ifndef CLS_RUN_INSTANCE_CUDA_EXT
+#define CLS_RUN_INSTANCE_CUDA_EXT
+
+#include <config.h>
 #include <cuda.h>
 
 class run_instance_cuda_ext
 {
-  friend class run_instance;
+//  friend class run_instance;
 
   private:
 
@@ -49,3 +53,5 @@ class run_instance_cuda_ext
 
   ~run_instance_cuda_ext();
 };
+
+#endif
