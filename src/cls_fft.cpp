@@ -35,7 +35,6 @@
 
 #include "cls_fft.hpp"
 
-#ifdef DONT_HAVE_CUDA_H
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -50,6 +49,7 @@ void fft::fftwInitialize( stack& run ) {
   fftwKInit(  run );
   fftwrtInit( run );
 
+#ifdef DONT_HAVE_CUDA_H
 
   int n1;    run.stack_data.fetch("n1",   &n1   );
   int n2;    run.stack_data.fetch("n2",   &n2   );
@@ -60,26 +60,32 @@ void fft::fftwInitialize( stack& run ) {
 
 /* ~ Forward field/layer transforms: ~ */
 
-#ifdef LD_PRECISION_H
+  #ifdef LD_PRECISION_H
   r_in      = (RealVar *)               fftwl_malloc(sizeof(RealVar)               * nr_in  );
   cplx_out  = (ComplexVar *) fftwl_malloc(sizeof(ComplexVar) * nc_out );
   p_lay_for = fftwl_plan_dft_r2c_2d(n1, n2, r_in, reinterpret_cast<fftwl_complex*>(cplx_out), FFTW_EXHAUSTIVE);
-#elif defined OD_PRECISION_H
+  #elif defined OD_PRECISION_H
   r_in      = (RealVar *)               fftw_malloc(sizeof(RealVar)               * nr_in  );
   cplx_out  = (ComplexVar *) fftw_malloc(sizeof(ComplexVar) * nc_out );
   p_lay_for = fftw_plan_dft_r2c_2d(n1, n2, r_in, reinterpret_cast<fftw_complex*>(cplx_out), FFTW_EXHAUSTIVE);
-#endif
+  #endif
 
 /* ~ Reverse field/layer transforms: ~ */
 
-#ifdef LD_PRECISION_H
+  #ifdef LD_PRECISION_H
   cplx_in   = (ComplexVar *) fftwl_malloc(sizeof(ComplexVar) * nc_out );
   r_out     = (RealVar *)    fftwl_malloc(sizeof(RealVar)    * nr_in  );
   p_lay_rev = fftwl_plan_dft_c2r_2d(n1, n2, reinterpret_cast<fftwl_complex*>(cplx_in), r_out, FFTW_EXHAUSTIVE);
-#elif defined OD_PRECISION_H
+  #elif defined OD_PRECISION_H
   cplx_in   = (ComplexVar *) fftw_malloc(sizeof(ComplexVar) * nc_out );
   r_out     = (RealVar *)    fftw_malloc(sizeof(RealVar)    * nr_in  );
   p_lay_rev = fftw_plan_dft_c2r_2d(n1, n2, reinterpret_cast<fftw_complex*>(cplx_in), r_out, FFTW_EXHAUSTIVE);
+  #endif
+
+#elif defined HAVE_CUDA_H
+
+  fft_cuext.cufftwInitialize( run );
+
 #endif
 
 }
@@ -88,24 +94,32 @@ void fft::fftwInitialize( stack& run ) {
 
 void fft::fftwFinalize() {
 
-#ifdef LD_PRECISION_H
- fftwl_destroy_plan(p_lay_for);
- fftwl_destroy_plan(p_lay_rev);
+#ifdef DONT_HAVE_CUDA_H
 
- fftwl_free(r_in);
- fftwl_free(r_out);
+  #ifdef LD_PRECISION_H
+   fftwl_destroy_plan(p_lay_for);
+   fftwl_destroy_plan(p_lay_rev);
+  
+   fftwl_free(r_in);
+   fftwl_free(r_out);
+  
+   fftwl_free(cplx_in); 
+   fftwl_free(cplx_out); 
+  #elif defined OD_PRECISION_H
+   fftw_destroy_plan(p_lay_for);
+   fftw_destroy_plan(p_lay_rev);
+  
+   fftw_free(r_in);
+   fftw_free(r_out);
+  
+   fftw_free(cplx_in); 
+   fftw_free(cplx_out); 
+  #endif
 
- fftwl_free(cplx_in); 
- fftwl_free(cplx_out); 
-#elif defined OD_PRECISION_H
- fftw_destroy_plan(p_lay_for);
- fftw_destroy_plan(p_lay_rev);
+#elif defined HAVE_CUDA_H
 
- fftw_free(r_in);
- fftw_free(r_out);
+  fft_cuext.cufftwFinalize( );
 
- fftw_free(cplx_in); 
- fftw_free(cplx_out); 
 #endif
 
 }
@@ -299,6 +313,8 @@ void fft::fftwrtFree() {
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+#ifdef DONT_HAVE_CUDA_H
 
 void fft::fftwForwardAll( stack& run ) {
 

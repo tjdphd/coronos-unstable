@@ -69,7 +69,6 @@ class fft {
     ComplexVar * cplx_in;
     ComplexVar * cplx_out;
 
-#ifndef HAVE_CUDA_H
 
 #ifdef LD_PRECISION_H
     fftwl_plan     p_lay_for;                              /* ~ For establishing plans for forward   ~ */
@@ -90,6 +89,8 @@ class fft {
 
     void fftwrtInit( stack& run );
     void fftwrtFree( );
+
+#ifndef HAVE_CUDA_H
 
     void fftwForwardAll( stack& run);                      /* ~ Forward FFT all fields all layers    ~ */
     void fftwReverseAll( stack& run);                      /* ~ Reverst FFT all fields all layers    ~ */

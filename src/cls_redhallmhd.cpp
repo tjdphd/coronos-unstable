@@ -57,7 +57,6 @@ redhallmhd::redhallmhd() {
 
 redhallmhd::redhallmhd(stack& run ) {
 
-#ifndef HAVE_CUDA_H
 
   int rank;  MPI_Comm_rank(MPI_COMM_WORLD,          &rank );
   int srun;  run.palette.fetch(         "srun",     &srun );
@@ -68,6 +67,8 @@ redhallmhd::redhallmhd(stack& run ) {
   init_physics_data(     run   );                          /* ~ physics - specific parameters               ~ */
   initU(                 run   );                          /* ~ initialization of layers 1 - n3 of U        ~ */
                                                            /* ~ for srun > 1 AUX has real space O and J now ~ */
+#ifndef HAVE_CUDA_H
+
   initTimeInc(           run   );
   fftw.fftwForwardAll(   run   );                          /* ~ puts real-space fields into Fourier space   ~ */
 
@@ -114,7 +115,6 @@ void redhallmhd::initTimeInc( stack& run ){
 
 void redhallmhd::initU( stack& run ) {
 
-#ifndef HAVE_CUDA_H
 
   fftw.fftwInitialize( run );
 
@@ -122,6 +122,8 @@ void redhallmhd::initU( stack& run ) {
 
   int srun;             run.palette.fetch("srun",     &srun    );
   std::string scenario; run.palette.fetch("scenario", &scenario);
+
+#ifndef HAVE_CUDA_H
 
   if (scenario.compare("reconnection")  == 0) {
 
@@ -506,7 +508,6 @@ void redhallmhd::initGauss( stack& run ) {
 
 void redhallmhd::computeFourierU( stack& run ) {
 
-#ifndef HAVE_CUDA_H
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   int n1;    run.stack_data.fetch("n1",    &n1    );
@@ -580,19 +581,22 @@ void redhallmhd::computeFourierU( stack& run ) {
 
     }
 
+#ifndef HAVE_CUDA_H
+
     fftw.fftwReverseIC(Cin, Rout);
     for (unsigned k   = 0; k < n1n2; ++k) { U[k][n3][i_f] = Rout[k]; }
 
+#endif
+
   }
 
+#ifndef HAVE_CUDA_H
   for (     int i_f = 0; i_f < n_flds; ++i_f) {
     for (   int i_l = 1; i_l < n3;     ++i_l) {
       for ( int k   = 0;   k < n1n2;   ++k)   { U[k][i_l][i_f] = U[k][n3][i_f]; }
     }
   }
-
 #endif
-
 }
 
 
