@@ -24,10 +24,11 @@ FUNCTION scan_parameters, param, n_step, desc_label
 
     IF (n_step GT 0 AND n_step LT last_step)  THEN BEGIN
 
-      prefix       = scan_parameters('prefix', 0, desc_label )
-      ip1          = scan_parameters('p1',     0, desc_label )
-      n3           = scan_parameters('p3',     0, desc_label )
-      mp           = scan_parameters('np',     0, desc_label )
+      prefix       = scan_parameters('prefix',   0, desc_label )
+      data_dir     = scan_parameters('data_dir', 0, desc_label )
+      ip1          = scan_parameters('p1',       0, desc_label )
+      n3           = scan_parameters('p3',       0, desc_label )
+      mp           = scan_parameters('np',       0, desc_label )
 
       x_res        = 2^ip1
       z_res        = n3 * mp
@@ -41,7 +42,7 @@ FUNCTION scan_parameters, param, n_step, desc_label
 
       str_res      = '_' + str_x_res + '_' + str_z_res
 
-      par_file     = '/' + prefix + str_res + '.00.' + 'o' + desc_label + str_n_step
+      par_file     = '/' + data_dir + '/' + prefix + str_res + '.00.' + 'o' + desc_label + str_n_step
 
     ENDIF ELSE BEGIN
       IF (STRCMP(param,"srun",4) AND (n_step EQ -1)) THEN BEGIN

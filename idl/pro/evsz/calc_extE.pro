@@ -36,42 +36,84 @@ FUNCTION calc_extE, E, desc_lab, step, i_efld, KK, GOFX
   i_lmi                        = 22 ; add -> length scale from F.T. of z^+
   i_lpla                       = 23 ; add -> ?alternative definition for lpl
   i_lmia                       = 24 ; add -> ?alternative definition for lmi
-  i_cnse                       = 25 ; energy conservation check vs z
 
-  i_rzpf                       = 26 ; |z+^2|^1/2  as determined from ep calculated in post-processing
-  i_rzmf                       = 27 ; |z-^2|^1/2  as determined from em calculated in post-processing
-  i_zpmf                       = 28 ; Z+Z- as determined from ep and em calculated in post-processing
-  i_likp                       = 29 ; IK length length scale  lambda_IK,+  (see notes)
-  i_likm                       = 30 ; IK length length scale  lambda_IK,-  (see notes)
-  i_lkop                       = 31 ; Kolmogorov length scale lambda_Kol,+ (see notes)
-  i_lkom                       = 32 ; Kolmogorov length scale lambda_Kol,- (see notes)
-  i_lsfp                       = 33 ; length scale from structure function for lambda +
-  i_lsfm                       = 34 ; length scale from structure function for lambda -
+  i_likp                       = 25 ; IK length length scale  lambda_IK,+  (see notes)
+  i_likm                       = 26 ; IK length length scale  lambda_IK,-  (see notes)
+  i_lkop                       = 27 ; Kolmogorov length scale lambda_Kol,+ (see notes)
+  i_lkom                       = 28 ; Kolmogorov length scale lambda_Kol,- (see notes)
+
+  i_rzpf                       = 29 ; |z+^2|^1/2  as determined from ep calculated in post-processing
+  i_rzmf                       = 30 ; |z-^2|^1/2  as determined from em calculated in post-processing
+  i_zpmf                       = 31 ; Z+Z- as determined from ep and em calculated in post-processing
+
+; i_rzpf                       = 25 ; |z+^2|^1/2  as determined from ep calculated in post-processing
+; i_rzmf                       = 26 ; |z-^2|^1/2  as determined from em calculated in post-processing
+; i_zpmf                       = 27 ; Z+Z- as determined from ep and em calculated in post-processing
+
+; i_likp                       = 28 ; IK length length scale  lambda_IK,+  (see notes)
+; i_likm                       = 29 ; IK length length scale  lambda_IK,-  (see notes)
+; i_lkop                       = 30 ; Kolmogorov length scale lambda_Kol,+ (see notes)
+; i_lkom                       = 31 ; Kolmogorov length scale lambda_Kol,- (see notes)
+
+  i_lsfp                       = 32 ; length scale from structure function for lambda +
+  i_lsfm                       = 33 ; length scale from structure function for lambda -
+  i_all                        = 99 ;
   
-  ip1                          = scan_parameters('p1', 0, desc_lab )      ; power of 2 giving x-resolution
-  ip2                          = scan_parameters('p2', 0, desc_lab )      ; power of 2 giving y-resolution
-  n3                           = scan_parameters('p3' ,0, desc_lab ) 
-  mp                           = scan_parameters('np' ,0, desc_lab ) 
-  zl                           = scan_parameters('zl' ,0, desc_lab ) 
+  ip1                          = scan_parameters('p1',  0, desc_lab )      ; power of 2 giving x-resolution
+  ip2                          = scan_parameters('p2',  0, desc_lab )      ; power of 2 giving y-resolution
+  n3                           = scan_parameters('p3' , 0, desc_lab ) 
+  mp                           = scan_parameters('np' , 0, desc_lab ) 
+  zl                           = scan_parameters('zl' , 0, desc_lab ) 
   
   n1                           = 2^ip1 
   n2                           = 2^ip2
   
   dx                           = ONE / FLOAT(n1)
   dy                           = ONE / FLOAT(n2)
-  dz                           = zl / (n3 * mp)
+  dz                           = zl  / (n3 * mp)
+  dz_m1                        = ONE / dz
 
   size_e                       = SIZE(E, /DIMENSIONS)
 
-  PRINT, "calc_extE: size_e          = ", size_e
-  PRINT, "calc_extE: i_lsfm - i_rzpf = ", i_lsfm - i_rzpf 
-
   extE                         = FLTARR(size_e[0], size_e[1] + (i_lsfm - i_lmia) )
-  extE[*, i_z:i_cnse]          =  E[*,i_z:i_cnse]                           ; copy E to 0:14 of Eext
+  extE[*, i_z:i_lmia]          =  E[*,i_z:i_lmia]                           ; copy E to 0:14 of Eext
   
-  extE[*, i_rzpf:i_lsfm]       = ZERO                                       ; set the rest to zero for now
+  extE[*, i_likp:i_lsfm]       = ZERO                                       ; set the rest to zero for now
 
-  IF ( (i_efld GE i_rzpf) && (i_efld LE i_lsfm) ) THEN BEGIN
+  size_ext_e                   = SIZE(E, /DIMENSIONS)
+
+  n_lines                      = size_E[0]
+  n_cols                       = size_E[1]
+
+  dzpdz                        = FLTARR(n_lines)
+  dzmdz                        = FLTARR(n_lines)
+
+  FOR J = 0, n_lines - 2 DO BEGIN
+
+    dzpdz[J]                   = (E[J+1,i_ep] - E[J, i_ep]) * dz_m1
+    dzmdz[J]                   = (E[J+1,i_em] - E[J, i_em]) * dz_m1
+
+  ENDFOR
+
+  dzpdz[n_lines - 1]           = dzpdz[n_lines - 2]
+  dzmdz[n_lines - 1]           = dzmdz[n_lines - 2]
+
+  ; Kolmogorov: 
+
+  extE[*,i_lkop]               = ABS((E[*, i_ep] * E[*,i_rzm]) / dzpdz[*])
+  extE[*,i_lkom]               = ABS((E[*, i_em] * E[*,i_rzp]) / dzmdz[*])
+
+  ; (ep^1/2 * em^1/2)
+
+; extE[*, i_zpm]                = E[*, i_rzp] * E[*, i_rzm]
+
+  ; Iroshnikov-Kraichnan
+
+  extE[*, i_likp]              = ABS(E[*,i_zpm]^2 / dzpdz[*])
+  extE[*, i_likm]              = ABS(E[*,i_zpm]^2 / dzmdz[*])
+
+
+  IF ( ((i_efld GE i_rzpf) && (i_efld LE i_lsfm)) OR (i_efld EQ i_all) ) THEN BEGIN
 
     n_layers                   = size_e[0]
     multithread                = 1
@@ -83,7 +125,6 @@ FUNCTION calc_extE, E, desc_lab, step, i_efld, KK, GOFX
 
       n_threads                = size_sr[0]
       
-      PRINT, 'calc_extE: n_threads = ', n_threads
       oBridge                  = OBJARR(n_threads - 1)
 
       FOR J = 0, n_threads - 1 DO BEGIN
@@ -133,16 +174,13 @@ FUNCTION calc_extE, E, desc_lab, step, i_efld, KK, GOFX
         IF (J EQ n_threads - 1) THEN BEGIN
 
           extE[(first_layer-1):(last_layer-1), i_rzpf : i_rzmf] = local_extE_for_lpm[*,0:1]
-;         extE[(first_layer-1):(last_layer-1), i_lpl  : i_lmi]  = local_extE_for_lpm[*,2:3]
-;         extE[(first_layer-1):(last_layer-1), i_lpla : i_lmia] = local_extE_for_lpm[*,4:5]
           extE[(first_layer-1):(last_layer-1), i_lsfp : i_lsfm] = local_extE_for_lpm[*,2:3]
 
         ENDIF ELSE BEGIN
-       
+
+
           thread_extE_for_lpm                                   = oBridge[J] -> GetVar('thread_extE_for_lpm')
           extE[(first_layer-1):(last_layer-1), i_rzpf : i_rzmf] = thread_extE_for_lpm[*,0:1]
-;         extE[(first_layer-1):(last_layer-1), i_lpl  : i_lmi]  = thread_extE_for_lpm[*,2:3]
-;         extE[(first_layer-1):(last_layer-1), i_lpla : i_lmia] = thread_extE_for_lpm[*,4:5]
           extE[(first_layer-1):(last_layer-1), i_lsfp : i_lsfm] = thread_extE_for_lpm[*,2:3]
     
           obj_destroy, oBridge[J]

@@ -12,7 +12,6 @@ FUNCTION calc_lpm, desc_lab, step, n1, n2, first_layer, last_layer, KK, GOFX
 
   n_layers_this_thread       = last_layer - first_layer + 1
 
-; thread_extE_for_lpm        = FLTARR(n_layers_this_thread, 8)
   thread_extE_for_lpm        = FLTARR(n_layers_this_thread, 4)
 
   FOR  I = 0, n_layers_this_thread - 1 DO BEGIN

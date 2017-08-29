@@ -90,7 +90,6 @@ FUNCTION global_q_minmax, i_qty, first_step, last_step, first_slice, last_slice,
         done                                   = 0
         FOR J = 0, n_threads - 2 DO done       = done + oBridge[J] -> Status()
         IF (done EQ 0) THEN notdone            = done
-
       ENDWHILE
     ENDIF
 

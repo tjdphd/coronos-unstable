@@ -42,108 +42,43 @@
 #                                                                              #
 ################################################################################
 
+         qty=$1      # field/quantity to be contoured - see above
+     res_str=$2      # string giving the x (or y) X z-resolution of the data
+  desc_label=$3      # descriptive label for run
+       n_slc=$4      # contoured layer
 
-       pfx=$1 # field/quantity to be contoured - see above
-   res_str=$2 # string giving the x (or y) X z-resolution of the data
-desc_label=$3 # descriptive label for run
-     n_slc=$4 # contoured layer
-
-cur_dir=`pwd` # directory originating script invocation
+     cur_dir=`pwd`   # directory originating script invocation
 
 cd cts
 
-cts_eps=`ls -1 $pfx/eps/$pfx'_ctr_'$res_str*.eps`
+     cts_eps=`ls -1 $qty/eps/$qty'_ctr_'$res_str*.eps`
 
-if [ ! -e $pfx/gif ]   # create gif directory if needed
+if [ ! -e $pfx/png ] # create gif directory if needed
   then 
-    mkdir $pfx/gif
+    mkdir $qty/png
 fi
 
-if [ ! -e $pfx/jpg ]   # create jpg directory if needed
-  then 
-    mkdir $pfx/jpg
-fi
-
-trunc=$pfx'/eps/'
+       trunc=$qty'/eps/'
 
 echo "trunc = " trunc
 
-#for plot in $cts_eps; do
-#        plot=${plot#$trunc}
-#    len_plot=${#plot}                                    # Get the file's basename and create a gif version
-#           n=`expr $len_plot - 4`                        # with convert
-#   base_name=${plot:0:$n}
-#   echo "creating = " $base_name'.gif'
-#   convert -density 144x144 $pfx/eps/$base_name.eps $pfx/gif/$base_name.gif
-#done
+for plot in $cts_eps; do
+        plot=${plot#$trunc}
+    len_plot=${#plot}                                    # Get the file's basename and create a gif version
+           n=`expr $len_plot - 4`                        # with convert
+   base_name=${plot:0:$n}
 
-cts_gif=`ls $pfx/gif/$pfx'_ctr_'$res_str*.gif`
-echo "cts_gif = " $cts_gif
+   echo "creating " $base_name'.png'
 
-cts_anim=$pfx'_cts_'$res_str'_'$desc_label'-anim.gif'
-convert -delay 10 -loop 0 -coalesce -background white -dispose 1 $cts_gif $cts_anim
+   convert -density 300x300 $qty/eps/$base_name.eps -background  white -flatten -resize 1024X1024 $qty/png/$base_name.png
+done
 
-#for plot in $cts_eps; do
-#        plot=${plot#$trunc}
-#    len_plot=${#plot}                                    # Get the file's basename and create a gif version
-#           n=`expr $len_plot - 4`                        # with convert
-#   base_name=${plot:0:$n}
-#   echo "creating = " $base_name'.jpg'
-#   convert -density 144x144 $pfx/eps/$base_name.eps $pfx/jpg/$base_name.jpg
-#done
+           cts_png=`ls $qty/png/$qty'_ctr_'$res_str*.png`
+      cts_gif_anim=$qty'_cts_'$res_str'_'$desc_label'-anim.gif'
+      cts_mpf_anim=$qty'_cts_'$res_str'_'$desc_label'-anim.mp4'
 
+convert -delay 20 -dispose previous -loop 0 $cts_png $cts_gif_anim
 
-#sep=`expr index $res_str '_'`
-#echo 'sep       = ' $sep
-
-#z_res=${res_str:$sep}
-#echo 'z_res     = ' $z_res
-
-#len_z_res=`expr length $z_res`
-#echo 'len_z_res = ' $len_z_res
-
-#len_n_slc=`expr length $n_slc`
-#echo 'len_n_slc = ' $len_n_slc
-
-#len_dif=`expr $len_z_res - $len_n_slc`
-
-#echo 'len_dif   = ' $len_dif
-
-#if [ $len_dif -eq 0 ]
-#then
-#  zero_str=''
-#else
-#  zero_str='000000000000000000000000000000'
-#  pos=`expr 30 - $len_dif`
-#  echo 'pos = ' $pos
-#  zero_str=${zero_str:$pos}
-#fi
-
-#echo 'zero_str  = ' $zero_str
-
-#if [ $len_n_slc -eq 1 ]
-#then zero_str='00'
-#fi
-#if [ $len_n_slc -eq 2 ]
-#then zero_str='0'
-#fi
-#if [ $len_n_slc -eq 2 ]
-#then zero_str=''
-#fi
-
-#str_n_slc=$zero_str$n_slc
-
-#echo "str_n_slc = " $str_n_slc
-
-#cts_jpg=$pfx/jpg/$1_contour_slc-${str_n_slc}_stp-%03d-ff-spec.jpg  # going to have to pass the slice as argument
-
-#cts_anim=$1'_cts_'$res_str'_'$desc_label'-anim.mp4'
-
-#if [ -e $cts_anim ]                                      # ffmpeg won't overwrite
-#then 
-#  rm $cts_anim
-#fi
-
-#ffmpeg -sameq -i $cts_jpg $cts_anim
+$HOME/local/bin/ffmpeg -framerate 24 -pattern_type glob -i $qty/png/"*.png" -pix_fmt yuv420p $cts_mpf_anim
 
 exit 0

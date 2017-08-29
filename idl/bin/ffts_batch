@@ -25,18 +25,24 @@
 ;              development of the script and its documentation.                ;
 ;                                                                              ;
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~;
-idl_src_dir = GETENV('IDL_PATH')           ; Directory where the required IDL
-                                           ; sources reside
+src_dir      = GETENV('SRCDIR')
+!PATH        = !PATH + ":" + src_dir
 
-ffts_dsc_lab = GETENV('FFTS_DSC_LAB')      ;
-ffts_fld_one = GETENV('FFTS_FLD_ONE')      ;
-ffts_fld_two = GETENV('FFTS_FLD_TWO')      ;
+;path_scan_parameters       = FILEPATH('scan_parameters.pro',       ROOT_DIR=src_dir)
+;path_open_energy_data_file = FILEPATH('open_energy_data_file.pro', ROOT_DIR=src_dir)
+;path_ff_time_series        = FILEPATH('ff_time_series.pro',        ROOT_DIR=src_dir)
 
-.run scan_parameters.pro                   ; compile
-.run open_energy_data_file.pro
-.run ff_time_series.pro
+;PRINT, "path_scan_parameters       = ", path_scan_parameters
+;PRINT, "path_open_energy_data_file = ", path_open_energy_data_file
+;PRINT, "path_ff_time_series        = ", path_ff_time_series
 
-ff_time_series, ffts_dsc_lab, ffts_fld_one, ffts_fld_two ; run 
+ffts_dsc_lab = GETENV('FFTS_DSC_LAB')
+ffts_fld_one = GETENV('FFTS_FLD_ONE')
+
+.compile scan_parameters
+.compile open_energy_data_file
+.compile ff_time_series
+
+ff_time_series, ffts_dsc_lab, ffts_fld_one ; run 
 
 retall                                     ; get ready to exit
-exit

@@ -1,10 +1,10 @@
 FUNCTION open_evsz_data_file, desc_label, n_step
 
-ip1          = scan_parameters('p1', 0, desc_label )                     ; power of 2 giving x-resolution
-ip2          = scan_parameters('p2', 0, desc_label )                     ; power of 2 giving y-resolution
-n3           = scan_parameters('p3' , 0, desc_label )                     ; number of slices per data file
-mp           = scan_parameters('np' , 0, desc_label )                     ; number of processors used in run
-zl           = scan_parameters('zl' , 0, desc_label )                     ; total height along z of integration volume
+ip1          = scan_parameters('p1',       0, desc_label )                ; power of 2 giving x-resolution
+ip2          = scan_parameters('p2',       0, desc_label )                ; power of 2 giving y-resolution
+n3           = scan_parameters('p3' ,      0, desc_label )                ; number of slices per data file
+mp           = scan_parameters('np' ,      0, desc_label )                ; number of processors used in run
+zl           = scan_parameters('zl' ,      0, desc_label )                ; total height along z of integration volume
 data_dir     = scan_parameters('data_dir', 0, desc_label )
  
 x_res        = 2^ip1                                                      ; resolution in x
@@ -40,7 +40,6 @@ READF, data_unit, time
 line         = ""
 READF, data_unit, line
 cols         = N_ELEMENTS(StrSplit(line))
-PRINT, "open energy file: cols = ", cols
 str_cols     = STRTRIM(cols,2)
 str_fmt      = '(' + str_cols + '(e24.20,1x),:/)'
 
