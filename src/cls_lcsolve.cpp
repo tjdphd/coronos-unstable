@@ -34,7 +34,9 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+
 #include "cls_lcsolve.hpp"
+
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -46,19 +48,19 @@
 
 lcsolve::lcsolve( stack& run ) {
 
-#ifndef HAVE_CUDA_H
     createFields( run );
-#endif
 
 }
 
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef HAVE_CUDA_H
 
 void lcsolve::Loop( stack& run ) {
 
   redhallmhd physics ( run );
+
+#ifndef HAVE_CUDA_H
 
   int     rank  ; MPI_Comm_rank(MPI_COMM_WORLD   , &rank   );
   int     n1n2  ; run.stack_data.fetch( "n1n2"   , &n1n2   );
@@ -142,6 +144,8 @@ void lcsolve::Loop( stack& run ) {
 
   run.writeUData(                                 );
   run.writeParameters(                            );
+
+#endif
 
 }
 
@@ -345,16 +349,17 @@ void lcsolve::passAdjacentLayers( std::string str_step, stack& run ) {
 //      }
 //    }
 //  }
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 
 void lcsolve::setS( std::string str_step, stack& run, redhallmhd& physics ) {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  std::string model;
-  run.palette.fetch("model", &model);
+  std::string model; run.palette.fetch("model", &model);
 
   RealVar  s0,  s1,  s2,   s3;                    /* ~ implicit fraction s - parameters                 ~ */
   run.palette.fetch(  "s0",   &s0 );
@@ -613,25 +618,22 @@ d3y.resize(0);
 
 }
 
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void lcsolve::setD( std::string str_step, stack& run, redhallmhd& physics ) {
 
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  RealVar dz;
-  run.stack_data.fetch("dz"       , &dz    );                                  /* ~ inter-layer width along z                   ~ */
+  RealVar dz; run.stack_data.fetch("dz"       , &dz    );                        /* ~ inter-layer width along z                 ~ */
   RealVar rho;
 
-  std::string model;
-  run.palette.fetch("model"       , &model );
+  std::string model; run.palette.fetch("model"       , &model );
 
   if (model.compare("hall") == 0) { physics.physics_data.fetch(  "rho", &rho ); } /* ~ gyro-radius parameter                    ~ */
   else { rho       = zero;                                                      }
 
-  RealVar beta;                           
-  run.palette.fetch("beta"        , &beta  );                                  /* ~ zero'th-order plasma-beta                   ~ */
+  RealVar beta; run.palette.fetch("beta"        , &beta  );                       /* ~ zero'th-order plasma-beta                ~ */
 
   RealVar dzm1     = one / dz;
   RealVar rtbeta   = sqrt(beta);
@@ -818,30 +820,28 @@ void lcsolve::setAi( stack& run, redhallmhd& physics ) {
     for (unsigned k = kstart; k < kstop; k++) { A1[k]         = -( eta * ssqd * J[k] ); }
 
   }
-
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~ non-CUDA vector representations for fields ~ */
 
+
 void lcsolve::createFields( stack& run ) {
 
-    int n1n2c;
-    run.stack_data.fetch("n1n2c", &n1n2c );        /* ~ number of complex elements per layer ~ */
+    int n1n2c;         run.stack_data.fetch("n1n2c", &n1n2c );  /* ~ number of complex elements per layer ~ */
+    int iu2;           run.stack_data.fetch("iu2"  , &iu2   );  /* ~ number of layers in stack            ~ */
   
-    int iu2;
-    run.stack_data.fetch("iu2"  , &iu2   );        /* ~ number of layers in stack            ~ */
+    std::string model; run.palette.fetch("model"   , &model );
   
-    std::string model;
-    run.palette.fetch("model"   , &model );
-  
-    run.tU0.reserve(n1n2c * iu2);                  /* ~ for predictor-step results           ~ */
-    run.tU1.reserve(n1n2c * iu2);                  /* ~ Note: U0, U1, U2, & U3 are defined   ~ */
-                                                   /* ~       on the stack.                  ~ */
+    run.tU0.reserve(n1n2c * iu2);                               /* ~ for predictor-step results           ~ */
+    run.tU1.reserve(n1n2c * iu2);                               /* ~ Note: U0, U1, U2, & U3 are defined   ~ */
+                                                                /* ~       on the stack.                  ~ */
   
     if (model.compare("hall") == 0 ) {
+
       run.tU2.reserve(n1n2c * iu2);
       run.tU3.reserve(n1n2c * iu2);
+
     }
   
     SE0.reserve(n1n2c);                            /* ~ the S -arrays. see documentation     ~ */
@@ -900,59 +900,6 @@ void lcsolve::destroyFields() {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void lcsolve::partialsInXandY( stack& run, redhallmhd& physics, ComplexArray& U, RealArray& Ux, RealArray& Uy) {
-
-  unsigned usize   = U.capacity();
-
-  RealArray& kx    = run.kx;
-  RealArray& ky    = run.ky;
-  
-  unsigned kx_size = kx.capacity();
-
-  ComplexArray U_tmp(usize, czero);
-
-  int      n1n2c;
-  run.stack_data.fetch("n1n2c", &n1n2c   );         /* ~ number of complex elements in a layer ~ */
-
-  unsigned idk;
-
-  for (unsigned k  = 0; k < usize; k++) { 
-
-    if ( k % n1n2c == 0 ) { idk = 0; }
-    U_tmp[k]       =  iunit * kx[idk] * U[k];
-    ++idk;
-
-  } /* ~ dU/dx -> ik_x U         ~ */
-
-  physics.fftw.fftwReverseRaw( run, U_tmp,  Ux);    /* ~ transform to real space               ~ */
-
-  for (unsigned k  = 0; k < usize; k++) { 
-    if ( k % n1n2c == 0 ) { idk = 0; }
-    U_tmp[k]       =  iunit * ky[idk] * U[k]; 
-    ++idk;
-    
-  } /* ~ dU/dy -> ik_y U ~ */
-
-  physics.fftw.fftwReverseRaw( run, U_tmp,  Uy);    /* ~ transform to real space               ~ */
-
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-void lcsolve::bracket( stack& run, redhallmhd& physics, ComplexArray& BrKt, RealArray& d1x, RealArray& d1y, RealArray& d2x, RealArray& d2y) {
-
-  unsigned dsize   = d1x.capacity();
-
-  RealArray B_tmp(dsize, zero);
-
-  for ( unsigned k = 0; k < dsize; k++ ) { B_tmp[k] = (d1y[k] * d2x[k]) - (d1x[k] * d2y[k]); }
-
-  physics.fftw.fftwForwardRaw( run, B_tmp, BrKt);
-
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
 RealVar lcsolve::maxdU( RealArray& dx, RealArray& dy, int i_grid, int i_layers) {
 
   unsigned dsize   = dx.capacity();
@@ -990,13 +937,10 @@ RealVar lcsolve::maxdU( RealArray& dx, RealArray& dy, int i_grid, int i_layers) 
 
 void lcsolve::averageAcrossLayers( stack& run, int shift_sign, RealArray& dx, RealArray& dy) {
 
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  int n1n2;
-  run.stack_data.fetch("n1n2",  &n1n2 );       /* ~ number of real elements in a layer       ~ */
-  int iu2;
-  run.stack_data.fetch("iu2"  , &iu2  );       /* ~ number of layers in stack                ~ */
+  int n1n2; run.stack_data.fetch("n1n2",  &n1n2 );       /* ~ number of real elements in a layer       ~ */
+  int iu2;  run.stack_data.fetch("iu2"  , &iu2  );       /* ~ number of layers in stack                ~ */
 
   int dsize          = dx.capacity();
 
@@ -1032,13 +976,10 @@ void lcsolve::averageAcrossLayers( stack& run, int shift_sign, RealArray& dx, Re
 
 void lcsolve::averageAcrossLayers( stack& run, int shift_sign, ComplexArray& dx ) {
 
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int rank;  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  int n1n2c;
-  run.stack_data.fetch("n1n2c",  &n1n2c );       /* ~ number of complex elements in a layer    ~ */
-  int iu2;
-  run.stack_data.fetch("iu2"  , &iu2    );       /* ~ number of layers in stack                ~ */
+  int n1n2c; run.stack_data.fetch("n1n2c",  &n1n2c );       /* ~ number of complex elements in a layer    ~ */
+  int iu2;   run.stack_data.fetch("iu2"  , &iu2    );       /* ~ number of layers in stack                ~ */
 
   int dsize          = dx.capacity();
 
@@ -1131,17 +1072,147 @@ void lcsolve::Step( std::string str_step, stack& run ) {
   }
 }
 
-#endif
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+void lcsolve::partialsInXandY( stack& run, redhallmhd& physics, ComplexArray& U, RealArray& Ux, RealArray& Uy) {
+
+#ifndef HAVE_CUDA_H
+
+  unsigned usize   = U.capacity();
+
+  RealArray& kx    = run.kx;
+  RealArray& ky    = run.ky;
+  
+  unsigned kx_size = kx.capacity();
+
+  ComplexArray U_tmp(usize, czero);
+
+  int      n1n2c;
+  run.stack_data.fetch("n1n2c", &n1n2c   );         /* ~ number of complex elements in a layer ~ */
+
+  unsigned idk;
+
+  for (unsigned k  = 0; k < usize; k++) { 
+
+    if ( k % n1n2c == 0 ) { idk = 0; }
+    U_tmp[k]       =  iunit * kx[idk] * U[k];
+    ++idk;
+
+  } /* ~ dU/dx -> ik_x U         ~ */
+
+  physics.fftw.fftwReverseRaw( run, U_tmp,  Ux);    /* ~ transform to real space               ~ */
+
+  for (unsigned k  = 0; k < usize; k++) { 
+    if ( k % n1n2c == 0 ) { idk = 0; }
+    U_tmp[k]       =  iunit * ky[idk] * U[k]; 
+    ++idk;
+    
+  } /* ~ dU/dy -> ik_y U ~ */
+
+  physics.fftw.fftwReverseRaw( run, U_tmp,  Uy);    /* ~ transform to real space               ~ */
+
+#endif
+
+}
+
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+void lcsolve::bracket( stack& run, redhallmhd& physics, ComplexArray& BrKt, RealArray& d1x, RealArray& d1y, RealArray& d2x, RealArray& d2y) {
+
+#ifndef HAVE_CUDA_H
+  unsigned dsize   = d1x.capacity();
+
+  RealArray B_tmp(dsize, zero);
+
+  for ( unsigned k = 0; k < dsize; k++ ) { B_tmp[k] = (d1y[k] * d2x[k]) - (d1x[k] * d2y[k]); }
+
+  physics.fftw.fftwForwardRaw( run, B_tmp, BrKt);
+
+#endif
+
+}
+
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+//#ifndef HAVE_CUDA_H
+
+//void lcsolve::Step( std::string str_step, stack& run ) {
+//
+//  int rank;          MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//  int np;            run.palette.fetch(   "np"    ,&np     ); /* ~ number of processes                         ~ */
+//  std::string model; run.palette.fetch(   "model" , &model ); /* ~ one of "hall" or "rmhd", or "inhm"          ~ */
+//  int n1n2c;         run.stack_data.fetch("n1n2c" , &n1n2c ); /* ~ number of complex elements per layer        ~ */
+//  int iu2;           run.stack_data.fetch("iu2"   , &iu2   ); /* ~ number layers                               ~ */
+//  RealVar dt;        run.palette.fetch(   "dt"    , &dt    ); /* ~ current time increment                      ~ */
+//  RealVar pfrac;     run.palette.fetch(   "pfrac" , &pfrac ); /* ~ fraction of dt to use for predictor-        ~ */
+//                                                              /* ~ step                                        ~ */
+//  if (str_step.compare("predict") == 0 ) {                    /* ~ use partial step in predictor case          ~ */
+//    dt              = pfrac * dt;                             /* ~ dt is local so no problem here              ~ */
+//  }
+//
+//  int kstart        = n1n2c;                                  /* ~ stepping is only done for layers 1          ~ */
+//  int kstop         = n1n2c * (iu2 - 1);                      /* ~ through iu2 - 2                             ~ */
+//                                                              /* ~ layers 0 and iu2 - 1 are for the            ~ */
+//                                                              /* ~ boundaries and overlaps                     ~ */
+//  int idx;                                                    /* ~ an index for the S's which are              ~ */
+//                                                              /* ~ field-independent and thus the same         ~ */
+//                                                              /* ~ across layers                               ~ */
+//
+//  ComplexArray& U0  = run.U0;                                 /* ~ for predictor case                          ~ */
+//  ComplexArray& U1  = run.U1;                                 /* ~ un-updated values are transferred           ~ */
+//  ComplexArray& U2  = run.U2;
+//  ComplexArray& U3  = run.U3;
+//
+//  ComplexArray& tU0 = run.tU0;                                /* ~ for corrector case                          ~ */
+//  ComplexArray& tU1 = run.tU1;                                /* ~ results from predictor step are transferred ~ */
+//  ComplexArray& tU2 = run.tU2;
+//  ComplexArray& tU3 = run.tU3;
+//
+//  for (unsigned k   = kstart; k < kstop; k++) {
+//
+//    if (k % kstart  == 0 ) { idx = 0; }                      /* ~ reset idx when starting new layer            ~ */
+//
+//      if (     str_step.compare("predict") == 0) {           /* ~ the predictor case                           ~ */
+//
+//        tU0[k]     = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];}
+//        tU1[k]     = (SE1[idx] * U1[k] + (dt * (B1[k] + D1[k] + A1[k]))) * SI1[idx];
+//
+//        if ( model.compare("hall") == 0 ) {
+//
+//          tU2[k]    = (SE2[idx] * U2[k] + (dt * (B2[k] + D2[k] + A2[k]))) * SI2[idx];
+//          tU3[k]    = (SE3[idx] * U3[k] + (dt * (B3[k] + D3[k] + A3[k]))) * SI3[idx];
+//
+//        }
+//      else if (str_step.compare("correct") == 0) { /* ~ the corrector case                          ~ */
+//
+//         U0[k]      = (SE0[idx] * U0[k] + (dt * (B0[k] + D0[k] + A0[k]))) * SI0[idx];
+//         U1[k]      = (SE1[idx] * U1[k] + (dt * (B1[k] + D1[k] + A1[k]))) * SI1[idx];
+//
+//        if ( model.compare("hall") == 0 ) {
+//
+///* ~ NOTE: hall case does not yet reflect conditionals added above to tU0 for tU2 ~ */ 
+//
+//           U2[k]    = (SE2[idx] * U2[k] + (dt * (B2[k] + D2[k] + A2[k]))) * SI2[idx];
+//           U3[k]    = (SE3[idx] * U3[k] + (dt * (B3[k] + D3[k] + A3[k]))) * SI3[idx];
+//
+//        }
+//      }
+//
+//    ++idx;
+//
+//  }
+//}
+//#endif
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 
    /* ~ Destructor  ~ */
 
   lcsolve::~lcsolve( ) {
 
-#ifndef HAVE_CUDA_H
-
      destroyFields();
-
-#endif
 
   }

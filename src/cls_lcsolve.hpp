@@ -37,30 +37,30 @@
 #ifndef CLS_LCSOLVE
 #define CLS_LCSOLVE
 
+#include <config.h>
 #include "mpi.h"
-#include "cls_stack.hpp"
-#include "cls_redhallmhd.hpp"
-#include "nsp_constants.hpp"
-
-#include <assert.h>
+#include<iomanip>
 #include <fstream>
 #include <complex>
 #include <vector>
 #include <cstddef>
-#include<iomanip>
+#include "nsp_constants.hpp"
+#include "cls_stack.hpp"
+
+using namespace constants;
+#include "cls_redhallmhd.hpp"
 
 #ifdef HAVE_CUDA_H
   #include "cls_lcsolve_cuda_ext.hpp"
+#else
+  #include <assert.h>
 #endif
 
-using namespace constants;
 
 class lcsolve
 {
 
    private:
-
-#ifndef HAVE_CUDA_H
 
    RealArray    SE0; /* ~ same for different layers of U's      ~ */
    RealArray    SE1;
@@ -87,40 +87,53 @@ class lcsolve
    ComplexArray A2;
    ComplexArray A3;
 
-   void createFields(stack& run );
-   void destroyFields();
-
-   void setS(    std::string str_step,   stack& run, redhallmhd& physics );
-   void setB(    std::string str_step,   stack& run, redhallmhd& physics );
-   void setD(    std::string str_step,   stack& run, redhallmhd& physics );
-   void setAi(                           stack& run, redhallmhd& physics );
-
-   void partialsInXandY(stack& run, redhallmhd& physics, ComplexArray& U, RealArray& Ux, RealArray& Uy);
-   void bracket( stack& run, redhallmhd& physics, ComplexArray& BrKt, RealArray& dx1, RealArray& dy1, RealArray& dx2, RealArray& dy2);
+   void    createFields(stack& run );
+   void    destroyFields();
 
    RealVar maxdU(RealArray& dx, RealArray&  dy, int i_grid, int i_layers);
-   void averageAcrossLayers( stack& run, int shift_sign, RealArray&    dx, RealArray&  dy);
-   void averageAcrossLayers( stack& run, int shift_sign, ComplexArray& dx);
 
+   void    averageAcrossLayers(        stack& run, int shift_sign, RealArray&    dx, RealArray&  dy);
+   void    averageAcrossLayers(        stack& run, int shift_sign, ComplexArray& dx                );
 
-   void Step( std::string str_step, stack& run );
+   void    Step( std::string str_step, stack& run );
 
-#endif
+   void    setS(    std::string str_step,   stack& run, redhallmhd& physics );
+   void    setB(    std::string str_step,   stack& run, redhallmhd& physics );
+   void    setD(    std::string str_step,   stack& run, redhallmhd& physics );
+   void    setAi(                           stack& run, redhallmhd& physics );
+
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
+
+   void    partialsInXandY(                 stack& run, redhallmhd& physics, ComplexArray& U, RealArray& Ux, RealArray& Uy);
+
+   void    bracket(                         stack& run, redhallmhd& physics, 
+                                                                             ComplexArray& BrKt, 
+                                                                                RealArray& dx1, 
+                                                                                RealArray& dy1, 
+                                                                                RealArray& dx2, 
+                                                                                RealArray& dy2
+                  );
+
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
 
    public:
 
 // lcsolve();                                    /* ~ Constructors                         ~ */
 
-   lcsolve( stack& run );
-   void Loop(      stack& run );                /* ~ stepping and such                     ~ */
+    lcsolve(   stack& run );
+   ~lcsolve();                                   /* ~ Destructor                           ~ */
 
-#ifndef HAVE_CUDA_H
-
-   void passAdjacentLayers( std::string str_step, stack& run);
-
+#ifdef HAVE_CUDA_H
+  lcsolve_cuda_ext lcs_cuext;
 #endif
 
-   ~lcsolve();                                   /* ~ Destructor                           ~ */
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
+
+   void Loop(                                     stack& run ); /* ~ stepping and such                     ~ */
+
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
+
+   void passAdjacentLayers( std::string str_step, stack& run );
 
 };
 

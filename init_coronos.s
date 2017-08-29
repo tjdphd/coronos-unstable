@@ -34,7 +34,7 @@ FILE="coronos.in"
 k=1
 while read line                                  # Loop over lines of coronos.in
 do
-  for seek in "nprofile" "prefix" "run_label" "p1" "p2" "p3" "np" "nnodes" "ppn"
+  for seek in "nprofile" "prefix" "run_label" "p1" "p2" "p3" "np" "nnodes" "gpudev" "ppn"
   do
     if [ `expr "$line" : $seek` -ne 0 ]          # find line containing current seek string
     then
@@ -45,8 +45,9 @@ do
          "p1"        )        p1=$val ;;
          "p2"        )        p2=$val ;;
          "p3"        )        p3=$val ;;
-         "np"       )         np=$val ;;
+         "np"        )        np=$val ;;
          "nnodes"    )    nnodes=$val ;;
+         "gpudev"    )    gpudev=$val ;;
          "ppn"       )       ppn=$val ;;
        esac
     fi
@@ -65,22 +66,31 @@ else
   res_label="$xres"_"$yres"_"$zres"
 fi
 #
-         job_name=$prefix"-"$run_label"-"$res_label"-sr-"
-         arc_name=$prefix"-"$run_label"-"$res_label"-ar-"
+         batch_script_name=$prefix"-"$run_label"-"$res_label"-sr-"
+         arc_script_name=$prefix"-"$run_label"-"$res_label"-ar-"
 #
+  if [[ "$gpudev" -gt 0  ]]
+  then
+    job_name="coronos_gpu"
+  else
+    job_name="coronos_cpu"
+  fi
 echo " "
-echo " job_name = " $job_name
-echo " arc_name = " $arc_name
+echo " batch_script_name = " $batch_script_name
+echo " arc_script_name   = " $arc_script_name
+echo " job_name          = " $job_name
+echo " "
 echo "Job Specifications:"
 echo " "
-echo "   First subrun:    $start"
-echo "   Final subrun:    $stop"
-echo "   X-resolution:    $xres"
-echo "   Y-resolution:    $yres"
-echo "   Z-resolution:    $zres"
-echo "number of nodes:    $nnodes"
-echo "processes per node: $ppn"
-echo "total processes:    $np"
+echo "        First subrun: $start"
+echo "        Final subrun: $stop"
+echo "        X-resolution: $xres"
+echo "        Y-resolution: $yres"
+echo "        Z-resolution: $zres"
+echo "     number of nodes: $nnodes"
+echo "  processes per node: $ppn"
+echo "gpu devices per node: $gpudev"
+echo "     total processes: $np"
 echo " "
 echo -n "Does this look correct? (y/n):"
 read ans
@@ -113,8 +123,8 @@ fi
 #
   cur_dir=`pwd`
 #
-     subr=$job_name$j_sr$rsc_man
-  subarch=$arc_name$j_ar$rsc_man
+     subr=$batch_script_name$j_sr$rsc_man
+  subarch=$arc_script_name$j_ar$rsc_man
 #
 if [[ "$rsc_man" == ".pbs" ]]
 then
@@ -129,8 +139,8 @@ do
     j_nx=`expr $j + 1`
     j_nx=$add_zeros$j_nx
   fi
-     subr=$job_name$j_sr$rsc_man
-  subarch=$arc_name$j_ar$rsc_man
+     subr=$batch_script_name$j_sr$rsc_man
+  subarch=$arc_script_name$j_ar$rsc_man
 #
   echo "#!/bin/bash"                      > $subr
   echo "#PBS -W group_list=mhdturb"      >> $subr
@@ -143,7 +153,7 @@ do
   echo "mpirun -np $np src/coronos"      >> $subr
 # echo "qsub $subarch"                   >> $subr
 #
-  nextsr=$job_name$j_nx$rsc_man
+  nextsr=$batch_script_name$j_nx$rsc_man
   echo "nextsr = " $nextsr
   echo "#!/bin/bash"                     > $subarch
   echo "#PBS -W group_list=mhdturb"     >> $subarch
@@ -162,17 +172,22 @@ done
 #
 elif [[ "$rsc_man" == ".slurm" ]]
 then
+
 #
-  jobr=$job_name$j_sr_$start-$stop$rsc_man
-  joba=$arc_name$j_ar_$start-$stop$rsc_man
+  jobr=$batch_script_name$j_sr_$start-$stop$rsc_man
+  joba=$arc_script_name$j_ar_$start-$stop$rsc_man
 #
   echo "#!/bin/sh"                                                                            > $jobr
   echo " "                                                                                   >> $jobr
 # echo "#SBATCH -A $project"                                                                 >> $jobr
-  echo "#SBATCH --job-name=coronos"                                                          >> $jobr
+  echo "#SBATCH --job-name=$job_name"                                                        >> $jobr
   echo "#SBATCH --output=tjd.%j.%N.out"                                                      >> $jobr
   echo "#SBATCH --partition=$partition"                                                      >> $jobr
   echo "#SBATCH --nodes=$nnodes"                                                             >> $jobr
+if [[ "$gpudev" -gt 0 ]]
+then
+  echo "#SBATCH --gres=gpu:$gpudev"                                                          >> $jobr
+fi
   echo "#SBATCH --tasks-per-node=$ppn"                                                       >> $jobr
   echo "#SBATCH --export=ALL"                                                                >> $jobr
   echo "#SBATCH -t $run_wall"                                                                >> $jobr

@@ -33,11 +33,12 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+#include <config.h>
 #include <cuda.h>
 
 class redhallmhd_cuda_ext
 {
-  friend class redhallmhd;
+//  friend class redhallmhd;
 
   private:
 

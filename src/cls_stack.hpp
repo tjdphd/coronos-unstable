@@ -38,6 +38,7 @@
 #ifndef CLS_STACK
 #define CLS_STACK
 
+#include <config.h>
 #include "nsp_constants.hpp"
 #include "cls_canvas.hpp"
 #include "mpi.h"
@@ -56,6 +57,10 @@ class stack : public canvas
   void init_stack_data();                     /* ~ gather/infer information to be
                                                    included in stack_data container        ~ */
   public:
+
+#ifdef HAVE_CUDA_H
+    stack_cuda_ext stack_cuext;
+#endif
 
   stack();                                    /* ~ Constructors                            ~ */
   stack(std::string coronos_in);
@@ -79,7 +84,6 @@ class stack : public canvas
 
   void     zeroU();                           /* ~ a convenience function                  ~ */
 
-#ifndef HAVE_CUDA_H
 
    ComplexArray U0;                           /* ~Fourier Space Field Arrays               ~ */
    ComplexArray U1;
@@ -95,8 +99,6 @@ class stack : public canvas
   RealArray ky;
   RealArray k2;
   RealArray inv_k2;
-
-#endif
 
   void initAUX();                             /* ~ for containing auxiliary field data     ~ */
 

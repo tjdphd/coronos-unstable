@@ -32,20 +32,24 @@
  * DESCRIPTION: To be added prior to public release
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#ifndef CLS_LCSOLVE_CUDA_EXT
+#define CLS_LCSOLVE_CUDA_EXT
 
+#include <config.h>
 #include <cuda.h>
 
 class lcsolve_cuda_ext
 {
-  friend class lcsolve;
+//friend class lcsolve;
 
   private:
 
   public:
 
-  lcsolve_cuda_ext();
-
+   lcsolve_cuda_ext();
 
   ~lcsolve_cuda_ext();
 
 };
+
+#endif

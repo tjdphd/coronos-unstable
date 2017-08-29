@@ -37,7 +37,9 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+
 #include "cls_redhallmhd.hpp"
+
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -55,7 +57,6 @@ redhallmhd::redhallmhd() {
 
 redhallmhd::redhallmhd(stack& run ) {
 
-#ifndef HAVE_CUDA_H
 
   int rank;  MPI_Comm_rank(MPI_COMM_WORLD,          &rank );
   int srun;  run.palette.fetch(         "srun",     &srun );
@@ -66,6 +67,8 @@ redhallmhd::redhallmhd(stack& run ) {
   init_physics_data(     run   );                          /* ~ physics - specific parameters               ~ */
   initU(                 run   );                          /* ~ initialization of layers 1 - n3 of U        ~ */
                                                            /* ~ for srun > 1 AUX has real space O and J now ~ */
+#ifndef HAVE_CUDA_H
+
   initTimeInc(           run   );
   fftw.fftwForwardAll(   run   );                          /* ~ puts real-space fields into Fourier space   ~ */
 
@@ -92,13 +95,11 @@ redhallmhd::redhallmhd(stack& run ) {
   if (srun == 1) { fftw.fftwReverseAll(   run, O, J);
                    run.writeUData  (               ); }    /* ~ the real space values of O and J as well as ~ */
                                                            /* ~ P and A in a "subrun zero" data file        ~ */
-}
-
 #endif
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+}
 
-#ifndef HAVE_CUDA_H
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void redhallmhd::initTimeInc( stack& run ){
 
@@ -111,7 +112,9 @@ void redhallmhd::initTimeInc( stack& run ){
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+
 void redhallmhd::initU( stack& run ) {
+
 
   fftw.fftwInitialize( run );
 
@@ -119,6 +122,8 @@ void redhallmhd::initU( stack& run ) {
 
   int srun;             run.palette.fetch("srun",     &srun    );
   std::string scenario; run.palette.fetch("scenario", &scenario);
+
+#ifndef HAVE_CUDA_H
 
   if (scenario.compare("reconnection")  == 0) {
 
@@ -225,6 +230,9 @@ void redhallmhd::initU( stack& run ) {
     for (unsigned k = 0; k < nk; ++k) { ke[k] = log((k+ikb)*dk); }
 
   }
+
+#endif
+
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -497,6 +505,7 @@ void redhallmhd::initGauss( stack& run ) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+
 void redhallmhd::computeFourierU( stack& run ) {
 
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -572,17 +581,24 @@ void redhallmhd::computeFourierU( stack& run ) {
 
     }
 
+#ifndef HAVE_CUDA_H
+
     fftw.fftwReverseIC(Cin, Rout);
     for (unsigned k   = 0; k < n1n2; ++k) { U[k][n3][i_f] = Rout[k]; }
 
+#endif
+
   }
 
+#ifndef HAVE_CUDA_H
   for (     int i_f = 0; i_f < n_flds; ++i_f) {
     for (   int i_l = 1; i_l < n3;     ++i_l) {
       for ( int k   = 0;   k < n1n2;   ++k)   { U[k][i_l][i_f] = U[k][n3][i_f]; }
     }
   }
+#endif
 }
+
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -1220,7 +1236,10 @@ void redhallmhd::initNoDrive( stack& run) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+
 void redhallmhd::retrieveOJ( stack& run )  {
+
+#ifndef HAVE_CUDA_H
 
   int n1n2c;    run.stack_data.fetch("n1n2c", &n1n2c    ); /* ~ number of complex elements per layer       ~ */
   int n_layers; run.stack_data.fetch("iu2",   &n_layers ); /* ~ number of layers in stack                  ~ */
@@ -1228,6 +1247,8 @@ void redhallmhd::retrieveOJ( stack& run )  {
   ComplexArray::size_type usize;
   usize = n1n2c *n_layers;
   fftw.fftwForwardAll( run, O, J); /* ~ resulting O and J should compare well with OfromP and HfromA output below ~ */
+
+#endif
 
 }
 
@@ -3368,6 +3389,8 @@ void redhallmhd::updateTimeInc( stack& run ) {
 
 void redhallmhd::checkState( int pair, stack &run, std::string roc) {
 
+#ifndef HAVE_CUDA_H
+
   int          rank  ; MPI_Comm_rank(MPI_COMM_WORLD ,   &rank  );
   int          srun  ; run.palette.fetch(    "srun" ,   &srun  );
   int          n1n2  ; run.stack_data.fetch( "n1n2" ,   &n1n2  );
@@ -3479,9 +3502,10 @@ void redhallmhd::checkState( int pair, stack &run, std::string roc) {
   }
 
   ofs.close();
-}
 
 #endif
+
+}
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -3495,8 +3519,10 @@ void redhallmhd::physicsFinalize ( stack& run) {
 
 /* ~ Destructor ~ */
 
+
 redhallmhd:: ~redhallmhd() {
 
 //  fftw.fftwFinalize();
 
 }
+

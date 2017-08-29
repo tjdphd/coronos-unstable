@@ -40,12 +40,14 @@
 #ifndef CLS_REDHALLMHD
 #define CLS_REDHALLMHD
 
+
+#include <config.h>
 #include "mpi.h"
-#include "nsp_constants.hpp"
 #include "cls_parameter_map.hpp"
 #include "cls_stack.hpp"
 #include "cls_fft.hpp"
-#include <assert.h>
+#include "nsp_constants.hpp"
+
 #include <fstream>
 #include <complex>
 #include <vector>
@@ -54,6 +56,8 @@
 
 #ifdef HAVE_CUDA_H
   #include "cls_redhallmhd_cuda_ext.hpp"
+#else
+#include <assert.h>
 #endif
 
 class redhallmhd
@@ -70,8 +74,13 @@ class redhallmhd
   void init_physics_data(               stack& run);
 
   void initTimeInc(                     stack& run);
+
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
+
   void initU(                           stack& run);                  /* ~ U initialization functions                ~ */
   void computeFourierU(                 stack& run);
+
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
   void computeRealU(                    stack& run);
   void initGauss(                       stack& run);
   void readUData(                       stack& run);
@@ -82,7 +91,9 @@ class redhallmhd
   void initFootPointDriving(            stack& run);
   void initNoDrive(                     stack& run);
 
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
   void retrieveOJ (                     stack& run);
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
   void OfromP(                          stack& run );                 /* ~ Obtain vorticity from P                   ~ */
   void HfromA(                          stack& run );                 /* ~ Obtain H from A                           ~ */
 //void JfromA(                          stack& run );                 /* ~ Obtain J from A                           ~ */
@@ -140,7 +151,9 @@ class redhallmhd
   int         nk;
 
   void updatePAOJ( std::string str_step, stack& run );
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
   void checkState( int pair, stack &run, std::string roc); 
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
   void applyBC(    std::string str_step, stack& run );                 /* ~ Apply Boundary Conditions at current step ~ */
   void updateTimeInc(                    stack& run );
 
@@ -181,9 +194,12 @@ class redhallmhd
 
   redhallmhd();                                                       /* ~ Constructor (default)                     ~ */
 
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
   redhallmhd(                           stack& run );                 /* ~ Constructor                               ~ */
+/* ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ REQUIRES FFT ~ */
 
   ~redhallmhd();                                                      /* ~ Destructor                                ~ */
+
 
 };
 

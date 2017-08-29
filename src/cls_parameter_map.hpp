@@ -38,6 +38,7 @@
 #ifndef CLS_PARAMETER_MAP
 #define CLS_PARAMETER_MAP
 
+#include <config.h>
 #include "cls_parameter.hpp"
 #include<map>
 #include "mpi.h"

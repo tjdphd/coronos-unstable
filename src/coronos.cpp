@@ -35,21 +35,25 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+#include <config.h>
 #include "mpi.h"
+
 #include "cls_stack.hpp"
 #include "cls_lcsolve.hpp"
 
-int main(void) {
+int main( void ) {
 
   MPI::Init();
 
   stack       run(     "coronos.in");
-  lcsolve     solve(   run         );
 
 #ifndef HAVE_CUDA_H
+
+  lcsolve     solve(   run         );
   solve.Loop (         run         );
+
 #endif
 
   MPI::Finalize();
 
-}
+};

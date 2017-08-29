@@ -54,32 +54,35 @@ run_instance::run_instance() {
     std::string padjust;
 
     int tot_proc;
-    int ndevice = 0;
 
     std::string run_start_time = getTime();
     std::string node_name      = getNode();
     mpi_stat                   = MPI_Comm_size(MPI_COMM_WORLD, &tot_proc);
 
+    int ndevice; int * ptr_ndevice; ptr_ndevice = &ndevice;
+
 #ifdef HAVE_CUDA_H
-    ndevice                    = run_instance_cuda_ext::getDeviceCount();
+    ri_cuext.getDeviceCount(ptr_ndevice);
+#else
+    ndevice = 0;
 #endif
 
     padjust.assign("rfx");
 
-      pname.assign("run_start_time");
-      run_data.emplace(pname, run_start_time, padjust);
+    pname.assign("run_start_time");
+    run_data.emplace(pname, run_start_time, padjust);
 
-      pname.assign("node_name");
-      run_data.emplace(pname, node_name,      padjust);
+    pname.assign("node_name");
+    run_data.emplace(pname, node_name,      padjust);
 
-      pname.assign("rank");
-      run_data.emplace(pname, rank,           padjust);
+    pname.assign("rank");
+    run_data.emplace(pname, rank,           padjust);
 
-      pname.assign("tot_proc");
-      run_data.emplace(pname, tot_proc,       padjust);
+    pname.assign("tot_proc");
+    run_data.emplace(pname, tot_proc,       padjust);
 
-      pname.assign("ndevice");
-      run_data.emplace(pname, ndevice,        padjust);
+    pname.assign("ndevice");
+    run_data.emplace(pname, ndevice,        padjust);
 
   }
   else {
@@ -92,6 +95,10 @@ run_instance::run_instance() {
 /* ~ Destructor ~ */
 
 run_instance::~run_instance() {
+
+#ifdef HAVE_CUDA_H
+  run_data.report("gpu_run.out");
+#endif
 
 }
 

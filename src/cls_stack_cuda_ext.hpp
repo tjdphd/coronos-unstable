@@ -33,11 +33,15 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+#ifndef CLS_STACK_CUDA_EXT
+#define CLS_STACK_CUDA_EXT
+
+#include <config.h>
 #include <cuda.h>
 
 class stack_cuda_ext
 {
-  friend class stack;
+//  friend class stack;
 
   private:
 
@@ -46,3 +50,4 @@ class stack_cuda_ext
    stack_cuda_ext();
   ~stack_cuda_ext();
 };
+#endif
