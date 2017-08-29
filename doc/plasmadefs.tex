@@ -1,0 +1,385 @@
+\usepackage{isomath}
+%\usepackage{bm}
+\newcommand{\orderO}{\mathcal{O}}
+
+\newcommand{\wpar}{w_\parallel}
+\newcommand{\wperp}{w_\perp}
+%
+\newcommand{\kpar}{k_\parallel}
+\newcommand{\kperp}{k_\perp}
+%
+\newcommand{\Lpar}{L_\parallel}
+\newcommand{\Lperp}{L_\perp}
+
+
+% - Inhomogeneous RMHD qtys
+\newcommand{\kpp}{k_p^+}
+\newcommand{\kpm}{k_p^-}
+\newcommand{\kppm}{k_p^\pm}
+\newcommand{\kmp}{k_m^+}
+\newcommand{\kmm}{k_m^-}
+\newcommand{\kmpm}{k_m^\pm}
+\newcommand{\ka}{k_A}
+\newcommand{\krho}{k_\rho}
+% - Special functions
+
+\newcommand{\erf}{\mathrm{erf}} % error function
+\newcommand{\erfc}{\mathrm{erfc}} % error function
+% - Proper names
+
+\newcommand{\Alfven}{Alfv\'{e}n\ }
+% - Mathematical Operators
+
+\newcommand{\cross}{\boldsymbol{\times}}
+\newcommand{\deldot}{\boldsymbol{\nabla\cdot}}
+\newcommand{\delperpdot}{\boldsymbol{\nabla_\perp\cdot}}
+\newcommand{\delcross}{\boldsymbol{\nabla\times}}
+\newcommand{\delperpcross}{\boldsymbol{\nabla_\perp\times}}
+\newcommand{\dotdel}{\boldsymbol{\cdot\nabla}}
+\newcommand{\dotdelperp}{\boldsymbol{\cdot\nabla_\perp}}
+\newcommand{\delperp}{\boldsymbol{\nabla}_\perp}
+\newcommand{\delpar}{\boldsymbol{\nabla}_\parallel}
+\newcommand{\bfdel}{\boldsymbol{\nabla}}
+\newcommand{\pardt}{\partial_t}
+\newcommand{\pardx}{\partial_x}
+\newcommand{\pardy}{\partial_y}
+\newcommand{\pardz}{\partial_z}
+\newcommand{\pardzeta}{\partial_\zeta}
+\newcommand{\parddt}{\partial_{tt}}
+\newcommand{\parddx}{\partial_{xx}}
+\newcommand{\parddy}{\partial_{yy}}
+\newcommand{\parddz}{\partial_{zz}}
+\newcommand{\parddzeta}{\partial_{\zeta\zeta}}
+\newcommand{\delsquared}{\nabla^2}
+
+% - Bold-Face Vectors
+\newcommand{\Avec}{\mathbf{A}}
+\newcommand{\Bvec}{\mathbf{B}}
+\newcommand{\Cvec}{\mathbf{C}}
+\newcommand{\Dvec}{\mathbf{D}}
+\newcommand{\Evec}{\mathbf{E}}
+\newcommand{\Fvec}{\mathbf{F}}
+\newcommand{\Gvec}{\mathbf{G}}
+\newcommand{\Hvec}{\mathbf{H}}
+\newcommand{\Ivec}{\mathbf{I}}
+\newcommand{\Jvec}{\mathbf{J}}
+\newcommand{\Kvec}{\mathbf{K}}
+\newcommand{\Lvec}{\mathbf{L}}
+\newcommand{\Mvec}{\mathbf{M}}
+\newcommand{\Nvec}{\mathbf{N}}
+\newcommand{\Ovec}{\mathbf{O}}
+\newcommand{\Pvec}{\mathbf{P}}
+\newcommand{\Qvec}{\mathbf{Q}}
+\newcommand{\Rvec}{\mathbf{R}}
+\newcommand{\Svec}{\mathbf{S}}
+\newcommand{\Tvec}{\mathbf{T}}
+\newcommand{\Uvec}{\mathbf{U}}
+\newcommand{\Vvec}{\mathbf{V}}
+\newcommand{\Wvec}{\mathbf{W}}
+\newcommand{\Xvec}{\mathbf{X}}
+\newcommand{\Yvec}{\mathbf{Y}}
+\newcommand{\Zvec}{\mathbf{Z}}
+\newcommand{\avec}{\mathbf{a}}
+\newcommand{\bvec}{\mathbf{b}}
+\newcommand{\cvec}{\mathbf{c}}
+\newcommand{\dvec}{\mathbf{d}}
+\newcommand{\evec}{\mathbf{e}}
+\newcommand{\fvec}{\mathbf{f}}
+\newcommand{\gvec}{\mathbf{g}}
+\newcommand{\hvec}{\mathbf{h}}
+\newcommand{\ivec}{\mathbf{i}}
+\newcommand{\jvec}{\mathbf{j}}
+\newcommand{\kvec}{\mathbf{k}}
+\newcommand{\lvec}{\mathbf{l}}
+\newcommand{\mvec}{\mathbf{m}}
+\newcommand{\nvec}{\mathbf{n}}
+\newcommand{\ovec}{\mathbf{o}}
+\newcommand{\pvec}{\mathbf{p}}
+\newcommand{\qvec}{\mathbf{q}}
+\newcommand{\rvec}{\mathbf{r}}
+\newcommand{\svec}{\mathbf{s}}
+\newcommand{\tvec}{\mathbf{t}}
+\newcommand{\uvec}{\mathbf{u}}
+\newcommand{\vvec}{\mathbf{v}}
+\newcommand{\wvec}{\mathbf{w}}
+\newcommand{\xvec}{\mathbf{x}}
+\newcommand{\yvec}{\mathbf{y}}
+\newcommand{\zvec}{\mathbf{z}}
+
+% - Elsasser Variable related
+%
+\newcommand{\elsasser}{Els\"{a}sser}
+%
+\newcommand{\elsaspm}{\avec^{\pm}}
+\newcommand{\elsasmp}{\avec^{\mp}}
+\newcommand{\elsasp}{\avec^{+}}
+\newcommand{\elsasm}{\avec^{-}}
+%
+\newcommand{\elsasxpm}{a_x^{\pm}}
+\newcommand{\elsasypm}{a_y^{\pm}}
+\newcommand{\elsasxmp}{a_x^{\mp}}
+\newcommand{\elsasymp}{a_y^{\mp}}
+%
+\newcommand{\elsasOmpm}{\Omega^{\pm}}
+\newcommand{\elsasOmmp}{\Omega^{\mp}}
+\newcommand{\elsasOmp}{\Omega^{+}}
+\newcommand{\elsasOmm}{\Omega^{-}}
+%
+\newcommand{\elsasompm}{\omega^{\pm}}
+\newcommand{\elsasommp}{\omega^{\mp}}
+\newcommand{\elsasomp}{\omega^{+}}
+\newcommand{\elsasomm}{\omega^{-}}
+%
+\newcommand{\elsasphipm}{\phi^{\pm}}
+\newcommand{\elsasphimp}{\phi^{\mp}}
+\newcommand{\elsasphip}{\phi^{+}}
+\newcommand{\elsasphim}{\phi^{-}}
+%
+\newcommand{\elsaspsipm}{\psi^{\pm}}
+\newcommand{\elsaspsimp}{\psi^{\mp}}
+\newcommand{\elsaspsip}{\psi^{+}}
+\newcommand{\elsaspsim}{\psi^{-}}
+%
+% - Common functional dependencies and intregration elements
+
+\newcommand{\ofrvecvvecnt}{(\rvec,\vvec,t)}
+\newcommand{\ofrvecvvec}{(\rvec,\vvec)}
+\newcommand{\ofrvecnt}{(\rvec,t)}
+\newcommand{\ofrvec}{(\rvec)}
+\newcommand{\ofxnv}{(x,v)}
+\newcommand{\ofznv}{(z,v)}
+\newcommand{\ofznvz}{(z,v_z}
+\newcommand{\ofrhoznvz}{(\rho,z,v_z)}
+\newcommand{\ofrhonz}{(\rho,z)}
+\newcommand{\dcubedv}{\,d^3v}
+
+% - Kinetic Energy Quantities
+
+\newcommand{\kepar}{W_\parallel}
+\newcommand{\keperp}{W_\perp}
+
+% - Electric / Magnetic Field Quantities
+
+    % --> magnitudes 
+    \newcommand{\magEperp}{E_\perp}
+    \newcommand{\magEpar}{E_\parallel}
+    \newcommand{\magBperp}{B_\perp}
+    \newcommand{\magBpar}{B_\parallel}
+
+    % --> field vectors 
+    \newcommand{\Eperp}{\Evec_\perp}
+    \newcommand{\Epar}{\Evec_\parallel}
+    \newcommand{\Bperp}{\Bvec_\perp}
+    \newcommand{\Bpar}{\Bvec_\parallel}
+
+    % --> other field quantities 
+    \newcommand{\magBtor}{B_T}                 % Toroidal field strength
+    \newcommand{\jpar}{\jvec_\parallel}        % parallel current density
+    \newcommand{\jperp}{\jvec_\perp}           % perpendicular current density
+
+    %--> unit vectors
+    \newcommand{\bhat}{\hat\bvec}
+    \newcommand{\bperphat}{\hat\bvec_\perp}
+    \newcommand{\bparhat}{\hat\bvec_\parallel}
+
+% - Discplacements
+
+    \newcommand{\xperp}{\xvec_\perp}
+    \newcommand{\xpar}{\xvec_\parallel}
+
+% - Speeds, Velocities, and Vorticities
+
+    \newcommand{\vorticity}{\mathbf{\Omega}}
+    \newcommand{\magvorticity}{\Omega}
+
+    % - single fluid 
+
+    % --> magnitudes 
+
+    \newcommand{\talfven}{\tau_{\mathrm{A}}}    % Alfven time
+    \newcommand{\magvperp}{v_\perp}             % perpendicular velocity magnitude
+    \newcommand{\magvpar}{v_\parallel}          % parallel velocity magnitude
+    \newcommand{\magvalfven}{v_{\mathrm{A}}}    % Alfven speed
+    \newcommand{\magvthermal}{v_{t}}            % thermal speed
+
+    % --> vectors 
+    \newcommand{\vperp}{\vvec_\perp}            % perpendicular velocity
+    \newcommand{\vpar}{\vvec_\parallel}         % parallel velocity
+    \newcommand{\valfven}{\vvec_{A}}            % Alfven velocity
+
+    % - two fluid 
+
+    % --> magnitudes 
+
+    \newcommand{\magve}{v_e}                    % magnitude electron velocity magnitude
+    \newcommand{\magvi}{v_i}                    % magnitude ion velocity magnitude
+    \newcommand{\magvs}{v_s}                    % magnitude species velocity magnitude
+
+    \newcommand{\magveperp}{v_{e,\perp}}        % magnitude perpendicular electron perpendicular velocity magnitude
+    \newcommand{\magvepar}{v_{e,\parallel}}     % magnitude parallel electron parallel velocity magnitude
+
+    \newcommand{\magviperp}{v_{i,\perp}}        % magnitude ion perpendicular velocity magnitude
+    \newcommand{\magvipar}{v_{i,\parallel}}     % magnitude ion parallel velocity magnitude
+
+    \newcommand{\magvsperp}{v_{s,\perp}}        % magnitude species perpendicular velocity magnitude
+    \newcommand{\magvspar}{v_{s,\parallel}}     % magnitude species parallel velocity magnitude
+
+    \newcommand{\magvethermal}{v_{e,t}}         % magnitude electron thermal velocity
+    \newcommand{\magvithermal}{v_{i,t}}         % magnitude ion thermal velocity
+    \newcommand{\magvsthermal}{v_{s,t}}         % magnitude species thermal velocity
+
+    % --> vectors 
+
+    \newcommand{\ve}{\vvec_e}                   % electron velocity
+    \newcommand{\vi}{\vvec_i}                   % ion velocity
+    \newcommand{\vs}{\vvec_s}                   % species velocity
+
+    \newcommand{\veperp}{\vvec_{e,\perp}}       % perpendicular electron velocity electron perpendicular velocity
+    \newcommand{\vepar}{\vvec_{e,\parallel}}    % parallel electron velocity electron parallel velocity
+
+    \newcommand{\viperp}{\vvec_{i,\perp}}       % perpendicular ion velocity ion perpendicular velocity
+    \newcommand{\vipar}{\vvec_{i,\parallel}}    % parallel ion velocity ion parallel velocity
+
+    \newcommand{\vsperp}{\vvec_{s,\perp}}       % species perpendicular velocity
+    \newcommand{\vspar}{\vvec_{s,\parallel}}    % species parallel velocity
+
+% - Geometric Quantities
+
+    % - unit vectors
+
+    \newcommand{\xhat}{\hat\xvec}
+    \newcommand{\yhat}{\hat\yvec}
+    \newcommand{\zhat}{\hat\zvec}
+
+    \newcommand{\rhohat}{\boldsymbol{\hat\rho}}
+    \newcommand{\phihat}{\boldsymbol{\hat\phi}}
+
+    \newcommand{\eperphat}{\hat\evec_\perp}
+    \newcommand{\eparhat}{\hat\evec_\parallel}
+
+\newcommand{\Radcurv}{\Rvec_c} % - radius of curvature
+
+\newcommand{\Radcurvmag}{R_c}  % - magnitude radius of curvature
+
+% Thermodynamic Quantities
+
+   %--> number/particle densities
+   \newcommand{\nedens}{n_e}  % - electron density
+   \newcommand{\nidens}{n_i}  % - ion density
+   \newcommand{\npdens}{n_p}  % - proton density
+   \newcommand{\nsdens}{n_s}  % - species density
+   \newcommand{\nndens}{n_0}  % - neutral density
+   %--> temperatures (isotropic)
+   \newcommand{\etemp}{T_e}   % - electron temperature
+   \newcommand{\ptemp}{T_p}   % - proton temperature
+   \newcommand{\itemp}{T_i}   % - ion temperature
+   \newcommand{\stemp}{T_s}   % - species temperature
+   \newcommand{\gtemp}{T}     % - generic temperature
+   %--> temperatures (anisotropic)
+   \newcommand{\etempperp}{T_e^\perp} % - perpendicular electron temperature
+   \newcommand{\ptempperp}{T_p^\perp}   % - perpendicular proton temperature
+   \newcommand{\itempperp}{T_i^\perp}   % - perpendicular ion temperature
+   \newcommand{\stempperp}{T_s^\perp}   % - perpendicular species temperature
+
+   \newcommand{\etemppar}{T_e^\parallel}   % - parallel electron temperature
+   \newcommand{\ptemppar}{T_p^\parallel}   % - parallel proton temperature
+   \newcommand{\itemppar}{T_i^\parallel}   % - parallel ion temperature
+   \newcommand{\stemppar}{T_s^\parallel}   % - parallel species temperature
+
+   %-- pressures (species)
+
+   \newcommand{\epres}{P_e} % electron pressure
+   \newcommand{\ipres}{P_i} % ion pressure
+   \newcommand{\spres}{P_s} % species pressure
+
+   %-- vectors
+
+   \newcommand{\eifric}{\mathboldsans{\Gamma}} % electron-ion friction
+   \newcommand{\qeflux}{\qvec_e}               % electron heat flux
+   \newcommand{\qiflux}{\qvec_i}               % ion heat flux
+   \newcommand{\qsflux}{\qvec_s}               % species heat flux
+
+   %-- tensors
+   
+   \newcommand{\estresst}{\mathboldsans{\Pi}_e}      % electron stress tensor
+   \newcommand{\istresst}{\mathboldsans{\Pi}_i}      % ion stress tensor
+   \newcommand{\eistresst}{\mathboldsans{\Pi}_{e,i}} % electron or ion stress tensor
+   \newcommand{\sstresst}{\mathboldsans{\Pi}_{s}}    % species stress tensor
+   \newcommand{\stresst}{\mathboldsans{\Pi}}         % generic stress tensor
+
+   \newcommand{\stresscomp}{\mathsf{\Pi}}            % generic stress tensor component root
+
+
+   \newcommand{\rostrain}{\mathboldsans{W}}          % Rate-of-strain tensor
+   \newcommand{\rostraincomp}{\mathsf{W}}            % Rate-of-strain tensor component root
+
+% Units
+
+\newcommand{\percc}{\mathrm{cm}^{-3}}
+\newcommand{\kelvin}{\mathrm{K}}
+\newcommand{\radspersec}{\mathrm{rad/s}}
+\newcommand{\hertz}{\mathrm{Hz}}
+\newcommand{\percm}{\mathrm{m}^{-3}}
+\newcommand{\persec}{\mathrm{sec}^{-1}}
+\newcommand{\coulomb}{\mathrm{C}}
+\newcommand{\eV}{\mathrm{eV}}
+
+% physical constants
+
+\newcommand{\kboltz}{k_{\mathrm{B}}}
+\newcommand{\epszero}{\epsilon_0}
+\newcommand{\muzero}{\mu_0}
+
+% plasma parameters 
+
+\newcommand{\debyelength}{\lambda_{\mathrm{D}}} % debye length
+\newcommand{\edebyelength}{\lambda_{e}}         % electron debye length
+
+\newcommand{\elmass}{m_e}          % electron mass
+\newcommand{\prmass}{m_p}          % proton mass
+\newcommand{\iomass}{m_i}          % ion mass
+\newcommand{\spmass}{m_s}          % species mass
+
+\newcommand{\elplfr}{\omega_{p,e}} % electron plasma frequency larmor Larmor cyclotron
+\newcommand{\prplfr}{\omega_{p,p}} % proton plasma frequency
+\newcommand{\ioplfr}{\omega_{p,i}} % ion plasma frequency
+\newcommand{\spplfr}{\omega_{p,s}} % species plasma frequency
+
+\newcommand{\elgyrorad}{\rho_e}    % electron gyroradius
+\newcommand{\prgyrorad}{\rho_p}    % proton gyroradius
+\newcommand{\iogyrorad}{\rho_i}    % ion gyroradius
+\newcommand{\spgyrorad}{\rho_s}    % species gyroradius
+
+\newcommand{\elgyrofreq}{\Omega_e} % electron gyrofrequency
+\newcommand{\prgyrofreq}{\Omega_p} % proton gyrofrequency
+\newcommand{\iogyrofreq}{\Omega_i} % ion gyrofrequency
+\newcommand{\spgyrofreq}{\Omega_s} % species gyrofrequency
+\newcommand{\gegyrofreq}{\Omega}   % generic gyrofrequency
+
+\newcommand{\etcol}{\tau_e}        % electron collision time 
+\newcommand{\itcol}{\tau_i}        % ion collision time 
+\newcommand{\stcol}{\tau_s}        % species collision time 
+\newcommand{\tcol}{\tau}           % generic collision time 
+
+\newcommand{\condpar}{\sigma_\parallel} % parallel electrical conductivity
+\newcommand{\condperp}{\sigma_\perp}    % perpendicular electrical conductivity
+\newcommand{\condnom}{\sigma_0}         % nominal conductivity constant (see Breginskii 65 where it's called sigma_1)
+
+\newcommand{\visc}{\nu}                 % some changeable greek letter for representing viscosity coefficients
+
+\newcommand{\parvisc}{\visc_\parallel}  % parallel      viscosity as understood in the manner of Biskamp's discussion
+\newcommand{\perpvisc}{\visc_\perp}     % perpendicular viscosity as understood in the manner of Biskamp's discussion
+\newcommand{\gyrovisc}{\visc_g}         % ``non-dissipative'' gyroviscosity as understood in the manner of Biskamp's discussion
+
+\newcommand{\viscconstpar}{c_\parallel}  % numerical constant for parallel viscosity
+\newcommand{\viscconstperp}{c_\perp}     % numerical constant for perpendicular viscosity
+\newcommand{\viscconstgyro}{c_g}         % numerical constant for gyro viscosity
+
+% Operators
+
+
+% miscellaneous
+
+\newcommand{\ecrossb}{\Evec\times\Bvec}
+
+

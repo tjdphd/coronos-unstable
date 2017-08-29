@@ -1,0 +1,52 @@
+\documentclass{standalone}
+%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{tikz}
+\usetikzlibrary{intersections}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathreplacing, decorations.markings}
+\input{plasmadefs.tex}
+\newcommand{\hfield}{\mathscr{H}}
+%
+\tikzset{
+	on each segment/.style={
+		decorate,
+		decoration={
+			show path construction,
+			moveto code={},
+			lineto code={
+				\path [#1]
+				(\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+			},
+			curveto code={
+				\path [#1] (\tikzinputsegmentfirst)
+				..controls
+				(\tikzinputsegmentsupporta) and (\tikzinputsegmentsupportb)
+				..
+				(\tikzinputsegmentlast);
+			},
+			closepath code={
+				\path [#1]
+				(\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+			},
+		},
+	},
+	mid arrow/.style={postaction={decorate,decoration={
+		markings,
+		mark= at position .5 with {\arrow[#1]{stealth}}
+	}}},
+	reverse mid arrow/.style={postaction={decorate,decoration={
+		markings,
+		mark= at position .5 with {\arrowreversed[#1]{stealth}}
+	}}},
+}
+%
+\begin{document}
+ \input{tk_numvol.tex}
+\end{document}
+%

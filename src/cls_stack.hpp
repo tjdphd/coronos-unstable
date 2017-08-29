@@ -85,15 +85,15 @@ class stack : public canvas
   void     zeroU();                           /* ~ a convenience function                  ~ */
 
 
-   ComplexArray U0;                           /* ~Fourier Space Field Arrays               ~ */
-   ComplexArray U1;
-   ComplexArray U2;
-   ComplexArray U3;
+  ComplexArray U0;                            /* ~Fourier Space Field Arrays               ~ */
+  ComplexArray U1;
+  ComplexArray U2;
+  ComplexArray U3;
 
-   ComplexArray tU0;                          /* ~ for holding predictor results           ~ */
-   ComplexArray tU1;
-   ComplexArray tU2;
-   ComplexArray tU3;
+  ComplexArray tU0;                           /* ~ for holding predictor results           ~ */
+  ComplexArray tU1;
+  ComplexArray tU2;
+  ComplexArray tU3;
 
   RealArray kx;                               /* ~ Fourier Space Related                   ~ */
   RealArray ky;
