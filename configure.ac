@@ -43,7 +43,7 @@
 
 # get C++ compiler/mpi wrapper
     
-  CRS_CXX="mpic++ mpiCC CC "
+  CRS_CXX="mpic++ mpicxx mpiCC CC "
   AC_PROG_CXX([$CRS_CXX])
 
   AX_COMPILER_VERSION
@@ -67,43 +67,66 @@
 
 # Find mpi.h
 
-  AC_MSG_CHECKING([where to find MPI_PATH])
+  AC_MSG_CHECKING([whether MPI_PATH is set ])
 
   if ! test -n "$MPI_PATH"
   then
-    if  test -n "$MPIHOME"
+    AC_MSG_RESULT([no, searching...])
+    if test -n "$MPICH_HOME"
     then
-        MPI_PATH="$MPIHOME"
+        MPI_PATH="$MPICH_HOME"
     else
-      if test -n "$MPI_HOME"
+      if  test -n "$MPIHOME"
       then
-        MPI_PATH=$MPI_HOME
+          MPI_PATH="$MPIHOME"
       else
-        AC_MSG_ERROR([cannot find path to Message Passing Interface library. Consider setting MPI_PATH manually],[1])
+        if test -n "$MPI_HOME"
+        then
+          MPI_PATH=$MPI_HOME
+        else
+          AC_MSG_ERROR([cannot find path to Message Passing Interface library. Consider setting MPI_PATH manually],[1])
+        fi
       fi
     fi
+  else
+    AC_MSG_RESULT([yes])
   fi
 
-  MPI_PATH_INC="$MPI_PATH/include"
-  if test -n "$MPI_PATH"
+  MPI_PATH_INC=$MPI_PATH"/include"
+
+  if test -n "$MPI_PATH_INC"
   then
-    AC_CHECK_HEADERS([$MPI_PATH_INC/"mpi.h"],[],[],[])
-  else
-   AC_MSG_ERROR([cannot locate mpi.h],[1])
+    AC_CHECK_HEADERS([ $MPI_PATH_INC"/mpi.h" ],
+                     [ export MPI_H=$MPI_PATH_INC/"/mpi.h"], 
+                     [ AC_MSG_WARN([not found, trying suffixed include path])] 
+                     )
+    if ! test -n "$MPI_H"
+    then
+      MPI_PATH_INC="$MPI_PATH_INC$SUFFIX"
+      AC_CHECK_HEADERS([$MPI_PATH_INC"/mpi.h"],
+                       [export MPI_H=$MPI_PATH_INC/"mpi.h"],
+                       [AC_MSG_ERROR([sorry, cannot find mpi.h])],
+                      )
+    fi
   fi
   
   MPI_PATH_LIB="$MPI_PATH/lib$SUFFIX"
   if  [ ! test -e "$MPI_PATH_LIB"  ||  ! test -d "$MPI_PATH_LIB" ]
   then
     MPI_PATH_LIB="$MPI_PATH/lib"
-    AC_SEARCH_LIBS([MPI_Initialized], [$MPI_PATH_LIB],[AC_MSG_NOTICE(found MPI_Initialized)],[AC_MSG_WARN([MPI_Initialized not found])],[])
+    AC_SEARCH_LIBS([MPI_Initialized], 
+                   [$MPI_PATH_LIB],
+                   [AC_MSG_NOTICE(found MPI_Initialized)],
+                   [AC_MSG_WARN([MPI_Initialized not found])],[]
+                  )
   fi
 
   AC_MSG_NOTICE([MPI_PATH_LIB = $MPI_PATH_LIB])
 
 # locate FFTW path
 
-  FFTW_H="fftw3.h"
+# AH_TEMPLATE([HAVE_AC_HEADER], [Define to one when have header])
+# FFTW_H="fftw3.h"
   FFTW_LIBS="-lm -lfftw3"
 
   AC_MSG_CHECKING([whether FFTW_PATH is set])
@@ -111,16 +134,31 @@
   if ! test -n "$FFTW_PATH"
   then
     AC_MSG_RESULT([no, searching...])
-    if test -n "$FFTWHOME"
+    if test -n "$TACC_FFTW3_DIR"
     then
-    FFTW_PATH=$FFTWHOME
-    else 
-      if test -n "$FFTW_ROOT"
+      echo "TACC_FFTW3_DIR = " $TACC_FFTW_DIR " hey ho!"
+          FFTW_PATH=$TACC_FFTW3_DIR
+      FFTW_PATH_INC=$TACC_FFTW3_INC
+      FFTW_PATH_LIB=$TACC_FFTW3_LIB
+    else
+     if test -n "$FFTWHOME"
+     then
+         FFTW_PATH=$FFTWHOME
+     FFTW_PATH_INC=$FFTWHOME"/include"
+     FFTW_PATH_LIB=$FFTWHOME"/lib"
+     else 
+       if test -n "$FFTW_ROOT"
 
-      then
-      FFTW_PATH=$FFTW_ROOT
-      else
-        AC_MSG_ERROR([cannot find path to FFTW library. Check if fftw module is loaded, or consider setting FFTW_PATH manually],[1])
+       then
+         FFTW_PATH=$FFTW_ROOT
+     FFTW_PATH_INC=$FFTW_ROOT"/include"
+     FFTW_PATH_LIB=$FFTW_ROOT"/lib"
+       else
+         AC_MSG_ERROR([cannot find path to FFTW library. 
+                       Check whether fftw module is loaded, 
+                       or consider setting FFTW_PATH manually]
+                     )
+       fi
       fi
     fi
   else
@@ -129,12 +167,22 @@
 
   AC_MSG_NOTICE([FFTW_PATH = $FFTW_PATH])
 
-  FFTW_PATH_INC=$FFTW_PATH/include
-  AC_CHECK_HEADERS([$FFTW_PATH_INC/$FFTW_H],[
-  AC_MSG_NOTICE([please disregard the superfluous warning above regarding rejection by the pre-processor.])
-  ],[],[])
+  echo "FFTW_PATH_INC = " $FFTW_PATH_INC " hey ho again!"
+  AC_CHECK_HEADERS([ $FFTW_PATH_INC"/fftw3.h" ],
+                   [export FFTW_H="fftw3.h"],
+                   [ AC_MSG_WARN([not found, trying suffixed include path])]
+                  )
+  if ! test -n "$FFTW_H"
+  then
+    FFTW_PATH_INC=$FFTW_PATH_INC$SUFFIX
+    FFTW_PATH_LIB=$TACC_FFTW3_LIB$SUFFIX
+      AC_CHECK_HEADERS([ $FFTW_PATH_INC"/fftw3.h" ],
+                       [ export FFTW_H="fftw3.h" ],
+                       [ AC_MSG_ERROR([sorry, cannot find fftw3.h])])
+  fi
 
-  FFTW_PATH_LIB="$FFTW_PATH/lib$SUFFIX"
+# FFTW_PATH_LIB="$FFTW_PATH/lib$SUFFIX"
+
   if  [ ! test -e "$FFTW_PATH_LIB" || ! test -d "$FFTW_PATH_LIB" ]
   then
     FFTW_PATH_LIB="$FFTW_PATH/lib"
@@ -225,8 +273,8 @@ CORONOS_SYSTEM='cls_run_instance_cuda_ext.cu.$(OBJEXT) cls_canvas_cuda_ext.cu.$(
   
 # Wrap up
 
-   CRS_CPPFLAGS="-I$MPI_PATH_INC -I$CUDA_PATH_INC -I$FFTW_PATH_INC -I.. "
-    CRS_LDFLAGS="-L$CUDA_PATH_LIB -L$FFTW_PATH_LIB -L$MPI_PATH_LIB "
+   CRS_CPPFLAGS="-I$FFTW_PATH_INC -I$MPI_PATH_INC -I$CUDA_PATH_INC -I.. "
+    CRS_LDFLAGS="-L$MPI_PATH_LIB -L$FFTW_PATH_LIB -L$CUDA_PATH_LIB -L."
        CRS_LIBS="$CUDA_LIBS $CUFFT_LIBS  $CUBLAS_LIBS  $FFTW_LIBS"
 
   
