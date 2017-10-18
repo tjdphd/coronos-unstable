@@ -1,7 +1,6 @@
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  %
 % 
 %\documentclass[12pt]{article}
-\documentclass[12pt]{memoir}
+\documentclass[12pt, letterpaper, oneside, leqno, openright]{memoir}
 %\documentclass[12pt]{scrbook}
 %
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  %
@@ -14,10 +13,8 @@
 %
 % > mathematical symbols ....................... %
 %
-\usepackage{amsfonts}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
+\usepackage{color}
+\usepackage{amsmath, mathtools}
 \usepackage{bbold}
 \usepackage{mathrsfs}
 %
@@ -28,13 +25,26 @@
 %
 \usepackage{graphicx}
 \usepackage{float}
-\usepackage{tikz}
-\usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{graphicx}
 \usepackage{natbib}
 %
 \graphicspath{{figures/}}                        % ~ tell includegraphics where to find figure files
+%
+% .............................................. %
+%
+% > pdf / html / ebook options ................. %
+%
+% ??????????????????????????????????????????????
+%
+% \usepackage{tex4ht}
+% \def\pgfsysdriver{pgfsys-tex4ht.def}
+  \usepackage{tikz}
+% \usepackage{pgffor}
+% \captionsetup{compatibility=false}
+%
+% ??????????????????????????????????????????????
 %
 % .............................................. %
 %
@@ -50,6 +60,13 @@
 %\usepackage{cancel}
 %\usepackage{multicol}
 %\usepackage{latexsym}
+%\usepackage{amsfonts}
+%\usepackage{amssymb}
+%\usepackage{amsthm}
+%
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{memhfixc}
 %
 % .............................................. %
 %
@@ -67,7 +84,7 @@
 %
 % ~ Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
 %
-\DeclareGraphicsExtensions{.jpg .pdf .png}
+\DeclareGraphicsExtensions{ .jpg .pdf .png }
 %
 %
 % > not sure what these were for ............... %
@@ -93,6 +110,8 @@
 %
 \newcommand{\irmhd}{\textbf{IRMHD}}
 \newcommand{\hrmhd}{\textbf{RMHD}}
+\newcommand{\cpu}{\textbf{cpu}}
+\newcommand{\gpu}{\textbf{gpu}}
 \newcommand{\coronos}{\textsf{CORONOS}}
 \newcommand{\sonoroc}{\textsf{SONOROC}}
 %
@@ -137,111 +156,322 @@
 %
 \author{T. J. Dennis}
 %
+\settocdepth{subsection}
+\setsecnumdepth{all}
 \begin{document}
+\chapterstyle{companion}
+\frontmatter
+ \begin{titlingpage}
+   \aliaspagestyle{titlingpage}{empty}
+   \setlength{\droptitle}{30pt}
+  \maketitle
+  \begin{abstract}
+    \lipsum[1-1]
+  \end{abstract}
+ \end{titlingpage}
+%\tableofcontents* use this to keep the self-reference to toc out of table
+\tableofcontents
+\mainmatter
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
 %
 \maketitle
-\section{Introduction}
+\chapter{Introduction}
+\chapterprecis{ Wherein we introduce the reader to the gist of 
+                this document
+              }
 \label{sec:intro}
 %
-``\coronos'' is the abbreviated name of a numerical code for use in space
-plasma physics called  ``\coronos$\,||\,$\sonoroc.'' The full name is
-adopted to accomodate the descriptive reverse acronym, ``\sonoroc''
-standing for ``(S)ynthesized, (O)bject-based (N)umerical (O)bservatory for
-(R)educed \newline plasma models with (O)ptional (C)UDA-accleration.''
-\footnote{The author, anxious to get started and needing {\em some} name
-for an initial source directory found the pretentious word ``coronos''
-lurking in his mind. Once found it could not be lost, and so it was chosen
-with the expectation that some suitable acronym could be constructed from 
-it some day. Regrettably, no suitable acronym ever suggested itself until,
-in a fit of frustration, the author considered reversing the letters.}
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
 %
-A full history of \coronos\ is beyond the scope of this document, which is
-intended to serve as a useful but very brief description of it, and which---it
-is hoped---will someday be replaced by a detailed manual for its use,
-adaptation, and expansion. For now it suffices to say that \coronos\ is
+``\coronos'' is the abbreviated name of a numerical code for use 
+in space plasma physics called  ``\coronos$\,||\,$\sonoroc.'' The 
+full name is adopted to accomodate the descriptive reverse acronym,
+``\sonoroc'' standing for ``(S)ynthesized, (O)bject-based
+(N)umerical (O)bservatory for (R)educed \newline plasma models with
+(O)ptional (C)UDA-accleration.''
+%
+\footnote{The author, anxious to 
+get started and needing {\em some} name for an initial source
+directory found the pretentious word ``coronos'' lurking in his
+mind. Once found it could not be lost, and so it was chosen with
+the expectation that some suitable acronym could be constructed
+from it some day.  Regrettably, no suitable acronym ever suggested
+itself until, in a fit of frustration, the author considered
+reversing the letters.}
+%
+\par
+%
+A full history of \coronos\ is beyond the scope of this document,
+which is intended to serve as a useful but very brief description
+of it, and which---it is hoped---will someday be replaced by a
+detailed manual for its use, adaptation, and expansion. For now it
+suffices to say that \coronos\ is:
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
 %
 \begin{itemize}
 %
-\item{ ``synthesized'' because it descends from a suite (or rather ``swarm'')
-       of older and more brittle codes which collectively were intended for
-       similar applications.
+\item{``synthesized'' because it descends from a suite (or rather
+      ``swarm'') of older and more brittle codes which collectively
+       were intended for similar applications.
      }
 %
-\item{ ``object-based'' because it is designed to be modular with individual
-       classes defined for the separate and semi-independent specifications of
-       the numerical domain of integration, the solving methodology, and the
-       physics to be modeled respectively. Additional classes are (and/or---it
-       is hoped---will be) defined to facilitate the management of Fast Fourier
-       Transforms (FFT's), the organization and maintenance of parameters
-       and their values during runs, matters pertaining to the input and output
-       of data, the handling of errors and warnings, and extensions for the
-       incremental implementation of GPU acceleration for certain numerically
-       intensive operations. The classes themselves are also designed to be as
-       modular as possible to allow for a high degree of adaptibility and
-       expandibility while limiting and localizing the locations within the
-       code where new bugs can arise during new development phases.
+\item{ ``object-based'' because it is designed to be modular with
+       individual classes defined for the separate and semi-
+       independent specifications of the numerical domain of
+       integration, the solving methodology, and the physics to be
+       modeled respectively. Additional classes are (and/or---it is
+       hoped---will be) defined to facilitate the management of
+       Fast Fourier Transforms (FFT's), the organization and
+       maintenance of parameters and their values during runs,
+       matters pertaining to the input and output of data, the
+       handling of errors and warnings, and extensions for the
+       incremental implementation of GPU acceleration for certain
+       numerically intensive operations. The classes themselves
+       are also designed to be as modular as possible to allow for
+       a high degree of adaptibility and expandibility while
+       limiting and localizing the locations within the code where
+       new bugs can arise during new development phases.
      }
 %
-\item{ a ``Numerical Observatory'' for what is hoped are obvious reasons.
+\item{ a ``Numerical Observatory'' for what is hoped are obvious
+       reasons.
      }
 %
-\item{ for ``reduced plasma models'' in the sense that it is focused on the
-       solution to a class of coupled, non-linear time-dependent partial
-       differential equations of a kind which is typified by---but not limited
-       to---so-called ``Reduced Magnetohydrodynamics.''
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+\item{ for ``reduced plasma models'' in the sense that it is
+       focused on the solution to a class of coupled, non-linear
+       time-dependent partial differential equations of a kind
+       which is typified by---but not limited to---so-called
+       ``Reduced Magnetohydrodynamics,'' (\hrmhd)
+       \citep{KadomtsevPogutse74, Strauss76, Strauss77}.
      }
 %
-\item{ with ``CUDA-acceleration'' which is ``optional'' in the sense that
-       the code is designed to be configurable to run on parallel high
-       performance computing (HPC) clusters with or without the presence and
-       utilization of graphics processing units (GPU's). This configurability
-       is facilitated through the use of the GNU autotools build system, which
-       also has the advantage of easing portability of the code across a variety
-       of computing platforms.
+\item{ with ``CUDA-acceleration'' which is ``optional'' in the
+       sense that the code is designed to be configurable to run
+       on parallel high performance computing (HPC) clusters with
+       or without the presence and utilization of graphics
+       processing units (GPU's). This configurability is
+       facilitated through the use of the GNU autotools build
+       system, which also has the advantage of easing portability
+       of the code across a variety of computing platforms.
      }
 %
 \end{itemize}
 %
 \par
+
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
 %
-In subsequent sections, I'll provide an overview of the general class
-of plasma models \coronos\ is designed to integrate, and provide three
-specific examples that have already been either fully or partially
-implemented. Additionally, I will describe the method of solution currently
-implemented for all three of these examples, and the manner in which the
-numerical volume is specified. I'll also describe the three classes of initial
-conditions so far implemented, the two classes of boundary conditions so far
-implemented, and the extent to which these various conditions do and do not
-depend upon the choice of plasma model.
-%
-\par
-%
-After these sections, I'll provide an illustration of \coronos\ in action;
-demonstrating how to download, configure compile, and execute a simple test
-simulation, concluding with some samples of the kinds of diagnostic output
-that are available via the execution of post-processing script-sets that have
-been developed in parallel with the development of \coronos\ itself. I will
-then outline in greater detail all diagnostic tools that either have been
-developed, or are in development, to aid in the analysis of \coronos' output.
-I also hope to include a section or sections describing suggested protocols
-for further expansion and adaptation of \coronos\ for additional initial
-condition choices, boundary condition choices, and even plasma model choices
-of the same class as those now implemented. Throughout these sections I will
-offer, at least in general terms, the scientific motivation behind \coronos,
-and I will conclude with some ideas of my own for its expansion and
-application.
+In subsequent sections, I'll provide an overview of the general
+class of plasma models \coronos\ is designed to integrate, and
+provide three specific examples that have already been either
+fully or partially implemented. Additionally, I will describe the
+method of solution currently implemented for all three of these
+examples, and the manner in which the numerical volume is
+specified.  I'll also describe the three classes of initial
+conditions so far implemented, the two classes of boundary
+conditions so far implemented, and the extent to which these
+various conditions do and do not depend upon the choice of plasma
+model.
 %
 \par
 %
-Though far along in development, \coronos\ remains a work in progress.
-I will therefore conclude this document with a summary of its current
-state and a list of those development tasks that are still underway as
-of the distribution date of this document, and which the author regards
-as being essential before \coronos\ can be said to be ``finished.''
+After these sections, I'll provide an illustration of \coronos\ in
+action; demonstrating how to download, configure compile, and
+execute a simple test simulation, concluding with some samples of
+the kinds of diagnostic output that are available via the
+execution of post-processing script-sets that have been developed
+in parallel with the development of \coronos\ itself. I will then
+outline in greater detail all diagnostic tools that either have
+been developed, or are in development, to aid in the analysis of
+\coronos' output. I also hope to include a section or sections
+describing suggested protocols for further expansion and
+adaptation of \coronos\ for additional initial condition choices,
+boundary condition choices, and even plasma model choices of the
+same class as those now implemented. Throughout these sections
+I will offer, at least in general terms, the scientific
+motivation behind \coronos, and I will conclude with some ideas
+of my own for its expansion and application.
 %
 \par
 %
-\section{Overview of ``Reduced Plasma Models''}
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+Though far along in development, \coronos\ remains a work in
+progress  I will therefore conclude this document with a summary
+of its current state and a list of those development tasks that
+are still underway as of the distribution date of this document,
+and which the author regards as being essential before \coronos
+can be said to be ``finished.''
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+\par
+%
+\section{ Getting Started}
+\label{sec:gettingstarted}
+%
+\subsection{Obtaining \coronos\ }
+\label{sec:obtaining}
+
+Obtaining a copy of \coronos\ is easy. The source is publicly
+available at \url{https://github.com/tjdphd/coronos-unstable}.
+\footnote{Note the suffix ``unstable'' on the repository name.
+I'm intentionally directing the reader to this particular branch.
+There is a ``stable'' version but it is somewhat out-of-date
+and in also in the development stages anyway. It's best to remind
+the reader that \coronos\ is a work in progress but directing
+her to the unstable branch which is currently the more portable
+of the two.} I will illustrate by assuming that I have a terminal
+application open on my local host from where I have logged in
+via \texttt{ssh} to the login node of some suitable high-
+performance computing resource such as the San Diego 
+Supercomputing Center's cluster ``comet:'' \footnote{comet has
+both \cpu\ and \gpu\ computing partitions and is a good choice
+for illustrating the two configuration options on one machine.}
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+\begin{verbatim}
+$ cd ~
+$ mkdir repositories  
+$cd repositories
+$
+\end{verbatim}
+%
+I also assume that the user's cluster has the \texttt{Git}
+version control tool installed. On comet \texttt{Git} is
+available upon logging in. Note however that it's possible that
+on the reader's cluster, it may be that \texttt{Git} is 
+installed but unavailable until ``loaded'' as a module 
+using a command such as:
+%
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+\begin{verbatim}
+$ module load git
+\end{verbatim}
+%
+%https://github.com/tjdphd/coronos-unstable.git%
+%
+At this point one may click on the link above, or enter the
+address into the search field of a web browser to navigate to 
+the public repository on \texttt{github}. Once there one may
+click on the green button labeled ``Clone or download '' which
+will open a dialog box with a field wherein the \texttt{https:}
+address for the repository may be copied and pasted on to the 
+command line after the ``\texttt{git clone}'' command as 
+follows:\footnote{Alternatively, one may skip the web browsing
+completely and simply type this command oneself at the command
+prompt.}
+%
+\begin{verbatim}
+$ git clone https://github.com/tjdphd/coronos-unstable.git
+Cloning into 'coronos-unstable'...
+remote: Counting objects: 537, done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 537 (delta 0), reused 1 (delta 0), pack-reused 534
+Receiving objects: 100% (537/537), 805.77 KiB | 3.65 MiB/s, done.
+Resolving deltas: 100% (320/320), done.
+$
+\end{verbatim}
+%
+\par
+%
+Upon pressing return a sub-directory of repositories called
+``\texttt{coronos-unstable}'' should now be present
+and should contain a variety of files:
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+\begin{verbatim}
+$ ls 
+coronos-unstable
+$ ls coronos-unstable/
+LICENSE  Makefile.am  README.md  TODO  configure.ac  coronos.in
+crs-archive.s	doc  idl  init_coronos.s  m4  revert.s	src  
+tests
+$ 
+\end{verbatim}
+%
+The items \texttt{src}, \texttt{doc}, \texttt{idl},
+\texttt{tests}, and \texttt{m4} are all directories
+which the reader is encouraged to explore but to not 
+(yet) otherwise manipulate. Their contents are as 
+follows:
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+\begin{itemize}
+  \item{\texttt{src} contains the \texttt{C++} source 
+    files for \coronos.} 
+  \item{ \texttt{doc} contains the source for the 
+          latest version of this document as well 
+          as the document itself.} 
+  \item{\texttt{idl} contains a collection of post-
+         processing IDL-based\footnote{IDL is an 
+         acronym for ``Interactive Data Language''
+         and is a very powerful computing language
+         of particular use for the analysis and
+         graphical representation of large sets
+         of numerical data. Though not free software
+         it is usually available for use on
+         high-performance computing clusters such as
+         comet. If IDL is not available on your system 
+         please \href{mailto:tdennis10@alaska.edu}{contact me}
+         I do hope to provide a python-based alternative
+         using freely available software someday.}
+         ``script-sets'' that are useful for creating 
+         a variety of diagnostic graphics including
+         animations.  These are discussed in detail
+         in chapter \ref{chap:postprocessing}.
+       }
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+     \item{ \texttt{tests} contains a number of 
+            files with names of the form\newline
+            \texttt{coronos.in\_<suffix>}.
+            These are pre-prepared parameter input
+            files for test simulations of \coronos.
+            We will discuss these and the file
+            \texttt{coronos.in} itself in chapter
+            \ref{chap:illustration}.
+          }
+     \item{\texttt{m4} is a folder containing
+           \texttt{m4}-language ``macro'' definitions.
+           If you don't know what this means fear not.
+           These files are required for the protocol
+           to be described in the next section for
+           configuring and building the \coronos
+           executable. If I have done my job you will
+           not notice them being used at all.
+          }
+\end{itemize}
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+%
+The documents \texttt{LICENSE} \texttt{TODO} and 
+\texttt{README.md} are self-explanatory. The files with the
+``\texttt{.s}'' suffix are shell scripts, most of which are
+to be discussed in other sections, and the files
+\texttt{configure.ac} and \texttt{Makefile.am}, like the contents
+of the directory \texttt{m4} are required for the configuration
+and compilation of \coronos\ which we now discuss.
+%
+\par
+%
+\subsection{Configuring and compiling \coronos\ }
+\label{sec:concom}
+%
+\chapter{Overview of ``Reduced Plasma Models''}
+\chapterprecis{Wherein we introduce the reader to the gist of this
+               document}
 \label{sec:overview}
 %
 The development of \coronos\ has been motivated chiefly by a wish to advance
@@ -256,9 +486,9 @@ turbulence \citep{PerezChandran2013}, and power transmission and particle
 acceleration along the Io flux tube of Jupiter \citep{Hessetal2010}.
 Figure~\ref{fig:figone} provides an illustration of one context for which
 \coronos\ is applicable; namely the modeling of coronal loops.
-%
-% ~ Figure One ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
-%
+
+ ~ Figure One ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+
   \begin{figure}[ht]
     \centering
     \begin{subfigure}[t]{0.45\textwidth}
@@ -361,6 +591,7 @@ For any such model $\pmodel$, of the kind defined above, the $i$'th equation of
 that model---giving the time-evolution of the field $F^{(i)}$---is expressible
 according to,
 %
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
 \begin{equation}
   F^{(i)}_t = { \color{red!65!black} B^{(i)}}
             + { \color{blue!65!black} D^{(i)}_z}
@@ -371,27 +602,51 @@ according to,
 %
 where,
 %
-\begin{list}{\Box}{
-  \setlength{\labelwidth}{5cm}
-  \setlength{\leftmargin}{2.25cm}
-                  }
+\begin{subequations}
+  \begin{align}
 %
-   \item[$F^{(i)}_t$]{is the partial time derivative of the field $F^{(i)}$}
+   F^{(i)}_t      &=\pardt F^{(i)}                                                                   \\
+   B^{(i)}        &=
+   \sum_{j \ne k}\epsilon_{ijk}\biggl\{   b^{(F_j,F_k)}_{i,j,k}\left[F^{(j)},F^{(k)}\right] \nonumber \\
+                  &\hspace{2cm}       +  b^{(F_j,G_k)}_{i,j,k}\left[F^{(j)},G^{(k)}\right]
+                                      +  b^{(G_j,G_k)}_{i,j,k}\left[G^{(j)},G^{(k)}\right]
+                                \biggr\}                                                              \\
+   D_z^{(i)}      &=\sum_{j} \left\{f_{ij}(z)\pardz F^{(j)} + g_{ij}(z)\pardz G^{(j)}\right\}        \\
+   L^{(i)}_\perp  &= c_{F^{(i)}}\delperp^2F^{(i)}.
 %
-   \item[{\color{red!65!black}$B^{(i)}$}]{is a sum of terms involving Poisson
-          brackets and which together completely specify the nonlinear coupling
-          among fields for the $i$'th equation.}
+  \end{align}
+\end{subequations}
+%\begin{list}{\Box}{
+%  \setlength{\labelwidth}{5.0 cm}
+%  \setlength{\leftmargin}{5.08cm}
+%                  }
+%%
+%   \item[$F^{(i)}_t=\pardt F^{(i)}$\hfill]
+%        {is the partial time derivative of the field $F^{(i)}$}
+%%
+%\item[{\color{red!65!black}$B^{(i)} =
+%  \sum_{j \ne k}\epsilon_{ijk}\left\{   b_{F_i,j,k}\left[F^{(j)},F^{(k)}\right]
+%                                      + b_{G_i,j,k}\left[G^{(j)},F^{(k)}\right]
+%                             \right\}$
+%      }
+%     \hfill]
+%     {is a sum of terms involving Poisson brackets and which together
+%      completely specify the nonlinear coupling among fields for the
+%      $i$'th equation.
+%     }
 %
-   \item[{\color{blue!65!black}$D_z^{(i)}$}]{terms involving partial spatial 
-         derivatives in $z$.}
+%  \item[{\color{blue!65!black}$D_z^{(i)}$}=\sum{\hfill]{terms involving partial spatial 
+%        derivatives in $z$.}
 %
-   \item[{\color{green!65!black}$G^{(i)}$}]{auxiliary term(s) present for some 
-         models}
+%  \item[{\color{green!65!black}$G^{(i)}$}\hfill]{auxiliary term(s) present for some 
+%        models}
 %
-   \item[{\color{orange}$L^{(i)}_\perp$}]{dissipative term of the form 
-         $c_{F^{(i)}}\delperp^2F^{(i)}$, where $c_{F^{(i)}}$ is a constant.}
+%  \item[{\color{orange}$L^{(i)}_\perp$}\hfill]{dissipative term of the form 
+%        $c_{F^{(i)}}\delperp^2F^{(i)}$, where $c_{F^{(i)}}$ is a constant.}
 %
-\end{list}
+%\end{list}
+%
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
 %
 As a starting example, we consider homogeneous reduced magnetohydrodynamics
 (RMHD) \citep{KadomtsevPogutse74, Strauss76, Strauss77}. Developed originally
@@ -795,7 +1050,8 @@ terms ${\color{green!65!black}G^{(i)}}$ are absent.
 %
 \par
 %
-\section{Description Numerical Volume and Integration Methodology}
+\chapter{Description Numerical Volume and Integration Methodology}
+\chapterprecis{Wherein we introduce the reader to the gist of this document}
 %
 \begin{figure}[ht]
   \centering
@@ -1524,17 +1780,30 @@ the exterior boundary conditions at both ends are conditions on the
 field $\Omega$ (or equivalently $\phi$). In the figure, the layers
 upon which exterior boundary conditions are imposed are colored red.
 %
-\section{Initial Conditions and Boundary Conditions}
+\chapter{Initial Conditions and Boundary Conditions}
+\chapterprecis{Wherein we introduce the reader to the gist of this document}
 %
-\section{An Illustration: Modeling Magnetic Reconnection in Homogeneous Reduced MHD}
+\chapter{An Illustration: Modeling Magnetic Reconnection in Homogeneous Reduced MHD}
+\chapterprecis{Wherein we introduce the reader to the gist of this document}
 %
-\section{Reduced Model Conservation Laws and Post-Processing Diagnostics}
+\chapter{Reduced Model Conservation Laws and Post-Processing Diagnostics}
+\chapterprecis{Wherein we introduce the reader to the gist of this document}
 %
-\section{Suggested Protocols for Adapting and Expanding \coronos}
+\chapter{Suggested Protocols for Adapting and Expanding \coronos}
+\chapterprecis{Wherein we introduce the reader to the gist of this document}
 %
-\section{Remarks On The Current State of \coronos\ and Essential Tasks Remaining.}
+\chapter{Remarks On The Current State of \coronos\ and Essential Tasks Remaining.}
+\chapterprecis{Wherein we introduce the reader to the gist of this document}
 %
-\bibliographystyle{apa}
+\appendix
+\chapter{Appendices}
+\chapterprecis{Wherein we introduce the reader to the gist of this document}
+\section{A}
+\subsection{A i}
+\subsection{A ii}
+\section{B}
+\backmatter
+\bibliographystyle{apalike}
 \bibliography{turb}{}
 %
 \end{document}
