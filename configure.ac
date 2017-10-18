@@ -136,7 +136,6 @@
     AC_MSG_RESULT([no, searching...])
     if test -n "$TACC_FFTW3_DIR"
     then
-      echo "TACC_FFTW3_DIR = " $TACC_FFTW_DIR " hey ho!"
           FFTW_PATH=$TACC_FFTW3_DIR
       FFTW_PATH_INC=$TACC_FFTW3_INC
       FFTW_PATH_LIB=$TACC_FFTW3_LIB
@@ -167,7 +166,6 @@
 
   AC_MSG_NOTICE([FFTW_PATH = $FFTW_PATH])
 
-  echo "FFTW_PATH_INC = " $FFTW_PATH_INC " hey ho again!"
   AC_CHECK_HEADERS([ $FFTW_PATH_INC"/fftw3.h" ],
                    [export FFTW_H="fftw3.h"],
                    [ AC_MSG_WARN([not found, trying suffixed include path])]
